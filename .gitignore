@@ -1,0 +1,19 @@
+# === GENERAL ===
+.env
+.env.*
+
+# === NODE ===
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# === FRONTEND (Vite / Vue) ===
+Ponte_a_prueba/dist
+Ponte_a_prueba/.vite
+
+# === BACKEND ===
+backend/dist
+
+# === OS / EDITOR ===
+.vscode/
+.DS_Store

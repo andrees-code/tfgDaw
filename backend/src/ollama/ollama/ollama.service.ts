@@ -9,7 +9,7 @@ export class OllamaService {
   async chat(messages: any[]) {
     try {
       const ollamaRes = await axios.post(this.OLLAMA_URL, {
-        model: 'llama3:instruct',
+        model: 'llama3.2',
         messages,
         stream: false,
       });

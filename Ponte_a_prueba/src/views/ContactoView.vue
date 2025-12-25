@@ -75,9 +75,7 @@
       </div>
     </main>
 
-    <footer class="py-6 text-center text-gray-500 text-xs bg-white">
-      © 2025 Nombre de la Empresa. Todos los derechos reservados.
-    </footer>
+    <Footer />
   </div>
 </template>
 
@@ -85,6 +83,8 @@
 import { ref } from "vue"
 import emailjs from "emailjs-com"
 import Header from "@/components/HeaderCompleto.vue"
+import Footer from '@/components/FooterComponent.vue'
+
 
 const loading = ref(false)
 const error = ref(null)

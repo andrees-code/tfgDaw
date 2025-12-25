@@ -108,9 +108,7 @@
       </div>
     </main>
 
-    <footer class="py-6 text-center text-gray-500 text-xs bg-white">
-      © 2025 Nombre de la Empresa. Todos los derechos reservados.
-    </footer>
+    <Footer/>
   </div>
 </template>
 
@@ -119,6 +117,8 @@ import Header from '@/components/HeaderCompleto.vue'
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { userStore } from '@/stores/userStores'
+import Footer from '@/components/FooterComponent.vue'
+
 
 const fotoPlaceholder = '/img/perro.jpg' // imagen por defecto
 const previewFoto = ref(null)

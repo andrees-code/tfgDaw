@@ -91,10 +91,7 @@
         <p v-if="error" class="text-red-500 mt-4 text-center">{{ error }}</p>
       </div>
     </main>
-
-    <footer class="py-6 text-center text-gray-500 text-xs bg-white">
-      © 2025 Nombre de la Empresa. Todos los derechos reservados.
-    </footer>
+    <Footer/>
   </div>
 </template>
 
@@ -103,6 +100,7 @@ import Header from '@/components/HeaderCompleto.vue'
 import { ref, onMounted } from "vue"
 import { sendChat } from "@/services/ollamaService"
 import * as pdfjsLib from "pdfjs-dist"
+import Footer from '@/components/FooterComponent.vue'
 
 
 onMounted(() => {

@@ -1,26 +1,65 @@
-// ollama.service.ts
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 
 @Injectable()
 export class OllamaService {
-  private readonly OLLAMA_URL = 'http://localhost:11434/v1/chat/completions';
+  private readonly CHAT_URL = 'http://localhost:11434/v1/chat/completions';
+  private readonly STREAM_URL = 'http://localhost:11434/api/chat';
 
+  // 🔹 MODO NORMAL
   async chat(messages: any[]) {
-    try {
-      const ollamaRes = await axios.post(this.OLLAMA_URL, {
-        model: 'llama3.2',
-        messages,
-        stream: false,
-      });
+    const res = await axios.post(this.CHAT_URL, {
+      model: 'llama3.2',
+      messages,
+      stream: false,
+    });
 
-      const content = ollamaRes.data?.choices?.[0]?.message?.content || '';
-      return { message: { content } };
-
-    } catch (error) {
-      console.error('Error llamando a Ollama:', error.message || error);
-      // Siempre devolvemos JSON aunque falle
-      return { message: { content: 'Error llamando a Ollama' } };
-    }
+    const content = res.data?.choices?.[0]?.message?.content || '';
+    return { message: { content } };
   }
+
+  // 🔹 MODO STREAMING
+  async streamChat(
+  messages: any[],
+  onToken: (token: string) => void,
+  onEnd: () => void,
+) {
+  const res = await axios.post(
+    'http://localhost:11434/api/chat',
+    {
+      model: 'llama3.2',
+      messages,
+      stream: true,
+    },
+    { responseType: 'stream' },
+  );
+
+  let buffer = '';
+
+  res.data.on('data', (chunk) => {
+    buffer += chunk.toString();
+
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+
+      try {
+        const json = JSON.parse(line);
+
+        if (json.message?.content) {
+          onToken(json.message.content);
+        }
+
+        // 👈 Ollama indica fin así
+        if (json.done === true) {
+          onEnd();
+        }
+      } catch {
+        // ignorar líneas incompletas
+      }
+    }
+  });
+}
 }

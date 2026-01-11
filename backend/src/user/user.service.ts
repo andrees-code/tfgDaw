@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 import { User } from './interfaces/user/user.interface';
 import { UserDocument } from './interfaces/user/user-document';
@@ -10,16 +10,14 @@ import { UserDto } from './dto/user.dto/user.dto';
 import { CreateUserDto } from './dto/user.dto/CreateUserDto';
 import { LoginUserDto } from './dto/user.dto/LoginUserDto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret_key';
-
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel('User')
-    private userModel: Model<UserDocument>,
+    @InjectModel('User') private userModel: Model<UserDocument>,
+    private readonly jwtService: JwtService,
   ) {}
 
-  // ➕ Crear usuario (admin/manual)
+  // ➕ Crear usuario manual/admin
   async addUser(userDto: UserDto): Promise<User> {
     if (userDto.password) {
       userDto.password = await bcrypt.hash(userDto.password, 10);
@@ -27,11 +25,11 @@ export class UserService {
     const user = new this.userModel(userDto);
     const savedUser = await user.save();
     const { password, ...rest } = savedUser.toObject();
-    return { ...rest, _id: savedUser._id.toString() };
+    return { ...rest, _id: savedUser._id.toString() } as User;
   }
 
   // 🔐 Registro
-  async register(data: CreateUserDto): Promise<{ user: User; token: string }> {
+  async register(data: CreateUserDto) {
     const existing = await this.userModel.findOne({ email: data.email });
     if (existing) throw new BadRequestException('Email ya registrado');
 
@@ -41,48 +39,41 @@ export class UserService {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ id: newUser._id.toString(), role: newUser.role }, JWT_SECRET, { expiresIn: '1d' });
+    const token = this.jwtService.sign({ id: newUser._id.toString(), role: newUser.role });
 
     const { password, ...userWithoutPassword } = newUser.toObject();
     return { user: { ...userWithoutPassword, _id: newUser._id.toString() }, token };
   }
 
   // 🔑 Login
-  async login(loginData: LoginUserDto): Promise<{ user: User; token: string }> {
-    const user = await this.userModel
-      .findOne({ email: loginData.email })
-      .select('+password')
-      .exec();
-
+  async login(data: LoginUserDto) {
+    const user = await this.userModel.findOne({ email: data.email }).select('+password');
     if (!user) throw new BadRequestException('Usuario o contraseña incorrecta');
 
-    const isValid = await bcrypt.compare(loginData.password, user.password);
-    if (!isValid) throw new BadRequestException('Usuario o contraseña incorrecta');
+    const valid = await bcrypt.compare(data.password, user.password);
+    if (!valid) throw new BadRequestException('Usuario o contraseña incorrecta');
 
-    user.lastLogin = new Date();
-    await user.save();
-
-    const token = jwt.sign({ id: user._id.toString(), role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+    const token = this.jwtService.sign({ id: user._id.toString(), role: user.role });
 
     const { password, ...userWithoutPassword } = user.toObject();
     return { user: { ...userWithoutPassword, _id: user._id.toString() }, token };
   }
 
-  // 📄 Obtener todos
+  // 📄 Obtener todos los usuarios
   async getUsers(): Promise<User[]> {
     const users = await this.userModel.find().exec();
     return users.map(u => {
       const { password, ...rest } = u.toObject();
-      return { ...rest, _id: u._id.toString() };
+      return { ...rest, _id: u._id.toString() } as User;
     });
   }
 
   // 🔍 Obtener por ID
-  async getUser(idUser: string): Promise<User> {
-    const user = await this.userModel.findById(idUser).exec();
+  async getUser(id: string): Promise<User> {
+    const user = await this.userModel.findById(id).exec();
     if (!user) throw new NotFoundException('User not found');
     const { password, ...rest } = user.toObject();
-    return { ...rest, _id: user._id.toString() };
+    return { ...rest, _id: user._id.toString() } as User;
   }
 
   // 🔍 Buscar por username
@@ -91,41 +82,47 @@ export class UserService {
     const users = await this.userModel.find({ username: { $regex: regex } }).exec();
     return users.map(u => {
       const { password, ...rest } = u.toObject();
-      return { ...rest, _id: u._id.toString() };
+      return { ...rest, _id: u._id.toString() } as User;
     });
   }
 
-  // 🔄 Update completo
+  // 🔄 Update completo con hash de password si existe
   async updateUser(id: string, userDto: UserDto): Promise<User> {
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      id,
-      { $set: userDto },
-      { new: true },
-    ).exec();
+    if (userDto.password) {
+      userDto.password = await bcrypt.hash(userDto.password, 10);
+    }
+
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(id, { $set: userDto }, { new: true })
+      .exec();
 
     if (!updatedUser) throw new NotFoundException('User not found');
+
     const { password, ...rest } = updatedUser.toObject();
-    return { ...rest, _id: updatedUser._id.toString() };
+    return { ...rest, _id: updatedUser._id.toString() } as User;
   }
 
   // 🩹 Patch parcial
   async patchUser(id: string, partialUserDto: Partial<UserDto>): Promise<User> {
-    const patchedUser = await this.userModel.findByIdAndUpdate(
-      id,
-      { $set: partialUserDto },
-      { new: true },
-    ).exec();
+    if (partialUserDto.password) {
+      partialUserDto.password = await bcrypt.hash(partialUserDto.password, 10);
+    }
+
+    const patchedUser = await this.userModel
+      .findByIdAndUpdate(id, { $set: partialUserDto }, { new: true })
+      .exec();
 
     if (!patchedUser) throw new NotFoundException('User not found');
+
     const { password, ...rest } = patchedUser.toObject();
-    return { ...rest, _id: patchedUser._id.toString() };
+    return { ...rest, _id: patchedUser._id.toString() } as User;
   }
 
   // ❌ Eliminar
-  async deleteUser(idUser: string): Promise<User> {
-    const deletedUser = await this.userModel.findByIdAndDelete(idUser).exec();
+  async deleteUser(id: string): Promise<User> {
+    const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
     if (!deletedUser) throw new NotFoundException('User not found');
     const { password, ...rest } = deletedUser.toObject();
-    return { ...rest, _id: deletedUser._id.toString() };
+    return { ...rest, _id: deletedUser._id.toString() } as User;
   }
 }

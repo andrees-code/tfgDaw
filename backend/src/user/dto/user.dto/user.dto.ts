@@ -4,7 +4,38 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  ValidateNested,
+  IsDate,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+/* =========================
+   SUBSCRIPTION DTO
+========================= */
+
+export class SubscriptionDto {
+  @IsOptional()
+  @IsEnum(['free', 'monthly', 'yearly'])
+  plan?: 'free' | 'monthly' | 'yearly';
+
+  @IsOptional()
+  @IsEnum(['active', 'expired', 'canceled'])
+  status?: 'active' | 'expired' | 'canceled';
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  startDate?: Date;
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  endDate?: Date;
+}
+
+/* =========================
+   USER DTO
+========================= */
 
 export class UserDto {
   @IsOptional()
@@ -28,4 +59,10 @@ export class UserDto {
   @IsOptional()
   @IsString()
   avatar?: string;
+
+  // 👇 NUEVO (Stripe-ready)
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SubscriptionDto)
+  subscription?: SubscriptionDto;
 }

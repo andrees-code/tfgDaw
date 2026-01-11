@@ -1,3 +1,5 @@
+import { Subscription } from '../../subscriptions/subscription.interface';
+
 export interface User {
   _id: string;
   username: string;
@@ -5,6 +7,10 @@ export interface User {
   role: 'user' | 'admin';
   avatar: string | null;
   lastLogin?: Date;
+
+  // 👇 NUEVO
+  subscription: Subscription;
+
   createdAt: Date;
   updatedAt: Date;
 }

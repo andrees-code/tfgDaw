@@ -28,29 +28,42 @@
 let menu = ref([
   {
     id: 1,
-    label: "Inicio",
-    route: "/",
-    icon: "home",
+    label: "Buscador",
+    route: "/buscador",
+    icon: "search", // 🔍 más adecuado que "home"
   },
   {
     id: 2,
-    label: "Ajustes",
-    route: "/ajustes",
-    icon: "gear",
+    label: "Examenes",
+    route: "/home",
+    icon: "file-alt", // 📄 o "clipboard" para examenes
   },
   {
     id: 3,
-    label: "Contacto",
-    route: "/contacto",
-    icon: "envelope",
+    label: 'Biblioteca',
+    route: '/biblioteca',
+    icon: 'book', // 📚 correcto
   },
   {
     id: 4,
-    label: "Perfil",
-    route: "/perfil",
-    icon: "user",
+    label: 'Estudio',
+    route: '/estudio',
+    icon: 'graduation-cap', // 🎓 más representativo que "book"
+  },
+    {
+    id: 5,
+    label: "Contacto",
+    route: "/contacto",
+    icon: "envelope", // ✉️ ya está perfecto
+  },
+  {
+    id: 6,
+    label: 'Ajustes',
+    route: '/ajustes',
+    icon: 'cog', // ⚙️ "cog" es más común que "gear"
   }
 ]);
+
 
 
 </script>

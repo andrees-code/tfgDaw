@@ -11,14 +11,8 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    ConfigModule, // 👈 necesario para usar ConfigService
-    MongooseModule.forFeature([
-      {
-        name: 'User',
-        schema: UserSchema,
-        collection: 'usuarios',
-      },
-    ]),
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -30,13 +24,7 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [UserController],
-  providers: [
-    UserService,
-    JwtStrategy, // 👈 obligatorio para AuthGuard('jwt')
-  ],
-  exports: [
-    PassportModule, // 👈 para que otros módulos (Ollama) puedan usar AuthGuard
-    JwtModule,
-  ],
+  providers: [UserService, JwtStrategy],
+  exports: [JwtModule, PassportModule],
 })
 export class UserModule {}

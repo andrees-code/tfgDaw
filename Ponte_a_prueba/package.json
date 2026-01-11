@@ -14,11 +14,18 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@paypal/paypal-js": "^9.1.0",
+    "@tiptap/extension-color": "^3.15.3",
+    "@tiptap/extension-text-style": "^3.15.3",
+    "@tiptap/starter-kit": "^3.15.3",
+    "@tiptap/vue-3": "^3.15.3",
     "axios": "^1.13.2",
     "emailjs-com": "^3.2.0",
+    "lucide-vue-next": "^0.562.0",
     "pdfjs-dist": "^5.4.449",
     "pinia": "^3.0.4",
     "sass": "^1.96.0",
+    "uuid": "^13.0.0",
     "vue": "^3.5.25",
     "vue-router": "^4.6.3"
   },

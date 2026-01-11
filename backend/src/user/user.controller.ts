@@ -11,7 +11,12 @@ import {
   Post,
   Put,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto/user.dto';
@@ -34,17 +39,15 @@ export class UserController {
   }
 
   // 🔑 Login
-@Post('login')
-async login(@Body() loginUserDto: LoginUserDto) {
-  try {
-    const { user, token } = await this.userService.login(loginUserDto); // solo 1 argumento
-    return { status: true, user, token };
-  } catch (e: any) {
-    throw new BadRequestException({ status: false, message: e.message });
+  @Post('login')
+  async login(@Body() loginUserDto: LoginUserDto) {
+    try {
+      const { user, token } = await this.userService.login(loginUserDto);
+      return { status: true, user, token };
+    } catch (e: any) {
+      throw new BadRequestException({ status: false, message: e.message });
+    }
   }
-}
-
-
 
   // ➕ Crear usuario (admin)
   @Post()
@@ -91,12 +94,30 @@ async login(@Body() loginUserDto: LoginUserDto) {
     }
   }
 
-  // 🔄 Update completo
+  // 🔄 Update completo con avatar
   @Put('update/:id')
-  async updateUser(@Param('id') id: string, @Body() userDto: UserDto) {
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/avatars',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async updateUser(
+    @Param('id') id: string,
+    @Body() userDto: UserDto,
+    @UploadedFile() avatar?: Express.Multer.File,
+  ) {
     try {
-      await this.userService.updateUser(id, userDto);
-      return { status: true, message: 'User updated' };
+      if (avatar) {
+        userDto.avatar = `/uploads/avatars/${avatar.filename}`;
+      }
+      const updatedUser = await this.userService.updateUser(id, userDto);
+      return { status: true, data: updatedUser };
     } catch (e: any) {
       if (e instanceof NotFoundException) throw e;
       throw new InternalServerErrorException({ status: false, message: e.message });
@@ -107,8 +128,8 @@ async login(@Body() loginUserDto: LoginUserDto) {
   @Patch('update/:id')
   async patchUser(@Param('id') id: string, @Body() partialUserDto: Partial<UserDto>) {
     try {
-      await this.userService.patchUser(id, partialUserDto);
-      return { status: true, message: 'User partially updated' };
+      const updated = await this.userService.patchUser(id, partialUserDto);
+      return { status: true, data: updated };
     } catch (e: any) {
       if (e instanceof NotFoundException) throw e;
       throw new InternalServerErrorException({ status: false, message: e.message });

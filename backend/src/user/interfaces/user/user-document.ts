@@ -1,7 +1,8 @@
 import { Document } from 'mongoose';
 import { User } from './user.interface';
+import { Subscription } from '../../subscriptions/subscription.interface';
 
-// No redefinimos _id
 export interface UserDocument extends Omit<User, '_id'>, Document {
-  password: string; // solo backend
+  password: string;
+  subscription: Subscription;
 }

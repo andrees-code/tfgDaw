@@ -25,8 +25,10 @@
               v-model="form.nombre"
               type="text"
               class="w-full p-3 border border-gray-300 rounded-lg"
+              :placeholder="userStore.user ? userStore.user.username : 'Nombre'"
             />
           </div>
+
 
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1">Correo electrónico</label>
@@ -34,6 +36,7 @@
               v-model="form.email"
               type="email"
               class="w-full p-3 border border-gray-300 rounded-lg"
+              placeholder="Correo electrónico"
             />
           </div>
 
@@ -57,6 +60,7 @@
               v-model="form.mensaje"
               rows="5"
               class="w-full p-3 border border-gray-300 rounded-lg resize-none"
+              placeholder="Escriba aqui su problema."
             ></textarea>
           </div>
 
@@ -84,6 +88,7 @@ import { ref } from "vue"
 import emailjs from "emailjs-com"
 import Header from "@/components/HeaderCompleto.vue"
 import Footer from '@/components/FooterComponent.vue'
+import { userStore } from '@/stores/userStores'
 
 
 const loading = ref(false)

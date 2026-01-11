@@ -1,13 +1,7 @@
-export async function sendChatStream(
-  messages,
-  onToken,
-  onEnd,
-) {
+export async function sendChatStream(messages, onToken, onEnd) {
   const res = await fetch("/api/chat/stream", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages }),
   });
 
@@ -31,7 +25,9 @@ export async function sendChatStream(
     buffer = parts.pop() || "";
 
     for (const part of parts) {
-      // token normal
+      if (!part.trim()) continue;
+
+      // token normal: PASAMOS TAL CUAL, sin formatear
       if (part.startsWith("data: ")) {
         const tokenText = part.replace("data: ", "");
         onToken(tokenText);

@@ -1,4 +1,4 @@
-import { Schema, Document } from "mongoose";
+import { Schema, Document } from 'mongoose';
 
 export interface UserDocument extends Document {
   username: string;
@@ -7,6 +7,14 @@ export interface UserDocument extends Document {
   role: 'user' | 'admin';
   avatar: string | null;
   lastLogin?: Date;
+
+  subscription: {
+    plan: 'free' | 'monthly' | 'yearly';
+    status: 'active' | 'expired' | 'canceled';
+    startDate?: Date;
+    endDate?: Date;
+  };
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,4 +26,20 @@ export const UserSchema = new Schema<UserDocument>({
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   avatar: { type: String, default: null },
   lastLogin: { type: Date, default: null },
+
+  // 👇 SUSCRIPCIÓN
+  subscription: {
+    plan: {
+      type: String,
+      enum: ['free', 'monthly', 'yearly'],
+      default: 'free',
+    },
+    status: {
+      type: String,
+      enum: ['active', 'expired', 'canceled'],
+      default: 'active',
+    },
+    startDate: { type: Date, default: null },
+    endDate: { type: Date, default: null },
+  },
 }, { timestamps: true });

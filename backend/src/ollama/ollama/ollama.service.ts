@@ -9,7 +9,7 @@ export class OllamaService {
   // 🔹 MODO NORMAL
   async chat(messages: any[]) {
     const res = await axios.post(this.CHAT_URL, {
-      model: 'llama3.2',
+      model: 'llama3:instruct',
       messages,
       stream: false,
     });
@@ -27,7 +27,7 @@ export class OllamaService {
   const res = await axios.post(
     'http://localhost:11434/api/chat',
     {
-      model: 'llama3.2',
+      model: 'llama3:instruct',
       messages,
       stream: true,
     },

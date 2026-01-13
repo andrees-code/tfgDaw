@@ -7,7 +7,7 @@ async function setAnnualSubscription() {
   try {
     await mongoose.connect('mongodb+srv://a1:a1@mongodb.pioui.mongodb.net/Ponte_a_Prueba');
 
-    const email = 'whinky2013@gmail.com';
+    const email = 'blasco.ivia@gmail.com';
     const user = await User.findOne({ email });
 
     if (!user) {

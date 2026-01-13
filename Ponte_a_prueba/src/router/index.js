@@ -15,11 +15,11 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: BibliotecaView,
+      component: HomeView,
     },
     {
       path: '/**',
-      component: BibliotecaView,
+      component: HomeView,
     },
     {
       path: '/home',

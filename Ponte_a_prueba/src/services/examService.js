@@ -2,7 +2,7 @@ import axios from 'axios'
 import { userStore } from "@/stores/userStores"
 
 const api = axios.create({
-  baseURL: 'http://192.168.0.14:3000/api',
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
 })
 

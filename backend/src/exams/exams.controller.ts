@@ -2,7 +2,7 @@ import { Controller, Post, Req, UseGuards, Body, Get, Delete, Param, Patch } fro
 import { ExamsService } from "./exams.service";
 import { CreateExamDto } from "./dto/create-exam.dto";
 import { AuthGuard } from "@nestjs/passport";
-import { JwtAuthGuard } from "src/user/jwt-auth.guard";
+import { JwtAuthGuard } from "../user/jwt-auth.guard";
 
 @UseGuards(JwtAuthGuard)
 @Controller('api/exams')

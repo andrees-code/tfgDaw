@@ -3,7 +3,7 @@ import axios from 'axios'
 import { userStore } from '@/stores/userStores'
 
 export const api = axios.create({
-  baseURL: 'https://bakend-murex.vercel.app/api/v1/users',
+  baseURL: 'https://bakend-murex.vercel.app/api/api/v1/users',
   headers: { 'Content-Type': 'application/json' },
 })
 

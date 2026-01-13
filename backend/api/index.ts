@@ -1,3 +1,4 @@
+// api/index.ts
 import { Handler } from 'aws-lambda'
 import serverlessExpress from '@vendia/serverless-express'
 import express from 'express'
@@ -8,10 +9,10 @@ let cachedServer: Handler
 async function bootstrap() {
   const expressApp = express()
 
-  // 👇 JSON base (IMPORTANTE en serverless)
+  // 🔑 IMPORTANTE en serverless
   expressApp.use(express.json())
 
-  // 👇 reutilizamos TODA la config real de Nest
+  // ♻️ reutilizamos exactamente la misma app
   await createApp(expressApp)
 
   return serverlessExpress({ app: expressApp })

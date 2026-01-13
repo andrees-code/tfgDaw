@@ -1,3 +1,4 @@
+// src/main.ts
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { ValidationPipe } from '@nestjs/common'
@@ -11,20 +12,22 @@ export async function createApp(expressApp?: express.Express) {
     ? await NestFactory.create(AppModule, new ExpressAdapter(expressApp))
     : await NestFactory.create(AppModule)
 
-  // ✅ PREFIJO GLOBAL (CLAVE)
+  // 🔑 PREFIJO GLOBAL (imprescindible)
   app.setGlobalPrefix('api')
 
-  // 👇 RAW BODY SOLO para Stripe Webhook
+  // 🔔 Stripe webhook necesita RAW body
   app.use(
     '/api/v1/webhooks/stripe',
     bodyParser.raw({ type: 'application/json' }),
   )
 
-  // 👇 JSON normal para el resto
+  // 🧾 JSON normal para el resto
   app.use(bodyParser.json())
 
+  // 🚨 Filtro global
   app.useGlobalFilters(new AllExceptionsFilter())
 
+  // ✅ Validación global
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -33,16 +36,26 @@ export async function createApp(expressApp?: express.Express) {
     }),
   )
 
+  // 🌍 CORS (abre en prod + dev)
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://192.168.0.14:5173',
-      'https://tu-frontend.vercel.app', // 👈 añade el dominio real
-    ],
+    origin: true, // ← en Vercel es lo más seguro
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 
   return app
+}
+
+/**
+ * SOLO PARA DESARROLLO LOCAL
+ * Vercel NO ejecuta esto
+ */
+if (process.env.NODE_ENV !== 'production') {
+  async function bootstrap() {
+    const app = await createApp()
+    await app.listen(3000)
+    console.log('🚀 API running on http://localhost:3000')
+  }
+  bootstrap()
 }

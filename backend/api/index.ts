@@ -1,10 +1,8 @@
-// api/index.ts
-import { Handler } from 'aws-lambda'
 import serverlessExpress from '@vendia/serverless-express'
 import express from 'express'
-import { createApp } from '../dist/main'
+import { createApp } from './main'
 
-let cachedServer: Handler
+let server: any
 
 async function bootstrap() {
   const expressApp = express()
@@ -15,9 +13,9 @@ async function bootstrap() {
   return serverlessExpress({ app: expressApp })
 }
 
-export const handler: Handler = async (event, context, callback) => {
-  if (!cachedServer) {
-    cachedServer = await bootstrap()
+export default async function handler(req: any, res: any) {
+  if (!server) {
+    server = await bootstrap()
   }
-  return cachedServer(event, context, callback)
+  return server(req, res)
 }

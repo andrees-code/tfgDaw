@@ -1,5 +1,5 @@
 export async function sendChatStream(messages, onToken, onEnd) {
-  const res = await fetch("/api/chat/stream", {
+  const res = await fetch("https://bakend-murex.vercel.app/api/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages }),

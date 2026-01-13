@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { userStore } from '@/stores/userStores'
 
-const api = axios.create({ baseURL: '/api/v1' })
+const api = axios.create({ baseURL: 'https://bakend-murex.vercel.app/api/v1' })
 api.interceptors.request.use(config => {
   if (userStore.token) config.headers.Authorization = `Bearer ${userStore.token}`
   return config

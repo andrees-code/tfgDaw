@@ -1,25 +1,25 @@
-import { Handler, Context, Callback } from 'aws-lambda';
-import serverlessExpress from '@vendia/serverless-express';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../src/app.module';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
+import { Handler } from 'aws-lambda'
+import serverlessExpress from '@vendia/serverless-express'
+import express from 'express'
+import { createApp } from '../src/main'
 
-let cachedServer: Handler;
+let cachedServer: Handler
 
 async function bootstrap() {
-  const expressApp = express();
-  const adapter = new ExpressAdapter(expressApp);
+  const expressApp = express()
 
-  const app = await NestFactory.create(AppModule, adapter);
-  await app.init();
+  // 👇 JSON base (IMPORTANTE en serverless)
+  expressApp.use(express.json())
 
-  return serverlessExpress({ app: expressApp });
+  // 👇 reutilizamos TODA la config real de Nest
+  await createApp(expressApp)
+
+  return serverlessExpress({ app: expressApp })
 }
 
-export const handler: Handler = async (event: any, context: Context, callback: Callback) => {
+export const handler: Handler = async (event, context, callback) => {
   if (!cachedServer) {
-    cachedServer = await bootstrap();
+    cachedServer = await bootstrap()
   }
-  return cachedServer(event, context, callback);
-};
+  return cachedServer(event, context, callback)
+}

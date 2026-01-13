@@ -6,12 +6,9 @@
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "sourceMap": false,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "strict": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "outDir": "./dist"
   },
-  "include": ["src/**/*"],
-  "exclude": ["api", "node_modules", "dist"]
+  "include": ["src/**/*"]
 }

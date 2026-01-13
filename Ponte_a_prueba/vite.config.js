@@ -17,7 +17,7 @@ export default defineConfig({
     host: true, // 👈 importante
     port: 5173,
     hmr: {
-      host: '192.168.1.11', // 👈 IP desde el navegador
+      host: 'https://bakend-murex.vercel.app', // 👈 IP desde el navegador
       protocol: 'ws',
       port: 5173,
     },
@@ -29,7 +29,7 @@ export default defineConfig({
         secure: true,
       },
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://bakend-murex.vercel.app',
         changeOrigin: true,
         secure: false,
       },

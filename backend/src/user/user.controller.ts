@@ -15,8 +15,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto/user.dto';
@@ -94,17 +93,11 @@ export class UserController {
     }
   }
 
-  // 🔄 Update completo con avatar
+  // 🔄 Update completo con avatar (compatible Vercel)
   @Put('update/:id')
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: './uploads/avatars',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   async updateUser(
@@ -114,7 +107,10 @@ export class UserController {
   ) {
     try {
       if (avatar) {
-        userDto.avatar = `/uploads/avatars/${avatar.filename}`;
+        // Aquí deberías subir avatar.buffer a S3, Cloudinary o Firebase
+        // y luego guardar la URL resultante en userDto.avatar
+        // Ejemplo: userDto.avatar = await this.userService.uploadAvatar(avatar);
+        userDto.avatar = `data:${avatar.mimetype};base64,${avatar.buffer.toString('base64')}`; // temporal
       }
       const updatedUser = await this.userService.updateUser(id, userDto);
       return { status: true, data: updatedUser };

@@ -11,13 +11,12 @@ export class OllamaService {
     });
   }
 
-  // 🔹 MODO NORMAL (equivalente a tu chat actual)
   async chat(messages: any[]) {
     const completion = await this.openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
-      temperature: 0.3,       // estable para exámenes
-      max_tokens: 1500,       // control de coste
+      temperature: 0.3,
+      max_tokens: 1500,
     });
 
     const content =

@@ -125,4 +125,24 @@ export class UserService {
     const { password, ...rest } = deletedUser.toObject();
     return { ...rest, _id: deletedUser._id.toString() } as User;
   }
+
+  async updateAiUsage(
+  userId: string,
+  aiUsage: {
+    examsThisMonth: number;
+    resetAt: Date;
+  },
+): Promise<void> {
+  const result = await this.userModel.updateOne(
+    { _id: userId },
+    {
+      $set: { aiUsage },
+    },
+  );
+
+  if (result.matchedCount === 0) {
+    throw new NotFoundException('User not found');
+  }
+}
+
 }

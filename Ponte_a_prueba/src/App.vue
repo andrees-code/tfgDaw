@@ -2,6 +2,7 @@
 import { RouterView } from "vue-router"
 import { onMounted } from 'vue'
 import { userStore } from '@/stores/userStores'
+import { SpeedInsights } from "@vercel/speed-insights/vue"
 import { getUser } from '@/services/userService'
 
 onMounted(async () => {
@@ -19,5 +20,8 @@ onMounted(async () => {
 </script>
 
 <template>
+  <div>
+  <SpeedInsights />
   <RouterView />
+  </div>
 </template>

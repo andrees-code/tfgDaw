@@ -1,10 +1,5 @@
 import { Subscription } from '../../subscriptions/subscription.interface';
 
-export interface AiUsage {
-  examsThisMonth: number;
-  resetAt: Date;
-}
-
 export interface User {
   _id: string;
   username: string;
@@ -13,11 +8,8 @@ export interface User {
   avatar: string | null;
   lastLogin?: Date;
 
-  // 👇 Suscripción (YA EXISTENTE)
+  // 👇 NUEVO
   subscription: Subscription;
-
-  // 👇 NUEVO: control de uso de IA
-  aiUsage: AiUsage;
 
   createdAt: Date;
   updatedAt: Date;

@@ -83,56 +83,87 @@
         </section>
 
         <!-- SUSCRIPCIONES -->
-        <section class="mb-10">
-          <h3 class="font-semibold text-[#546E7A] mb-4 text-center">Planes de suscripción</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <!-- Gratuita -->
-            <div class="p-4 border rounded-lg flex flex-col items-center">
-              <h4 class="font-bold mb-2">Gratis</h4>
-              <p class="text-gray-600 mb-4">Acceso limitado a funciones básicas</p>
-              <button
-                class="bg-gray-400 text-white px-4 py-2 rounded cursor-not-allowed"
-                disabled
-              >
-                Actual
-              </button>
-            </div>
+<section class="mb-10">
+  <h3 class="font-semibold text-[#546E7A] mb-6 text-center text-lg">
+    Planes de suscripción
+  </h3>
 
-            <!-- Mensual -->
-            <div class="p-4 border rounded-lg flex flex-col items-center">
-              <h4 class="font-bold mb-2">Mensual</h4>
-              <p class="text-gray-600 mb-4">9,99 € / mes</p>
-              <button
-                :class="userStore.user.subscription?.plan === 'monthly' ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#3978D7] hover:bg-[#2d62b3]'"
-                :disabled="userStore.user.subscription?.plan === 'monthly'"
-                @click="suscribirse('monthly')"
-              >
-                {{ userStore.user.subscription?.plan === 'monthly' ? 'Actual' : 'Suscribirse' }}
-              </button>
-            </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <!-- Anual -->
-            <div class="p-4 border rounded-lg flex flex-col items-center">
-              <h4 class="font-bold mb-2">Anual</h4>
-              <p class="text-gray-600 mb-4">99,99 € / año</p>
-              <button
-                :class="userStore.user.subscription?.plan === 'yearly' ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#3978D7] hover:bg-[#2d62b3]'"
-                :disabled="userStore.user.subscription?.plan === 'yearly'"
-                @click="suscribirse('yearly')"
-              >
-                {{ userStore.user.subscription?.plan === 'yearly' ? 'Actual' : 'Suscribirse' }}
-              </button>
-            </div>
-          </div>
+    <!-- GRATIS -->
+    <div class="p-5 rounded-2xl border bg-gray-50 shadow-sm flex flex-col text-center min-h-[320px]">
+      <div>
+        <h4 class="text-lg font-bold mb-2 text-gray-700">Gratis</h4>
 
-          <div class="mt-4 flex justify-center">
-            <button @click="getPremiumContent" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-              Probar contenido premium
-            </button>
-          </div>
-        </section>
+        <p class="text-sm text-gray-500 mb-4">
+          Funciones básicas para empezar
+        </p>
 
-        <!-- DONACIONES -->
+        <p class="text-2xl font-bold text-gray-700 mb-1">0 €</p>
+        <p class="text-xs text-gray-400 mb-4">Para siempre</p>
+      </div>
+
+      <button
+        class="mt-auto bg-gray-400 text-white px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+        disabled
+      >
+        Plan actual
+      </button>
+    </div>
+
+    <!-- MENSUAL -->
+    <div class="p-5 rounded-2xl border bg-white shadow-md flex flex-col text-center min-h-[320px] hover:scale-105 transition">
+      <div>
+        <h4 class="text-lg font-bold mb-2 text-[#3978D7]">Mensual</h4>
+
+        <p class="text-sm text-gray-500 mb-4">
+          Acceso completo sin compromiso
+        </p>
+
+        <p class="text-2xl font-bold mb-1">9,99 €</p>
+        <p class="text-xs text-gray-400 mb-4">/ mes</p>
+      </div>
+
+      <button
+        :class="userStore.user.subscription?.plan === 'monthly'
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-[#3978D7] hover:bg-[#2d62b3]'"
+        class="mt-auto text-white px-4 py-2 rounded-lg text-sm w-full"
+        :disabled="userStore.user.subscription?.plan === 'monthly'"
+        @click="suscribirse('monthly')"
+      >
+        {{ userStore.user.subscription?.plan === 'monthly' ? 'Plan actual' : 'Elegir plan' }}
+      </button>
+    </div>
+
+    <!-- ANUAL -->
+    <div class="p-5 rounded-2xl border-2 border-[#3978D7] bg-[#F4F8FF] shadow-lg flex flex-col text-center min-h-[320px] hover:scale-105 transition">
+      <div>
+        <h4 class="text-lg font-bold mb-2 text-[#3978D7]">Anual</h4>
+
+        <p class="text-sm text-gray-500 mb-4">
+          Ahorra más con un solo pago anual
+        </p>
+
+        <p class="text-2xl font-bold mb-1">99,99 €</p>
+        <p class="text-xs text-gray-400 mb-4">/ año</p>
+      </div>
+
+      <button
+        :class="userStore.user.subscription?.plan === 'yearly'
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-[#3978D7] hover:bg-[#2d62b3]'"
+        class="mt-auto text-white px-4 py-2 rounded-lg text-sm w-full"
+        :disabled="userStore.user.subscription?.plan === 'yearly'"
+        @click="suscribirse('yearly')"
+      >
+        {{ userStore.user.subscription?.plan === 'yearly' ? 'Plan actual' : 'Elegir plan' }}
+      </button>
+    </div>
+
+  </div>
+</section>
+     <!-- DONACIONES -->
         <section class="mb-10">
           <h3 class="font-semibold text-[#546E7A] mb-4 text-center">Donaciones</h3>
           <div class="flex justify-center">
@@ -144,6 +175,8 @@
             </router-link>
           </div>
         </section>
+
+
 
         <!-- BOTÓN GUARDAR -->
         <button
@@ -278,18 +311,8 @@ async function suscribirse(plan) {
   }
 }
 
-async function getPremiumContent() {
-  try {
-    const res = await SubscriptionService.getPremiumContent()
-    alert(`Contenido premium desbloqueado: ${res.message}`)
-  } catch (e) {
-    alert('No tienes suscripción activa')
-  }
-}
 
-function donarPaypal() {
-  window.open('https://www.paypal.com/donate?hosted_button_id=TU_ID', '_blank')
-}
+
 </script>
 
 <style lang="sass">

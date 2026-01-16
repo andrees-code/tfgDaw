@@ -5,7 +5,7 @@ export const userStore = reactive({
     _id: null,
     username: 'Invitado',
     email: '',
-    avatar: '/img/perro.jpg',
+    avatar: '/img/perfil.jpg',
     subscription: null
   },
   token: null,
@@ -44,7 +44,7 @@ export const userStore = reactive({
     this.updateUser({
       ...userData,
       username: userData.username ?? 'Invitado',
-      avatar: userData.avatar ?? '/img/perro.jpg'
+      avatar: userData.avatar ?? '/img/perfil.jpg'
     })
     this.isAuthenticated = true
   },
@@ -65,7 +65,7 @@ export const userStore = reactive({
       _id: null,
       username: 'Invitado',
       email: '',
-      avatar: '/img/perro.jpg',
+      avatar: '/img/perfil.jpg',
       subscription: null
     }
     this.token = null

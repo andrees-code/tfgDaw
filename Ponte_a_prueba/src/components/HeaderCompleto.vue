@@ -31,7 +31,7 @@
         <template v-if="userStore.isAuthenticated">
           <div class="relative">
             <img
-              :src="userStore.user?.avatar ?? '/img/perro.jpg'"
+              :src="userStore.user?.avatar ?? '/img/perfil.jpg'"
               alt="Avatar"
               class="w-10 h-10 rounded-full cursor-pointer border-2 border-white"
               @click="abrirDropdown"

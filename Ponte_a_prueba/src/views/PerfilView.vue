@@ -210,7 +210,7 @@ import { userStore } from '@/stores/userStores'
 import { SubscriptionService } from '@/services/subscriptionService'
 import { updateProfile, loginUser } from '@/services/userService'
 
-const fotoPlaceholder = '/img/perro.jpg'
+const fotoPlaceholder = '/img/perfil.jpg'
 const previewFoto = ref(null)
 const username = ref('')
 const email = ref('')

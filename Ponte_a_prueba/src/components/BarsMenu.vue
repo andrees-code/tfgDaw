@@ -26,38 +26,33 @@
  const emit = defineEmits(['cerrar'])
 
 let menu = ref([
+
   {
     id: 1,
-    label: "Buscador",
-    route: "/buscador",
-    icon: "search", // 🔍 más adecuado que "home"
-  },
-  {
-    id: 2,
     label: "Examenes",
     route: "/home",
     icon: "file-alt", // 📄 o "clipboard" para examenes
   },
   {
-    id: 3,
+    id: 2,
     label: 'Biblioteca',
     route: '/biblioteca',
     icon: 'book', // 📚 correcto
   },
   {
-    id: 4,
+    id: 3,
     label: 'Estudio',
     route: '/estudio',
     icon: 'graduation-cap', // 🎓 más representativo que "book"
   },
     {
-    id: 5,
+    id: 4,
     label: "Contacto",
     route: "/contacto",
     icon: "envelope", // ✉️ ya está perfecto
   },
   {
-    id: 6,
+    id: 5,
     label: 'Ajustes',
     route: '/ajustes',
     icon: 'cog', // ⚙️ "cog" es más común que "gear"

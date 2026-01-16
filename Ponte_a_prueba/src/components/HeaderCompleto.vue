@@ -13,7 +13,7 @@
 
       <!-- Logo centrado -->
       <div class="absolute left-1/2 transform -translate-x-1/2 pointer-events-none">
-        <router-link to="/buscador" class="pointer-events-auto">
+        <router-link to="/" class="pointer-events-auto">
           <img class="w-24 h-17" src="../assets/logo/prueba2.png" alt="Logo" />
         </router-link>
       </div>

@@ -3,7 +3,7 @@ import { RouterView } from "vue-router"
 import { onMounted } from 'vue'
 import { userStore } from '@/stores/userStores'
 import { SpeedInsights } from "@vercel/speed-insights/vue"
-import { Analytics } from "@vercel/analytics/next"
+
 import { getUser } from '@/services/userService'
 
 onMounted(async () => {
@@ -23,7 +23,6 @@ onMounted(async () => {
 <template>
   <div>
   <SpeedInsights />
-  <Analytics/>
   <RouterView />
   </div>
 </template>

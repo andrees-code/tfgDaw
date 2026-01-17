@@ -11,14 +11,14 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
         <aside class="lg:col-span-4 xl:col-span-3">
-          <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 sticky top-6 overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 sticky top-24 overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-blue-600 to-blue-400 opacity-10"></div>
 
             <div class="relative flex flex-col items-center text-center pt-4">
               <div class="relative group">
                 <img
                   :src="previewFoto || userStore.user.avatar || fotoPlaceholder"
-                  class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md group-hover:shadow-lg transition-all"
+                  class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md group-hover:shadow-lg transition-all bg-slate-200"
                 />
                 <label
                   for="foto"
@@ -43,10 +43,10 @@
             </div>
 
             <nav class="mt-8 space-y-2">
-              <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl font-medium transition-colors">
+              <a href="#general" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl font-medium transition-colors">
                 <i class="fa-regular fa-user w-5"></i> General
               </a>
-              <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-medium transition-colors">
+              <a href="#billing" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-medium transition-colors">
                 <i class="fa-regular fa-credit-card w-5"></i> Facturación
               </a>
             </nav>
@@ -55,7 +55,7 @@
 
         <section class="lg:col-span-8 xl:col-span-9 space-y-8">
 
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8">
+          <div id="general" class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 scroll-mt-24">
             <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
               <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                 <i class="fa-regular fa-id-card text-lg"></i>
@@ -118,16 +118,17 @@
                 <span v-if="loadingSave" class="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></span>
                 {{ loadingSave ? 'Guardando...' : 'Guardar cambios' }}
               </button>
+
               <transition name="fade">
-                <p v-if="mensaje" class="text-green-600 text-sm font-medium"><i class="fa-solid fa-check-circle mr-1"></i> {{ mensaje }}</p>
+                <p v-if="mensaje" class="text-green-600 text-sm font-medium flex items-center"><i class="fa-solid fa-check-circle mr-1.5"></i> {{ mensaje }}</p>
               </transition>
               <transition name="fade">
-                <p v-if="error" class="text-red-500 text-sm font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i> {{ error }}</p>
+                <p v-if="error" class="text-red-500 text-sm font-medium flex items-center"><i class="fa-solid fa-circle-exclamation mr-1.5"></i> {{ error }}</p>
               </transition>
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 overflow-hidden relative">
+          <div id="billing" class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 overflow-hidden relative scroll-mt-24">
             <div class="absolute top-0 right-0 p-4 opacity-5">
               <i class="fa-solid fa-gem text-9xl text-blue-900"></i>
             </div>
@@ -137,7 +138,7 @@
               <p class="text-slate-500">Estado actual: <strong class="text-slate-800">{{ activePlanDisplay }}</strong></p>
             </div>
 
-           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
 
              <div class="rounded-2xl border p-6 flex flex-col items-start transition-colors bg-slate-50/50"
                   :class="activePlan === 'free' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-slate-200 hover:border-slate-300'">
@@ -150,10 +151,7 @@
                <ul class="space-y-3 mb-8 flex-1">
                  <li class="flex items-center gap-2 text-sm text-slate-600"><i class="fa-solid fa-check text-green-500"></i> Acceso básico</li>
                </ul>
-               <button
-                 disabled
-                 class="w-full py-2.5 rounded-xl font-semibold border border-slate-300 text-slate-400 bg-transparent cursor-default"
-               >
+               <button disabled class="w-full py-2.5 rounded-xl font-semibold border border-slate-300 text-slate-400 bg-transparent cursor-default">
                  {{ activePlan === 'free' ? 'Plan Actual' : 'Incluido' }}
                </button>
              </div>
@@ -233,13 +231,15 @@
 <script setup>
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue' // Añadido watch
 import { userStore } from '@/stores/userStores'
 import { SubscriptionService } from '@/services/subscriptionService'
 import { updateProfile, loginUser } from '@/services/userService'
 
 const fotoPlaceholder = '/img/perfil.jpg'
-const previewFoto = ref(null)
+const previewFoto = ref(null) // Solo para mostrar en el <img>
+const fotoFile = ref(null)    // IMPORTANTE: Para guardar el archivo real a subir
+
 const username = ref('')
 const email = ref('')
 const password = ref('')
@@ -250,68 +250,67 @@ const error = ref('')
 const loadingSave = ref(false)
 const loadingSub = ref(null)
 
-// Plan activo: "free", "monthly" o "yearly"
+// Plan activo
 const activePlan = ref('free')
 
 const activePlanDisplay = computed(() => {
-  if (activePlan.value === 'free') return 'Plan Gratuito'
   if (activePlan.value === 'monthly') return 'Pro Mensual'
   if (activePlan.value === 'yearly') return 'Pro Anual'
-  return 'Plan desconocido'
+  return 'Plan Gratuito'
 })
 
 onMounted(async () => {
   await userStore.loadSession()
 
   if (userStore.user) {
-    // 1. Cargar datos básicos
-    username.value = userStore.user.username
-    email.value = userStore.user.email
-    previewFoto.value = userStore.user.avatar
-
-    // 2. Intentar obtener el plan directamente del store (fuente de verdad más rápida)
-    // Asumimos que la propiedad en BD se llama 'plan', 'subscriptionPlan' o similar.
-    // Si tu backend guarda el plan en user.plan, esto lo arregla instantáneamente.
-    if (userStore.user.plan) {
-      activePlan.value = userStore.user.plan
-    } else if (userStore.user.subscription && userStore.user.subscription.plan) {
-        // Por si viene anidado
-        activePlan.value = userStore.user.subscription.plan
-    }
-
-    // 3. (Opcional) Refrescar estado desde el servidor para asegurar que no hay caché vieja
-    // Esto es vital si el usuario acaba de pagar y vuelve a esta página.
+    cargarDatosLocales()
+    // Verificación asíncrona fresca
     await refreshSubscriptionStatus()
   }
 })
 
-// Nueva función robusta para chequear el estado
+// Sincronizar inputs con el store al cargar
+function cargarDatosLocales() {
+  username.value = userStore.user.username
+  email.value = userStore.user.email
+
+  // Lógica del plan con jerarquía
+  if (userStore.user.plan) {
+    activePlan.value = userStore.user.plan
+  } else if (userStore.user.subscription?.plan) {
+    activePlan.value = userStore.user.subscription.plan
+  }
+}
+
 async function refreshSubscriptionStatus() {
     try {
-        // Intentamos obtener el usuario fresco primero (a veces getPremiumContent falla si no hay contenido)
-        // O usamos el servicio de suscripción si tiene un endpoint de 'status'
         const res = await SubscriptionService.getPremiumContent()
 
-        // Verificamos varias estructuras posibles de respuesta para evitar el bug
-        if (res && res.plan) {
-            activePlan.value = res.plan
-        } else if (res && res.data && res.data.plan) {
-            activePlan.value = res.data.plan
-        }
+        // Determinar el plan basado en la respuesta
+        let planDetectado = 'free'
 
-        // Actualizamos el store si detectamos un cambio
-        if (userStore.user.plan !== activePlan.value) {
-             userStore.updateUser({ ...userStore.user, plan: activePlan.value })
+        if (res?.plan) planDetectado = res.plan
+        else if (res?.data?.plan) planDetectado = res.data.plan
+
+        // Solo actualizamos si es diferente para evitar reactividad innecesaria
+        if (activePlan.value !== planDetectado) {
+            activePlan.value = planDetectado
+            // Actualizamos store silenciosamente
+            userStore.updateUser({ ...userStore.user, plan: planDetectado })
         }
     } catch (e) {
-        console.warn("No se pudo verificar suscripción externa, usando datos en caché de usuario.", e)
-        // No forzamos 'free' aquí para no sobrescribir si el userStore ya tenía el dato correcto
+        console.warn("Usando caché local para suscripción.")
     }
 }
 
 function cambiarFoto(e) {
   const file = e.target.files[0]
   if (!file) return
+
+  // 1. Guardar el archivo real para el envío
+  fotoFile.value = file
+
+  // 2. Crear URL para vista previa
   previewFoto.value = URL.createObjectURL(file)
 }
 
@@ -330,13 +329,29 @@ async function guardarCambios() {
   mensaje.value = ''
 
   try {
-    const updatedUser = await updateProfile(userStore.user._id, {
-      username: username.value,
-      email: email.value,
-      password: password.value || undefined,
-      avatar: previewFoto.value || undefined
-    })
+    // IMPORTANTE: Usar FormData si hay archivo, o JSON normal si no
+    // Aunque updateProfile suela esperar JSON, si hay foto se suele requerir FormData.
+    // Asumiremos que tu servicio updateProfile maneja esto o que necesitamos pasar un objeto plano
+    // y el servicio decide.
+    // NOTA: Si tu backend espera 'multipart/form-data', el servicio updateProfile debe estar configurado para ello.
 
+    // Preparar objeto de actualización
+    const updateData = {
+      username: username.value,
+      email: email.value
+    }
+
+    if (password.value) updateData.password = password.value
+
+    // Si hay archivo nuevo, lo pasamos. Si no, no enviamos 'avatar' para no borrar el existente.
+    if (fotoFile.value) {
+        updateData.avatar = fotoFile.value
+    }
+
+    // Llamada al servicio (asegúrate de que updateProfile convierta a FormData si hay archivo)
+    const updatedUser = await updateProfile(userStore.user._id, updateData)
+
+    // Manejo de token si la contraseña cambió
     let token = userStore.token
     if (password.value) {
       const loginRes = await loginUser({ email: updatedUser.email, password: password.value })
@@ -344,13 +359,21 @@ async function guardarCambios() {
       userStore.setToken(token)
     }
 
-    // Asegurarnos de no perder el plan al actualizar el usuario
-    const planActual = activePlan.value
-    userStore.updateUser({ ...updatedUser, token, plan: planActual })
+    // Actualizar Store preservando el plan actual (importante para que no se resetee a Free visualmente)
+    // Usamos el activePlan actual como backup si el backend no devuelve el plan en updatedUser
+    const planPreservado = updatedUser.plan || activePlan.value
 
+    userStore.updateUser({
+        ...updatedUser,
+        token,
+        plan: planPreservado
+    })
+
+    // Actualizar vista local
     username.value = updatedUser.username
     email.value = updatedUser.email
-    previewFoto.value = updatedUser.avatar
+    previewFoto.value = null // Limpiar preview temporal, usar el nuevo avatar del userStore
+    fotoFile.value = null // Limpiar archivo seleccionado
 
     mensaje.value = 'Perfil actualizado correctamente'
     password.value = ''
@@ -358,6 +381,7 @@ async function guardarCambios() {
 
     setTimeout(() => mensaje.value = '', 3000)
   } catch (e) {
+    console.error(e)
     error.value = e.response?.data?.message || 'Error al guardar cambios'
   } finally {
     loadingSave.value = false
@@ -384,4 +408,8 @@ async function suscribirse(plan) {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+/* Asegura que el scroll suave respete el header sticky si lo hubiera o el margen */
+.scroll-mt-24 {
+    scroll-margin-top: 6rem;
+}
 </style>

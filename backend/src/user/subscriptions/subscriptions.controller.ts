@@ -1,5 +1,5 @@
 // src/subscriptions/subscriptions.controller.ts
-import { Controller, Post, Body, Req, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get, Request, UseGuards, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../jwt-auth.guard';
 import { SubscriptionsService } from './subscriptions.service';
 
@@ -27,5 +27,12 @@ export class SubscriptionsController {
 
     // Devolver la URL de Stripe para redirigir en frontend
     return { url: session.url };
+  }
+
+  @UseGuards(JwtAuthGuard) // Protegemos la ruta para saber quién es el usuario
+  @Get('premium') // Esto crea la ruta: /api/v1/subscriptions/premium
+  async getPremiumStatus(@Request() req) {
+    // req.user viene del token JWT decodificado
+    return this.subscriptionsService.getSubscriptionStatus(req.user.userId); 
   }
 }

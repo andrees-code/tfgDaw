@@ -84,4 +84,30 @@ export class SubscriptionsService {
 
     return user.subscription;
   }
+
+  async getSubscriptionStatus(userId: string) {
+    const user = await this.userModel.findById(userId);
+    
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    // Si no tiene objeto subscription, asumimos free
+    if (!user.subscription) {
+      return { plan: 'free', status: 'active' };
+    }
+
+    // Verificamos si ha caducado (opcional, pero recomendado)
+    const now = new Date();
+    if (user.subscription.endDate && new Date(user.subscription.endDate) < now) {
+       // Si caducó, podrías devolver free o status expired
+       return { plan: 'free', status: 'expired' };
+    }
+
+    return {
+      plan: user.subscription.plan,
+      status: user.subscription.status,
+      endDate: user.subscription.endDate
+    };
+  }
+
+
 }

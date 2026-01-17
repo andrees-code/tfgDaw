@@ -1,5 +1,5 @@
 export async function sendChat(messages, token) {
-  const res = await fetch("/api/api/chat", {
+  const res = await fetch("https://bakend-murex.vercel.app/api/api/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

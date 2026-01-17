@@ -168,7 +168,7 @@
                </div>
                <ul class="space-y-3 mb-8 flex-1">
                  <li class="flex items-center gap-2 text-sm text-slate-600"><i class="fa-solid fa-check text-blue-500"></i> Sin publicidad</li>
-                 <li class="flex items-center gap-2 text-sm text-slate-600"><i class="fa-solid fa-check text-blue-500"></i> Soporte prioritario</li>
+                 <li class="flex items-center gap-2 text-sm text-slate-600"><i class="fa-solid fa-check text-blue-500"></i> Exámenes ilimitados</li>
                </ul>
                <button
                  @click="suscribirse('monthly')"
@@ -196,6 +196,8 @@
                  <span class="text-slate-500">/año</span>
                </div>
                <ul class="space-y-3 mb-8 flex-1">
+                <li class="flex items-center gap-2 text-sm text-slate-600"><i class="fa-solid fa-check text-blue-500"></i> Sin publicidad</li>
+                <li class="flex items-center gap-2 text-sm text-slate-600"><i class="fa-solid fa-check text-blue-500"></i> Exámenes ilimitados</li>
                  <li class="flex items-center gap-2 text-sm text-slate-600"><i class="fa-solid fa-check text-blue-500"></i> 2 meses gratis</li>
                </ul>
                <button

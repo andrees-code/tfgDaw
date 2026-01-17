@@ -1,206 +1,140 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-[#E8F1FD] font-sans">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
     <Header />
 
-    <main class="flex-grow flex items-center justify-center p-4">
-      <div class="bg-white w-full max-w-md md:max-w-4xl rounded-2xl shadow-xl p-6 md:p-10">
+    <main class="mx-auto max-w-6xl px-4 py-10">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Ajustes de perfil</h1>
+        <p class="text-slate-500 mt-1">Gestiona tu información personal, seguridad y suscripción</p>
+      </div>
 
-        <h2 class="text-center text-[#546E7A] font-bold text-lg mb-10">
-          Ajustes de perfil
-        </h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Columna izquierda -->
+        <aside class="lg:col-span-1">
+          <div class="bg-white rounded-2xl shadow-sm border p-6 sticky top-6">
+            <div class="flex flex-col items-center text-center">
+              <img
+                :src="previewFoto || userStore.user.avatar || fotoPlaceholder"
+                class="w-28 h-28 rounded-full border-4 border-blue-500 shadow"
+              />
+              <h2 class="mt-4 font-semibold text-slate-800">{{ username || 'Usuario' }}</h2>
+              <p class="text-sm text-slate-500">{{ email }}</p>
 
-        <!-- FOTO DE PERFIL -->
-        <section class="mb-10">
-          <h3 class="font-semibold text-[#546E7A] mb-4">
-            Foto de perfil
-          </h3>
-          <div class="flex items-center justify-center gap-6">
-            <img
-              :src="previewFoto || userStore.user.avatar || fotoPlaceholder"
-              class="w-24 h-24 rounded-full border-4 border-[#3978D7]"
-            />
-            <div class="flex flex-col items-center">
               <label
                 for="foto"
-                class="bg-[#3978D7] text-white px-4 py-2 rounded cursor-pointer hover:bg-[#2d62b3] text-sm"
+                class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm cursor-pointer hover:bg-blue-700"
               >
-                Cambiar foto
+                <i class="fa-solid fa-camera"></i> Cambiar foto
               </label>
-              <input
-                id="foto"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="cambiarFoto"
-              />
-              <p class="text-xs text-gray-500 mt-2 text-center">
-                JPG o PNG · Máx. 2MB
+              <input id="foto" type="file" accept="image/*" class="hidden" @change="cambiarFoto" />
+              <span class="text-xs text-slate-400 mt-2">JPG o PNG · Máx. 2MB</span>
+            </div>
+
+            <div class="mt-6 border-t pt-4 space-y-3 text-sm">
+              <p class="flex items-center gap-2 text-slate-600">
+                <i class="fa-solid fa-shield-halved text-blue-500"></i> Cuenta segura
+              </p>
+              <p class="flex items-center gap-2 text-slate-600">
+                <i class="fa-solid fa-credit-card text-blue-500"></i> Gestión de pagos
               </p>
             </div>
           </div>
-        </section>
+        </aside>
 
-        <!-- DATOS PERSONALES -->
-        <section class="mb-10">
-          <h3 class="font-semibold text-[#546E7A] mb-4 text-center">
-            Datos personales
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              v-model="username"
-              type="text"
-              placeholder="Nombre completo"
-              class="w-full border border-gray-300 rounded-lg p-3 text-gray-600"
-            />
-            <input
-              v-model="email"
-              type="email"
-              placeholder="Correo electrónico"
-              class="w-full border border-gray-300 rounded-lg p-3 text-gray-600"
-            />
+        <!-- Columna derecha -->
+        <section class="lg:col-span-2 space-y-8">
+          <!-- Datos personales -->
+          <div class="bg-white rounded-2xl shadow-sm border p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
+              <i class="fa-solid fa-user text-blue-500"></i> Datos personales
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="text-sm text-slate-500">Nombre completo</label>
+                <input v-model="username" type="text" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="text-sm text-slate-500">Correo electrónico</label>
+                <input v-model="email" type="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              </div>
+            </div>
           </div>
-        </section>
 
-        <!-- SEGURIDAD -->
-        <section class="mb-10">
-          <h3 class="font-semibold text-[#546E7A] mb-4 text-center">
-            Seguridad
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              v-model="password"
-              type="password"
-              placeholder="Nueva contraseña"
-              class="w-full border border-gray-300 rounded-lg p-3 text-gray-600"
-            />
-            <input
-              v-model="passwordConfirm"
-              type="password"
-              placeholder="Confirmar contraseña"
-              class="w-full border border-gray-300 rounded-lg p-3 text-gray-600"
-            />
+          <!-- Seguridad -->
+          <div class="bg-white rounded-2xl shadow-sm border p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
+              <i class="fa-solid fa-lock text-blue-500"></i> Seguridad
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="text-sm text-slate-500">Nueva contraseña</label>
+                <input v-model="password" type="password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
+              </div>
+              <div>
+                <label class="text-sm text-slate-500">Confirmar contraseña</label>
+                <input v-model="passwordConfirm" type="password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
+              </div>
+            </div>
           </div>
-        </section>
 
-        <!-- SUSCRIPCIONES -->
-<section class="mb-10">
-  <h3 class="font-semibold text-[#546E7A] mb-6 text-center text-lg">
-    Planes de suscripción
-  </h3>
+          <!-- Suscripciones -->
+          <div class="bg-white rounded-2xl shadow-sm border p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
+              <i class="fa-solid fa-gem text-blue-500"></i> Planes de suscripción
+            </h3>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Gratis -->
+              <div class="rounded-xl border bg-slate-50 p-5 flex flex-col">
+                <h4 class="font-bold text-slate-700">Gratis</h4>
+                <p class="text-sm text-slate-500 mt-2">Funciones básicas</p>
+                <p class="text-3xl font-bold text-slate-700 mt-4">0 €</p>
+                <button class="mt-auto mt-6 bg-slate-400 text-white py-2 rounded-lg text-sm" disabled>Plan actual</button>
+              </div>
 
-    <!-- GRATIS -->
-    <div class="p-5 rounded-2xl border bg-gray-50 shadow-sm flex flex-col text-center min-h-[320px]">
-      <div>
-        <h4 class="text-lg font-bold mb-2 text-gray-700">Gratis</h4>
+              <!-- Mensual -->
+              <div class="rounded-xl border p-5 flex flex-col hover:shadow-md transition">
+                <h4 class="font-bold text-blue-600">Mensual</h4>
+                <p class="text-sm text-slate-500 mt-2">Acceso completo</p>
+                <p class="text-3xl font-bold mt-4">10,00 €</p>
+                <button class="mt-auto mt-6 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm">Elegir plan</button>
+              </div>
 
-        <p class="text-sm text-gray-500 mb-4">
-          Funciones básicas para empezar
-        </p>
+              <!-- Anual -->
+              <div class="rounded-xl border-2 border-blue-600 bg-blue-50 p-5 flex flex-col hover:shadow-lg transition">
+                <h4 class="font-bold text-blue-600">Anual</h4>
+                <p class="text-sm text-slate-500 mt-2">Mejor ahorro</p>
+                <p class="text-3xl font-bold mt-4">99,99 €</p>
+                <button class="mt-auto mt-6 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm">Elegir plan</button>
+              </div>
+            </div>
+          </div>
 
-        <p class="text-2xl font-bold text-gray-700 mb-1">0 €</p>
-        <p class="text-xs text-gray-400 mb-4">Para siempre</p>
-      </div>
-
-      <button
-        class="mt-auto bg-gray-400 text-white px-4 py-2 rounded-lg text-sm cursor-not-allowed"
-        disabled
-      >
-        Plan actual
-      </button>
-    </div>
-
-    <!-- MENSUAL -->
-    <div class="p-5 rounded-2xl border bg-white shadow-md flex flex-col text-center min-h-[320px] hover:scale-105 transition">
-      <div>
-        <h4 class="text-lg font-bold mb-2 text-[#3978D7]">Mensual</h4>
-
-        <p class="text-sm text-gray-500 mb-4">
-          Acceso completo sin compromiso
-        </p>
-
-        <p class="text-2xl font-bold mb-1">9,99 €</p>
-        <p class="text-xs text-gray-400 mb-4">/ mes</p>
-      </div>
-
-      <button
-        :class="userStore.user.subscription?.plan === 'monthly'
-          ? 'bg-gray-400 cursor-not-allowed'
-          : 'bg-[#3978D7] hover:bg-[#2d62b3]'"
-        class="mt-auto text-white px-4 py-2 rounded-lg text-sm w-full"
-        :disabled="userStore.user.subscription?.plan === 'monthly'"
-        @click="suscribirse('monthly')"
-      >
-        {{ userStore.user.subscription?.plan === 'monthly' ? 'Plan actual' : 'Elegir plan' }}
-      </button>
-    </div>
-
-    <!-- ANUAL -->
-    <div class="p-5 rounded-2xl border-2 border-[#3978D7] bg-[#F4F8FF] shadow-lg flex flex-col text-center min-h-[320px] hover:scale-105 transition">
-      <div>
-        <h4 class="text-lg font-bold mb-2 text-[#3978D7]">Anual</h4>
-
-        <p class="text-sm text-gray-500 mb-4">
-          Ahorra más con un solo pago anual
-        </p>
-
-        <p class="text-2xl font-bold mb-1">99,99 €</p>
-        <p class="text-xs text-gray-400 mb-4">/ año</p>
-      </div>
-
-      <button
-        :class="userStore.user.subscription?.plan === 'yearly'
-          ? 'bg-gray-400 cursor-not-allowed'
-          : 'bg-[#3978D7] hover:bg-[#2d62b3]'"
-        class="mt-auto text-white px-4 py-2 rounded-lg text-sm w-full"
-        :disabled="userStore.user.subscription?.plan === 'yearly'"
-        @click="suscribirse('yearly')"
-      >
-        {{ userStore.user.subscription?.plan === 'yearly' ? 'Plan actual' : 'Elegir plan' }}
-      </button>
-    </div>
-
-  </div>
-</section>
-     <!-- DONACIONES -->
-        <section class="mb-10">
-          <h3 class="font-semibold text-[#546E7A] mb-4 text-center">Donaciones</h3>
-          <div class="flex justify-center">
-            <router-link
-              to="/paypal"
-              class="bg-[#003087] text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-[#002169]"
-            >
-              <i class="fab fa-paypal text-lg"></i> Donar con PayPal
+          <!-- Donaciones -->
+          <div class="bg-white rounded-2xl shadow-sm border p-6 text-center">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Donaciones</h3>
+            <router-link to="/paypal" class="inline-flex items-center gap-2 bg-[#003087] hover:bg-[#002169] text-white px-6 py-3 rounded-lg">
+              <i class="fab fa-paypal"></i> Donar con PayPal
             </router-link>
           </div>
+
+          <!-- Guardar -->
+          <div class="bg-white rounded-2xl shadow-sm border p-6">
+            <button @click="guardarCambios" :disabled="loading" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium">
+              {{ loading ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+            <p v-if="mensaje" class="mt-4 text-center text-green-600 text-sm">{{ mensaje }}</p>
+            <p v-if="error" class="mt-4 text-center text-red-500 text-sm">{{ error }}</p>
+          </div>
         </section>
-
-
-
-        <!-- BOTÓN GUARDAR -->
-        <button
-          @click="guardarCambios"
-          :disabled="loading"
-          class="w-full bg-[#3978D7] hover:bg-[#2d62b3] text-white py-3 rounded-lg disabled:opacity-50"
-        >
-          {{ loading ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
-
-        <p v-if="mensaje" class="mt-4 text-center text-green-600 text-sm">
-          {{ mensaje }}
-        </p>
-
-        <p v-if="error" class="mt-4 text-center text-red-500 text-sm">
-          {{ error }}
-        </p>
-
       </div>
     </main>
 
-    <Footer/>
+    <Footer />
   </div>
 </template>
+
 
 <script setup>
 import Header from '@/components/HeaderCompleto.vue'

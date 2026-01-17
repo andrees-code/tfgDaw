@@ -51,12 +51,6 @@ let menu = ref([
     route: "/contacto",
     icon: "envelope", // ✉️ ya está perfecto
   },
-  {
-    id: 5,
-    label: 'Ajustes',
-    route: '/ajustes',
-    icon: 'cog', // ⚙️ "cog" es más común que "gear"
-  }
 ]);
 
 

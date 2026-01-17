@@ -1,87 +1,110 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-[#E8F1FD] font-sans">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
     <Header />
 
-    <main class="flex-grow flex items-center justify-center p-4">
-      <div class="bg-white w-full max-w-md md:max-w-3xl rounded-2xl shadow-xl p-6 md:p-12">
-        <h2 class="text-center text-[#546E7A] font-bold text-lg mb-8">
-          Página de contacto
-        </h2>
+    <main class="mx-auto max-w-5xl px-4 py-12">
+      <!-- Header -->
+      <div class="text-center mb-10">
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Contacto</h1>
+        <p class="mt-2 text-slate-500 max-w-xl mx-auto">
+          ¿Tienes alguna duda o sugerencia? Escríbenos y te responderemos lo antes posible.
+        </p>
+      </div>
 
-        <form @submit.prevent="enviarMensaje" class="space-y-6">
-
-          <!-- Honeypot anti-bots -->
-          <input
-            type="text"
-            v-model="form.website"
-            class="hidden"
-            tabindex="-1"
-            autocomplete="off"
-          />
-
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Nombre</label>
-            <input
-              v-model="form.nombre"
-              type="text"
-              class="w-full p-3 border border-gray-300 rounded-lg"
-              :placeholder="userStore.user ? userStore.user.username : 'Nombre'"
-            />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+        <!-- Información lateral -->
+        <aside class="space-y-6">
+          <div class="bg-white rounded-2xl shadow-sm border p-6">
+            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-envelope-open-text text-blue-500"></i>
+              Atención al usuario
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Nuestro equipo revisa los mensajes de forma diaria. Normalmente respondemos en menos de 24 horas.
+            </p>
           </div>
 
-
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Correo electrónico</label>
-            <input
-              v-model="form.email"
-              type="email"
-              class="w-full p-3 border border-gray-300 rounded-lg"
-              placeholder="Correo electrónico"
-            />
+          <div class="bg-white rounded-2xl shadow-sm border p-6">
+            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-blue-500"></i>
+              Seguridad y privacidad
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Tu información se utiliza exclusivamente para responder a tu consulta. No compartimos tus datos.
+            </p>
           </div>
+        </aside>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Asunto</label>
-            <select
-              v-model="form.asunto"
-              class="w-full p-3 border border-gray-300 rounded-lg"
+        <!-- Formulario -->
+        <section class="bg-white rounded-2xl shadow-sm border p-8">
+          <form @submit.prevent="enviarMensaje" class="space-y-6">
+
+            <!-- Honeypot -->
+            <input type="text" v-model="form.website" class="hidden" tabindex="-1" autocomplete="off" />
+
+            <div>
+              <label class="block text-sm font-medium text-slate-600">Nombre</label>
+              <input
+                v-model="form.nombre"
+                type="text"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                :placeholder="userStore.user ? userStore.user.username : 'Tu nombre'"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-600">Correo electrónico</label>
+              <input
+                v-model="form.email"
+                type="email"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-600">Asunto</label>
+              <select
+                v-model="form.asunto"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option disabled value="">Selecciona un asunto</option>
+                <option>Soporte técnico</option>
+                <option>Consulta general</option>
+                <option>Sugerencias</option>
+                <option>Otros</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-600">Mensaje</label>
+              <textarea
+                v-model="form.mensaje"
+                rows="5"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Cuéntanos en qué podemos ayudarte"
+              ></textarea>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="loading"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium disabled:opacity-50"
             >
-              <option disabled value="">Selecciona un asunto</option>
-              <option>Soporte técnico</option>
-              <option>Consulta general</option>
-              <option>Sugerencias</option>
-              <option>Otros</option>
-            </select>
-          </div>
+              {{ loading ? 'Enviando mensaje...' : 'Enviar mensaje' }}
+            </button>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Mensaje</label>
-            <textarea
-              v-model="form.mensaje"
-              rows="5"
-              class="w-full p-3 border border-gray-300 rounded-lg resize-none"
-              placeholder="Escriba aqui su problema."
-            ></textarea>
-          </div>
-
-          <button
-            type="submit"
-            :disabled="loading"
-            class="w-full bg-[#3978D7] hover:bg-[#2d62b3] text-white py-3 rounded-lg disabled:opacity-50"
-          >
-            {{ loading ? "Enviando..." : "Enviar mensaje" }}
-          </button>
-
-          <p v-if="error" class="text-red-500 text-center text-sm">{{ error }}</p>
-          <p v-if="success" class="text-green-600 text-center text-sm">Mensaje enviado correctamente</p>
-
-        </form>
+            <p v-if="error" class="text-red-500 text-center text-sm">{{ error }}</p>
+            <p v-if="success" class="text-green-600 text-center text-sm">Mensaje enviado correctamente</p>
+          </form>
+        </section>
       </div>
     </main>
 
     <Footer />
   </div>
 </template>
+
 
 <script setup>
 import { ref } from "vue"

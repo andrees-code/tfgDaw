@@ -2,155 +2,186 @@
   <div>
     <Header />
 
-  <div class="min-h-screen flex bg-[#E8F1FD] font-sans overflow-hidden">
+    <div class="min-h-screen flex bg-[#E8F1FD] font-sans overflow-hidden">
 
-    <!-- Sidebar -->
-    <aside class="w-72 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10">
-      <div class="p-4 border-b border-slate-100">
-        <h1 class="text-xl font-bold flex items-center gap-2 text-[#3978D7] mb-4">
-          <IconNotebook class="w-6 h-6" />
-          <span>Tus Notas</span>
-        </h1>
+      <!-- OVERLAY MOBILE -->
+      <div
+        v-if="showSidebar"
+        @click="showSidebar = false"
+        class="fixed inset-0 bg-black/40 z-20 md:hidden"
+      ></div>
 
-        <!-- Botones de creación por sección -->
-        <div class="grid grid-cols-3 gap-2 mb-4">
-          <button @click="addItemToSection('Documento')" class="sidebar-btn bg-blue-50 text-blue-600 hover:bg-blue-100" title="Nuevo Documento">
-            <IconFile class="w-5 h-5" />
-          </button>
-          <button @click="addItemToSection('Nota')" class="sidebar-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100" title="Nueva Nota Rápida">
-            <IconList class="w-5 h-5" />
-          </button>
-          <button @click="addItemToSection('Post-it')" class="sidebar-btn bg-amber-50 text-amber-600 hover:bg-amber-100" title="Nuevo Post-it">
-            <IconSticky class="w-5 h-5" />
-          </button>
-        </div>
+      <!-- SIDEBAR -->
+      <aside
+        class="fixed md:static inset-y-0 left-0 w-72 bg-white border-r border-slate-200
+               flex flex-col shadow-sm z-30 transform transition-transform duration-300
+               md:translate-x-0"
+        :class="showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+      >
+        <div class="p-4 border-b border-slate-100">
+          <h1 class="text-xl font-bold flex items-center gap-2 text-[#3978D7] mb-4">
+            <IconNotebook class="w-6 h-6" />
+            <span>Tus Notas</span>
+          </h1>
 
-        <!-- Buscador -->
-        <div class="relative">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Buscar..."
-            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3978D7] transition-all"
-          >
-          <IconSearch class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-        </div>
-      </div>
-
-      <!-- Secciones y notas -->
-      <div class="flex-1 overflow-y-auto p-2 space-y-4 custom-scrollbar">
-        <div v-for="section in filteredSections" :key="section.type">
-          <h2 class="text-sm font-semibold text-slate-400 px-2 mb-1">{{ section.title }}</h2>
-
-          <div v-for="item in section.items" :key="item.id"
-               @click="selectItem(item)"
-               class="group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border border-transparent"
-               :class="selectedItem?.id === item.id ? 'bg-[#D0E2FF] border-[#3978D7] shadow-sm' : 'hover:bg-slate-50 hover:border-slate-200'">
-
-            <div class="flex items-center gap-3 overflow-hidden">
-              <component :is="getIconByType(item.type)" class="w-4 h-4 flex-shrink-0" :class="getColorByType(item.type)" />
-              <div class="flex flex-col min-w-0">
-                <span class="font-medium truncate text-sm" :class="!item.title ? 'text-slate-400 italic' : ''">
-                  {{ item.title || 'Sin título' }}
-                </span>
-                <span class="text-xs text-slate-400 truncate">
-                  {{ formatDate(item.updatedAt) }}
-                </span>
-              </div>
-            </div>
-
-            <button @click.stop="deleteItemFromSection(item.id, section.type)" class="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all">
-              <IconTrash class="w-4 h-4" />
+          <!-- Botones creación -->
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <button @click="addItemToSection('Documento')" class="sidebar-btn bg-blue-50 text-blue-600 hover:bg-blue-100">
+              <IconFile class="w-5 h-5" />
+            </button>
+            <button @click="addItemToSection('Nota')" class="sidebar-btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100">
+              <IconList class="w-5 h-5" />
+            </button>
+            <button @click="addItemToSection('Post-it')" class="sidebar-btn bg-amber-50 text-amber-600 hover:bg-amber-100">
+              <IconSticky class="w-5 h-5" />
             </button>
           </div>
+
+          <!-- Buscador -->
+          <div class="relative">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Buscar..."
+              class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3978D7]"
+            >
+            <IconSearch class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          </div>
         </div>
 
-        <div v-if="sections.length === 0" class="text-center p-8 text-slate-400 text-sm">
-          <p>No tienes notas aún.</p>
-          <p>¡Crea una arriba!</p>
-        </div>
-      </div>
-    </aside>
+        <!-- LISTA -->
+        <div class="flex-1 overflow-y-auto p-2 space-y-4 custom-scrollbar">
+          <div v-for="section in filteredSections" :key="section.type">
+            <h2 class="text-sm font-semibold text-slate-400 px-2 mb-1">
+              {{ section.title }}
+            </h2>
 
-    <!-- Editor -->
-    <main class="flex-1 flex flex-col relative bg-[#E8F1FD]/50">
-      <div v-if="selectedItem" class="h-full flex flex-col animate-fadeIn">
+            <div
+              v-for="item in section.items"
+              :key="item.id"
+              @click="selectItem(item); showSidebar = false"
+              class="group flex items-center justify-between p-3 rounded-lg cursor-pointer transition border"
+              :class="selectedItem?.id === item.id
+                ? 'bg-[#D0E2FF] border-[#3978D7]'
+                : 'hover:bg-slate-50 border-transparent'"
+            >
+              <div class="flex items-center gap-3 overflow-hidden">
+                <component :is="getIconByType(item.type)"
+                           class="w-4 h-4"
+                           :class="getColorByType(item.type)" />
+                <div class="min-w-0">
+                  <span class="font-medium truncate block text-sm">
+                    {{ item.title || 'Sin título' }}
+                  </span>
+                  <span class="text-xs text-slate-400 truncate">
+                    {{ formatDate(item.updatedAt) }}
+                  </span>
+                </div>
+              </div>
 
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
-          <div class="flex items-center gap-2 text-sm text-slate-500">
-            <span class="bg-slate-100 px-2 py-1 rounded text-xs uppercase tracking-wide font-semibold">{{ selectedItem.type }}</span>
-            <span v-if="isSaving" class="text-[#3978D7] flex items-center gap-1">
-              <IconLoader class="w-3 h-3 animate-spin" /> Guardando...
-            </span>
-            <span v-else class="text-green-600 flex items-center gap-1">
-              <IconCheck class="w-3 h-3" /> Guardado
-            </span>
-          </div>
-
-          <div v-if="selectedItem.type === 'Post-it'" class="flex gap-2">
-            <button
-              v-for="color in postItColors"
-              :key="color.bg"
-              @click="selectedItem.color = color.bg; triggerAutoSave()"
-              class="w-6 h-6 rounded-full border border-slate-200 shadow-sm hover:scale-110 transition"
-              :class="color.bg"
-            ></button>
-          </div>
-        </header>
-
-        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          <div class="max-w-4xl mx-auto transition-all duration-300">
-
-            <div v-if="selectedItem.type !== 'Post-it'" class="bg-white min-h-[80vh] shadow-sm border border-slate-200 rounded-2xl p-10">
-              <input
-                v-model="selectedItem.title"
-                @input="triggerAutoSave"
-                placeholder="Título del documento..."
-                class="w-full text-4xl font-bold text-slate-800 placeholder-slate-300 border-none focus:outline-none focus:ring-0 bg-transparent mb-6"
+              <button
+                @click.stop="deleteItemFromSection(item.id, section.type)"
+                class="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500"
               >
-              <textarea
-                v-model="selectedItem.content"
-                @input="triggerAutoSave"
-                placeholder="Escribe aquí tu contenido..."
-                class="w-full h-[60vh] resize-none border-none focus:outline-none focus:ring-0 text-lg text-slate-600 leading-relaxed custom-textarea"
-              ></textarea>
+                <IconTrash class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="flex-1 flex flex-col relative bg-[#E8F1FD]/50">
+
+        <!-- MOBILE TOP BAR -->
+        <div class="md:hidden h-14 bg-white border-b flex items-center px-4 gap-3 shadow-sm">
+          <button @click="showSidebar = true" class="text-xl">☰</button>
+          <span class="font-semibold text-slate-600">
+            {{ selectedItem?.title || 'Notas' }}
+          </span>
+        </div>
+
+        <!-- EDITOR -->
+        <div v-if="selectedItem" class="flex-1 flex flex-col animate-fadeIn">
+
+          <header class="h-14 md:h-16 bg-white border-b flex items-center justify-between px-4 md:px-8 shadow-sm">
+            <div class="flex items-center gap-2 text-sm text-slate-500">
+              <span class="bg-slate-100 px-2 py-1 rounded text-xs font-semibold uppercase">
+                {{ selectedItem.type }}
+              </span>
+              <span v-if="isSaving" class="text-[#3978D7] flex items-center gap-1">
+                <IconLoader class="w-3 h-3 animate-spin" /> Guardando
+              </span>
+              <span v-else class="text-green-600 flex items-center gap-1">
+                <IconCheck class="w-3 h-3" /> Guardado
+              </span>
             </div>
 
-            <div v-else class="flex justify-center items-center h-full pt-10">
-              <div
-                class="w-96 aspect-square shadow-xl rotate-1 transition-colors duration-300 p-6 flex flex-col relative"
-                :class="selectedItem.color || 'bg-yellow-200'"
-              >
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 shadow-md border-2 border-white z-10"></div>
+            <div v-if="selectedItem.type === 'Post-it'" class="flex gap-2">
+              <button
+                v-for="color in postItColors"
+                :key="color.bg"
+                @click="selectedItem.color = color.bg; triggerAutoSave()"
+                class="w-5 h-5 rounded-full border"
+                :class="color.bg"
+              ></button>
+            </div>
+          </header>
 
+          <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+            <div class="max-w-4xl mx-auto">
+
+              <div v-if="selectedItem.type !== 'Post-it'"
+                   class="bg-white min-h-[70vh] border rounded-2xl p-6 md:p-10">
                 <input
                   v-model="selectedItem.title"
                   @input="triggerAutoSave"
-                  placeholder="Asunto..."
-                  class="bg-transparent border-b border-black/10 w-full mb-4 px-2 py-1 font-bold text-slate-800 placeholder-slate-500/50 focus:outline-none"
-                >
+                  placeholder="Título..."
+                  class="w-full text-2xl md:text-4xl font-bold mb-4 border-none focus:outline-none"
+                />
                 <textarea
                   v-model="selectedItem.content"
                   @input="triggerAutoSave"
-                  placeholder="No olvidar..."
-                  class="flex-1 bg-transparent border-none focus:outline-none resize-none text-slate-800 placeholder-slate-600/50 text-xl font-handwriting leading-loose"
+                  placeholder="Escribe aquí..."
+                  class="w-full h-[50vh] resize-none border-none focus:outline-none text-base md:text-lg"
                 ></textarea>
               </div>
-            </div>
 
+              <div v-else class="flex justify-center pt-10">
+                <div
+                  class="w-72 aspect-square p-6 shadow-xl"
+                  :class="selectedItem.color"
+                >
+                  <input
+                    v-model="selectedItem.title"
+                    @input="triggerAutoSave"
+                    placeholder="Asunto..."
+                    class="w-full mb-4 bg-transparent border-b focus:outline-none font-bold"
+                  />
+                  <textarea
+                    v-model="selectedItem.content"
+                    @input="triggerAutoSave"
+                    placeholder="No olvidar..."
+                    class="flex-1 w-full bg-transparent resize-none focus:outline-none font-handwriting text-lg"
+                  ></textarea>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
-      </div>
 
-      <div v-else class="flex-1 flex flex-col items-center justify-center text-slate-300">
-        <IconNotebook class="w-24 h-24 mb-4 text-slate-200" />
-        <p class="text-lg font-medium text-slate-400">Selecciona o crea un elemento para empezar</p>
-      </div>
+        <!-- EMPTY -->
+        <div v-else class="flex-1 flex flex-col items-center justify-center text-slate-300">
+          <IconNotebook class="w-24 h-24 mb-4" />
+          <p class="text-lg">Selecciona o crea una nota</p>
+        </div>
 
-    </main>
-  </div>
+      </main>
+    </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -170,6 +201,8 @@ import {
   Loader2 as IconLoader,
   BookOpen as IconNotebook
 } from 'lucide-vue-next'
+
+const showSidebar = ref(false)
 
 // ===============================
 // ESTADO

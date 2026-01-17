@@ -30,10 +30,6 @@ const router = createRouter({
       component: Perfil
     },
     {
-      path: '/ajustes',
-      component: Ajustes
-    },
-    {
       path: '/login',
       component: LoginRegister
     },

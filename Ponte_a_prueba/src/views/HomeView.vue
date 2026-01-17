@@ -1,122 +1,135 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-[#E8F1FD] font-sans">
-    <Header/>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
+    <Header />
 
-    <main class="flex-grow flex justify-center items-center p-4">
-      <div class="flex flex-col lg:flex-row gap-6 items-start max-w-[1440px] w-full">
+    <main class="mx-auto max-w-[1400px] px-4 py-10">
+      <!-- Título -->
+      <div class="text-center mb-10">
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Generador de Exámenes</h1>
+        <p class="mt-2 text-slate-500 max-w-2xl mx-auto">
+          Convierte tus apuntes o PDFs en exámenes personalizados en segundos.
+        </p>
+      </div>
 
-        <aside class="hidden lg:flex justify-center flex-shrink-0">
-          <div class="w-72 h-[915px] bg-gray-100 rounded-lg flex items-center justify-center">
-            <span class="text-gray-400 text-sm">Anuncio</span>
+      <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-8 items-start">
+        <!-- Anuncio izquierdo -->
+        <aside class="hidden lg:block">
+          <div class="h-[900px] bg-white border rounded-2xl shadow-sm flex items-center justify-center">
+            <span class="text-slate-400 text-sm">Espacio publicitario</span>
           </div>
         </aside>
 
-        <div class="flex-1 bg-white w-full rounded-2xl shadow-xl p-6 md:p-12 min-h-[70vh] flex flex-col justify-center">
-          <h2 class="text-center text-[#546E7A] font-bold text-sm mb-3 md:text-lg">
-            Pegue aquí los apuntes o suba un PDF
-          </h2>
-
-          <textarea
-            v-model="apuntes"
-            class="w-full h-40 md:h-[300px] p-3 border border-gray-300 rounded-lg text-sm md:text-base text-gray-600 resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-[#3978D7]"
-            placeholder="Escriba o copie un archivo PDF aquí..."
-          ></textarea>
-
-          <div class="my-6 flex flex-col items-center gap-4">
-            <label
-              for="pdf-upload"
-              class="bg-[#3978D7] text-white px-4 py-2 rounded cursor-pointer hover:bg-[#2d62b3]"
-            >
-              Subir PDF
+        <!-- Contenido principal -->
+        <section class="bg-white rounded-2xl shadow-sm border p-8 md:p-10">
+          <!-- Entrada de apuntes -->
+          <div class="mb-8">
+            <label class="block text-sm font-medium text-slate-600 mb-2">
+              Apuntes o contenido del examen
             </label>
-            <span class="text-sm md:text-base">{{ archivoNombre }}</span>
-            <input
-              id="pdf-upload"
-              type="file"
-              accept="application/pdf"
-              class="hidden"
-              @change="handlePdfUploadCustom"
-            />
+            <textarea
+              v-model="apuntes"
+              rows="8"
+              class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-700 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Pega aquí tus apuntes o sube un PDF…"
+            ></textarea>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 mb-6">
-            <select
-              v-model="dificultad"
-              class="w-full border border-gray-400 rounded-lg p-2.5 text-gray-500"
+          <!-- PDF -->
+          <div class="mb-10 flex flex-col items-center gap-3">
+            <label
+              for="pdf-upload"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm cursor-pointer hover:bg-blue-700"
             >
-              <option disabled value="">Elija la dificultad</option>
-              <option value="facil">Fácil</option>
-              <option value="medio">Medio</option>
-              <option value="dificil">Difícil</option>
-            </select>
+              <i class="fa-solid fa-file-pdf"></i> Subir PDF
+            </label>
+            <span class="text-sm text-slate-500">{{ archivoNombre }}</span>
+            <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" @change="handlePdfUploadCustom" />
+          </div>
 
+          <!-- Configuración -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <!-- Dificultad -->
             <div>
-              <div class="flex justify-between items-center mb-2 text-sm md:text-base">
-                <span>5</span>
-                <span class="font-semibold">Número de preguntas</span>
-                <span>20</span>
+              <label class="block text-sm font-medium text-slate-600 mb-2">Dificultad</label>
+              <select
+                v-model="dificultad"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option disabled value="">Selecciona dificultad</option>
+                <option value="facil">Fácil</option>
+                <option value="medio">Media</option>
+                <option value="dificil">Difícil</option>
+              </select>
+            </div>
+
+            <!-- Preguntas -->
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-2">Número de preguntas</label>
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>5</span><span>20</span>
               </div>
-              <input
-                type="range"
-                min="5"
-                max="20"
-                step="5"
-                v-model.number="numPreguntas"
-                class="w-full"
-              />
+              <input type="range" min="5" max="20" step="5" v-model.number="numPreguntas" class="w-full" />
             </div>
           </div>
 
-          <div class="mb-8 flex flex-col items-center">
-            <h3 class="text-center font-medium mb-4">Tipo de examen</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label v-for="tipo in tipos" :key="tipo" class="flex gap-2 items-center">
+          <!-- Tipo de examen -->
+          <div class="mb-10">
+            <h3 class="text-sm font-medium text-slate-600 mb-4">Tipo de examen</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label
+                v-for="tipo in tipos"
+                :key="tipo"
+                class="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:border-blue-500"
+              >
                 <input type="radio" :value="tipo" v-model="tipoExamen" />
-                <span>{{ tipo }}</span>
+                <span class="text-sm text-slate-700">{{ tipo }}</span>
               </label>
             </div>
           </div>
 
+          <!-- Botón -->
           <button
             @click="generarExamen"
             :disabled="loading"
-            class="w-full bg-[#3978D7] hover:bg-[#2d62b3] text-white py-3 rounded-lg disabled:opacity-50"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium disabled:opacity-50"
           >
-            {{ loading ? "Generando..." : "Generar Examen" }}
+            {{ loading ? 'Generando examen…' : 'Generar examen' }}
           </button>
 
-          <div v-if="resultado" class="mt-10">
-            <h3 class="font-bold mb-4">Examen generado</h3>
-            <div v-html="resultado.replace(/\n/g, '<br/>')"></div>
+          <!-- Resultado -->
+          <div v-if="resultado" class="mt-12">
+            <h3 class="font-semibold text-slate-800 mb-4">Examen generado</h3>
+            <div class="prose max-w-none" v-html="resultado.replace(/\n/g, '<br/>')"></div>
 
             <button
               v-if="hayRespuestas"
               @click="toggleResuelto"
-              class="mt-4 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+              class="mt-6 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-sm"
             >
-              {{ mostrarResuelto ? "Ocultar Resuelto" : "Ver Examen Resuelto" }}
+              {{ mostrarResuelto ? 'Ocultar soluciones' : 'Ver examen resuelto' }}
             </button>
 
-            <div v-if="mostrarResuelto" class="mt-4 p-4 bg-gray-50 border rounded">
-              <pre class="whitespace-pre-wrap font-sans">{{ respuestas }}</pre>
+            <div v-if="mostrarResuelto" class="mt-4 bg-slate-50 border rounded-lg p-4">
+              <pre class="whitespace-pre-wrap text-sm text-slate-700">{{ respuestas }}</pre>
             </div>
           </div>
 
-          <p v-if="error" class="text-red-500 mt-4 text-center">{{ error }}</p>
-        </div>
+          <p v-if="error" class="mt-6 text-center text-red-500">{{ error }}</p>
+        </section>
 
-        <aside class="hidden lg:flex justify-center flex-shrink-0">
-          <div class="w-72 h-[915px] bg-gray-100 rounded-lg flex items-center justify-center">
-            <span class="text-gray-400 text-sm">Anuncio</span>
+        <!-- Anuncio derecho -->
+        <aside class="hidden lg:block">
+          <div class="h-[900px] bg-white border rounded-2xl shadow-sm flex items-center justify-center">
+            <span class="text-slate-400 text-sm">Espacio publicitario</span>
           </div>
         </aside>
-
       </div>
     </main>
 
-    <Footer/>
+    <Footer />
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'

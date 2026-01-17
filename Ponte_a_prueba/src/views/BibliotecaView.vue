@@ -56,7 +56,7 @@
               <li
                 v-for="exam in examsByAsignatura(asig)"
                 :key="exam._id"
-                class="truncate"
+                class="break-words"   <!-- CAMBIO: permite que el texto largo haga wrap -->
               >
                 • {{ exam.title }}
               </li>

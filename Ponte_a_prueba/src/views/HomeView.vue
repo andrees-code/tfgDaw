@@ -111,10 +111,35 @@
             </div>
           </div>
 
-          <div v-if="error" class="mt-6 p-4 rounded-lg bg-red-50 border border-red-200 text-center">
-             <p class="text-red-600 font-medium">{{ error }}</p>
-             <p v-if="esErrorDeLimite" class="text-sm text-red-500 mt-1">
-                Actualiza a Premium para generar exámenes ilimitados.
+          <div v-if="error" class="mt-6 p-6 rounded-lg bg-red-50 border border-red-200 text-center animate-fade-in">
+             <div class="mb-3 flex justify-center">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                 </svg>
+             </div>
+
+             <p class="text-red-800 font-semibold text-lg">{{ error }}</p>
+
+             <div v-if="esErrorDeAuth" class="mt-4">
+                <p class="text-slate-600 mb-4 text-sm">
+                    Regístrate gratis para generar tus primeros 5 exámenes mensuales.
+                </p>
+                <button
+                    @click="irAlLogin"
+                    class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+                >
+                    Iniciar Sesión / Registrarse
+                </button>
+             </div>
+
+             <div v-else-if="esErrorDeLimite" class="mt-2">
+                <p class="text-sm text-red-600 mt-1">
+                   Actualiza a Premium para generar exámenes ilimitados y sin esperas.
+                </p>
+             </div>
+
+             <p v-else class="text-sm text-red-500 mt-2">
+                 Por favor, revisa tu conexión a internet o intenta de nuevo más tarde.
              </p>
           </div>
 
@@ -134,12 +159,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router' // 1. Importamos router para redirección
 import * as pdfjsLib from 'pdfjs-dist'
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
-// IMPORTANTE: Ya no importamos sendChat de ollamaService
 import { saveExam, generateExam } from '@/services/examService'
 import { userStore } from "@/stores/userStores"
+
+const router = useRouter() // 2. Inicializamos router
 
 const apuntes = ref("")
 const dificultad = ref("")
@@ -151,8 +178,12 @@ const respuestasInternas = ref("")
 const respuestas = ref("")
 const mostrarResuelto = ref(false)
 const hayRespuestas = ref(false)
+
+// Estados de error
 const error = ref(null)
 const esErrorDeLimite = ref(false)
+const esErrorDeAuth = ref(false) // 3. Nuevo estado para control de login
+
 const archivoNombre = ref("Ningún archivo seleccionado")
 
 const tipos = [
@@ -169,7 +200,7 @@ onMounted(() => {
     `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 })
 
-// --- MANEJO DE PDF (Se mantiene igual, procesado en cliente) ---
+// --- MANEJO DE PDF ---
 async function handlePdfUploadCustom(event) {
   const file = event.target.files[0]
   if (!file) return
@@ -179,7 +210,6 @@ async function handlePdfUploadCustom(event) {
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
 
   let text = ""
-  // Limitamos a 50 páginas para no saturar memoria antes de enviar al backend
   for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
     const page = await pdf.getPage(i)
     const content = await page.getTextContent()
@@ -198,29 +228,38 @@ async function guardarExamen() {
       tipo: tipoExamen.value,
       dificultad: dificultad.value,
       numPreguntas: Number(numPreguntas.value),
-      apuntes: 'Apuntes procesados', // Guardamos un placeholder para no llenar la DB con el PDF entero
+      apuntes: 'Apuntes procesados',
       preguntas: resultado.value,
       respuestas: respuestasInternas.value
     })
     console.log("Examen guardado correctamente en historial")
   } catch (e) {
     console.error("Error guardando examen en historial:", e)
-    // No mostramos error al usuario si falla el guardado automático,
-    // ya que ya tienen el examen generado en pantalla.
   }
 }
 
-// --- LÓGICA PRINCIPAL (NUEVA: CONEXIÓN A BACKEND) ---
+// --- LÓGICA PRINCIPAL ---
 async function manejarGeneracion() {
+  // 1. Validaciones básicas de formulario
   if (!apuntes.value || !dificultad.value || !tipoExamen.value) {
     error.value = "Por favor completa todos los campos (apuntes, dificultad, tipo)."
     esErrorDeLimite.value = false
+    esErrorDeAuth.value = false
     return
+  }
+
+  // 2. Validación PREVIA de autenticación (Ahorra llamada al server)
+  if (!userStore.token) {
+      error.value = "Debes iniciar sesión para generar exámenes."
+      esErrorDeAuth.value = true
+      esErrorDeLimite.value = false
+      return
   }
 
   loading.value = true
   error.value = null
   esErrorDeLimite.value = false
+  esErrorDeAuth.value = false
   resultado.value = ""
   respuestas.value = ""
   respuestasInternas.value = ""
@@ -228,8 +267,6 @@ async function manejarGeneracion() {
   hayRespuestas.value = false
 
   try {
-    // 1. Llamada al Backend (Endpoints: /api/exams/generate)
-    // El backend verifica el límite FREE y gestiona OLLAMA.
     const data = await generateExam({
       tipo: tipoExamen.value,
       dificultad: dificultad.value,
@@ -237,24 +274,36 @@ async function manejarGeneracion() {
       apuntes: apuntes.value
     });
 
-    // 2. Procesar respuesta del Backend
     resultado.value = data.preguntas;
     respuestasInternas.value = data.respuestas;
     hayRespuestas.value = true;
 
-    // 3. Guardar automáticamente (para historial y conteo futuro)
     await guardarExamen();
 
   } catch (e) {
     console.error("Error en generación:", e);
 
-    // 4. Manejo específico del error 403 (Límite alcanzado)
-    if (e.response && e.response.status === 403) {
-      error.value = e.response.data.message || "Has alcanzado el límite de exámenes para tu plan.";
-      esErrorDeLimite.value = true;
+    // 3. Gestión de errores HTTP
+    if (e.response) {
+        // ERROR 401: No autorizado (Token expirado o no login)
+        if (e.response.status === 401) {
+            error.value = "Tu sesión ha expirado o no estás registrado.";
+            esErrorDeAuth.value = true;
+        }
+        // ERROR 403: Límite de plan (Endpoint devuelve Forbidden)
+        else if (e.response.status === 403) {
+            error.value = e.response.data.message || "Has alcanzado el límite de exámenes para tu plan.";
+            esErrorDeLimite.value = true;
+        }
+        // ERROR Genérico del servidor
+        else {
+             error.value = "Hubo un error al generar el examen. Intenta con un texto más corto.";
+        }
     } else {
-      error.value = "Hubo un error al generar el examen. Intenta con un texto más corto o prueba más tarde.";
+        // ERROR de Red (Backend apagado, CORS, Internet)
+        error.value = "Error de conexión con el servidor.";
     }
+
   } finally {
     loading.value = false;
   }
@@ -263,6 +312,11 @@ async function manejarGeneracion() {
 function toggleResuelto() {
   mostrarResuelto.value = !mostrarResuelto.value
   respuestas.value = mostrarResuelto.value ? respuestasInternas.value : ""
+}
+
+function irAlLogin() {
+    // Ajusta esta ruta a la de tu pantalla de login/registro
+    router.push('/login')
 }
 </script>
 

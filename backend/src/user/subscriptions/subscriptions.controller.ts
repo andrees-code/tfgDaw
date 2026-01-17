@@ -1,10 +1,13 @@
 // src/subscriptions/subscriptions.controller.ts
-import { Controller, Post, Body, Req, Get, Request, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get, Request, UseGuards, BadRequestException, Logger } from '@nestjs/common';
 import { JwtAuthGuard } from '../jwt-auth.guard';
 import { SubscriptionsService } from './subscriptions.service';
 
+// Dejamos la ruta como la tienes (/api/api/...) ya que pediste no tocarla
 @Controller('api/v1/subscriptions')
 export class SubscriptionsController {
+  private readonly logger = new Logger(SubscriptionsController.name);
+
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   // 💳 Crear sesión Stripe Checkout
@@ -14,25 +17,36 @@ export class SubscriptionsController {
     @Req() req,
     @Body('plan') plan: 'monthly' | 'yearly',
   ) {
-    // Validar plan
     if (!['monthly', 'yearly'].includes(plan)) {
       throw new BadRequestException('Plan inválido');
     }
 
-    // Llamar al service para crear la sesión de Stripe
+    // ⚡️ CORRECCIÓN DE SEGURIDAD: Buscamos el ID en varias propiedades posibles
+    const userId = req.user.id || req.user.userId || req.user._id;
+
     const session = await this.subscriptionsService.createCheckoutSession(
-      req.user.id,
+      userId,
       plan,
     );
 
-    // Devolver la URL de Stripe para redirigir en frontend
     return { url: session.url };
   }
 
-  @UseGuards(JwtAuthGuard) // Protegemos la ruta para saber quién es el usuario
-  @Get('premium') // Esto crea la ruta: /api/v1/subscriptions/premium
+  @UseGuards(JwtAuthGuard)
+  @Get('premium') 
   async getPremiumStatus(@Request() req) {
-    // req.user viene del token JWT decodificado
-    return this.subscriptionsService.getSubscriptionStatus(req.user.userId); 
+    // 🔍 DEBUG: Ver qué trae el usuario realmente
+    this.logger.log(`Usuario solicitando premium: ${JSON.stringify(req.user)}`);
+
+    // ⚡️ CORRECCIÓN PRINCIPAL AQUÍ
+    // Antes usabas req.user.userId, pero en el otro método usabas req.user.id.
+    // Esto asegura que lo pille sea cual sea el nombre:
+    const id = req.user.id || req.user.userId || req.user._id || req.user.sub;
+
+    if (!id) {
+        throw new BadRequestException('No se pudo identificar el ID del usuario en el token');
+    }
+
+    return this.subscriptionsService.getSubscriptionStatus(id); 
   }
 }

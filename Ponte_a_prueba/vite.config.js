@@ -29,7 +29,7 @@ export default defineConfig({
         secure: true,
       },
       '/api': {
-        target: 'https://bakend-murex.vercel.app',
+        target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },

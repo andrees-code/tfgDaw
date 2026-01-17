@@ -7,12 +7,16 @@ import { ExamsController } from './exams.controller';
 import { ExamsService } from './exams.service';
 import { JwtStrategy } from '../user/jwt.strategy';
 import { UserModule } from '../user/user.module'; // IMPORTANTE: traer UserModule para usar JwtStrategy
+import { UserSchema } from '../user/schemas/user.schema/user.schema';
+import { OllamaModule } from '../ollama/ollama/ollama.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Exam.name, schema: ExamSchema }]),
+    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]), // <- esto es crítico
     PassportModule.register({ defaultStrategy: 'jwt' }),
     UserModule, // ⚠️ necesitamos la estrategia JWT
+    OllamaModule,
   ],
   controllers: [ExamsController],
   providers: [ExamsService],

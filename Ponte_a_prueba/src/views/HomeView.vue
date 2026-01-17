@@ -3,7 +3,6 @@
     <Header />
 
     <main class="mx-auto max-w-[1400px] px-4 py-10">
-      <!-- Título -->
       <div class="text-center mb-10">
         <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Generador de Exámenes</h1>
         <p class="mt-2 text-slate-500 max-w-2xl mx-auto">
@@ -12,16 +11,13 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-8 items-start">
-        <!-- Anuncio izquierdo -->
         <aside class="hidden lg:block">
           <div class="h-[900px] bg-white border rounded-2xl shadow-sm flex items-center justify-center">
             <span class="text-slate-400 text-sm">Espacio publicitario</span>
           </div>
         </aside>
 
-        <!-- Contenido principal -->
         <section class="bg-white rounded-2xl shadow-sm border p-8 md:p-10">
-          <!-- Entrada de apuntes -->
           <div class="mb-8">
             <label class="block text-sm font-medium text-slate-600 mb-2">
               Apuntes o contenido del examen
@@ -34,7 +30,6 @@
             ></textarea>
           </div>
 
-          <!-- PDF -->
           <div class="mb-10 flex flex-col items-center gap-3">
             <label
               for="pdf-upload"
@@ -46,9 +41,7 @@
             <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" @change="handlePdfUploadCustom" />
           </div>
 
-          <!-- Configuración -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-            <!-- Dificultad -->
             <div>
               <label class="block text-sm font-medium text-slate-600 mb-2">Dificultad</label>
               <select
@@ -62,7 +55,6 @@
               </select>
             </div>
 
-            <!-- Preguntas -->
             <div>
               <label class="block text-sm font-medium text-slate-600 mb-2">Número de preguntas</label>
               <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
@@ -72,7 +64,6 @@
             </div>
           </div>
 
-          <!-- Tipo de examen -->
           <div class="mb-10">
             <h3 class="text-sm font-medium text-slate-600 mb-4">Tipo de examen</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -87,37 +78,48 @@
             </div>
           </div>
 
-          <!-- Botón -->
           <button
-            @click="generarExamen"
+            @click="manejarGeneracion"
             :disabled="loading"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium disabled:opacity-50"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            {{ loading ? 'Generando examen…' : 'Generar examen' }}
+            <span v-if="loading" class="flex items-center justify-center gap-2">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Generando con IA...
+            </span>
+            <span v-else>Generar examen</span>
           </button>
 
-          <!-- Resultado -->
-          <div v-if="resultado" class="mt-12">
+          <div v-if="resultado" class="mt-12 animate-fade-in">
             <h3 class="font-semibold text-slate-800 mb-4">Examen generado</h3>
-            <div class="prose max-w-none" v-html="resultado.replace(/\n/g, '<br/>')"></div>
+            <div class="prose max-w-none bg-slate-50 p-6 rounded-xl border border-slate-200 text-slate-700" v-html="resultado.replace(/\n/g, '<br/>')"></div>
 
             <button
               v-if="hayRespuestas"
               @click="toggleResuelto"
-              class="mt-6 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-sm"
+              class="mt-6 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-sm font-medium text-slate-700 transition-colors"
             >
               {{ mostrarResuelto ? 'Ocultar soluciones' : 'Ver examen resuelto' }}
             </button>
 
-            <div v-if="mostrarResuelto" class="mt-4 bg-slate-50 border rounded-lg p-4">
-              <pre class="whitespace-pre-wrap text-sm text-slate-700">{{ respuestas }}</pre>
+            <div v-if="mostrarResuelto" class="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 animate-fade-in">
+              <h4 class="text-sm font-bold text-green-800 mb-2">Soluciones:</h4>
+              <pre class="whitespace-pre-wrap text-sm text-green-900 font-sans">{{ respuestas }}</pre>
             </div>
           </div>
 
-          <p v-if="error" class="mt-6 text-center text-red-500">{{ error }}</p>
+          <div v-if="error" class="mt-6 p-4 rounded-lg bg-red-50 border border-red-200 text-center">
+             <p class="text-red-600 font-medium">{{ error }}</p>
+             <p v-if="esErrorDeLimite" class="text-sm text-red-500 mt-1">
+                Actualiza a Premium para generar exámenes ilimitados.
+             </p>
+          </div>
+
         </section>
 
-        <!-- Anuncio derecho -->
         <aside class="hidden lg:block">
           <div class="h-[900px] bg-white border rounded-2xl shadow-sm flex items-center justify-center">
             <span class="text-slate-400 text-sm">Espacio publicitario</span>
@@ -130,19 +132,18 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue'
 import * as pdfjsLib from 'pdfjs-dist'
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
-import { sendChat } from '@/services/ollamaService'
-import { saveExam } from '@/services/examService'
+// IMPORTANTE: Ya no importamos sendChat de ollamaService
+import { saveExam, generateExam } from '@/services/examService'
 import { userStore } from "@/stores/userStores"
 
 const apuntes = ref("")
 const dificultad = ref("")
-const numPreguntas = ref(5) // Por defecto 5
+const numPreguntas = ref(5)
 const tipoExamen = ref("")
 const loading = ref(false)
 const resultado = ref("")
@@ -151,6 +152,7 @@ const respuestas = ref("")
 const mostrarResuelto = ref(false)
 const hayRespuestas = ref(false)
 const error = ref(null)
+const esErrorDeLimite = ref(false)
 const archivoNombre = ref("Ningún archivo seleccionado")
 
 const tipos = [
@@ -167,6 +169,7 @@ onMounted(() => {
     `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 })
 
+// --- MANEJO DE PDF (Se mantiene igual, procesado en cliente) ---
 async function handlePdfUploadCustom(event) {
   const file = event.target.files[0]
   if (!file) return
@@ -176,7 +179,7 @@ async function handlePdfUploadCustom(event) {
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
 
   let text = ""
-  // Limitamos a 50 páginas para no saturar memoria, ajustable
+  // Limitamos a 50 páginas para no saturar memoria antes de enviar al backend
   for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
     const page = await pdf.getPage(i)
     const content = await page.getTextContent()
@@ -186,152 +189,7 @@ async function handlePdfUploadCustom(event) {
   apuntes.value = text
 }
 
-// Función para dividir en bloques de 5 preguntas
-function dividirBloques(total) {
-  const bloques = []
-  let restantes = total
-  while (restantes > 0) {
-    bloques.push(Math.min(5, restantes))
-    restantes -= 5
-  }
-  return bloques
-}
-
-// -----------------------------------------------------------------------
-// PROMPTS AJUSTADOS (LÓGICA ANTI-ALUCINACIONES)
-// -----------------------------------------------------------------------
-
-const promptPreguntas = (cantidad, inicio, preguntasPrevias) => {
-  const tipo = tipoExamen.value;
-  // Recortamos apuntes para no exceder tokens, pero mantenemos suficiente contexto
-  const ap = apuntes.value.substring(0, 15000);
-
-  // Instrucción de sistema inyectada en el user prompt para reforzar obediencia
-  const instruccionBase = `
-ROL: Eres un generador de exámenes académico estricto.
-TAREA: Generar preguntas de examen basadas en el texto proporcionado.
-REGLA DE ORO: NO converses. NO saludes. SOLO entrega el contenido del examen.
-`;
-
-  // Contexto negativo: Qué NO debe preguntar porque ya se hizo
-  const contextoNegativo = preguntasPrevias.length > 10
-    ? `HISTORIAL: Ya has generado estas preguntas anteriormente:
-"""
-${preguntasPrevias}
-"""
-INSTRUCCIÓN CRÍTICA: NO repitas ninguna de las preguntas anteriores ni sus temáticas exactas. Busca nuevos ángulos o temas en los apuntes.`
-    : "";
-
-  if (tipo === "Test (4 opciones)") {
-    return `${instruccionBase}
-${contextoNegativo}
-
-INSTRUCCIONES DE FORMATO:
-1. Genera EXACTAMENTE ${cantidad} preguntas de opción múltiple.
-2. La PRIMERA pregunta de esta lista DEBE ser la número ${inicio}. (Ejemplo: ${inicio}. ¿Pregunta...?)
-3. Formato:
-${inicio}. Enunciado
-a) Opción
-b) Opción
-c) Opción
-d) Opción
-
-4. NO indiques la respuesta correcta todavía.
-5. Usa un lenguaje formal y académico.
-
-TEXTO BASE (APUNTES):
-""" ${ap} """`;
-  }
-
-  if (tipo === "Verdadero/Falso") {
-    return `${instruccionBase}
-${contextoNegativo}
-
-INSTRUCCIONES DE FORMATO:
-1. Genera EXACTAMENTE ${cantidad} afirmaciones.
-2. La PRIMERA afirmación DEBE ser la número ${inicio}.
-3. Formato:
-${inicio}. [Afirmación]
-
-TEXTO BASE (APUNTES):
-""" ${ap} """`;
-  }
-
-  if (tipo === "Respuestas cortas" || tipo === "Respuestas largas") {
-    return `${instruccionBase}
-${contextoNegativo}
-
-INSTRUCCIONES DE FORMATO:
-1. Genera EXACTAMENTE ${cantidad} preguntas abiertas.
-2. La PRIMERA pregunta DEBE ser la número ${inicio}.
-3. Formato:
-${inicio}. [Pregunta]
-
-TEXTO BASE (APUNTES):
-""" ${ap} """`;
-  }
-
-  // Fallback genérico para Mix
-  return `${instruccionBase}
-${contextoNegativo}
-Genera ${cantidad} preguntas variadas (Test, V/F, Abiertas) empezando por el número ${inicio}.
-TEXTO BASE: """ ${ap} """`;
-};
-
-const promptRespuestas = (preguntas) => {
-  const tipo = tipoExamen.value;
-  const ap = apuntes.value.substring(0, 15000);
-
-  const instruccionBase = `Eres un motor de corrección automatizado.
-TU OBJETIVO: Proveer la clave de respuestas correcta basada en el texto.
-FORMATO DE SALIDA: Lista numerada simple. Sin explicaciones extra.`;
-
-  if (tipo === "Test (4 opciones)") {
-    return `${instruccionBase}
-INSTRUCCIONES:
-- Devuelve solo el número y la letra.
-- Ejemplo:
-1. a
-2. c
-
-PREGUNTAS A RESOLVER:
-""" ${preguntas} """
-REFERENCIA: """ ${ap} """`;
-  }
-
-  if (tipo === "Verdadero/Falso") {
-    return `${instruccionBase}
-INSTRUCCIONES:
-- Devuelve número y "Verdadero" o "Falso".
-- Ejemplo:
-1. Verdadero
-2. Falso
-
-PREGUNTAS A RESOLVER:
-""" ${preguntas} """
-REFERENCIA: """ ${ap} """`;
-  }
-
-  return `${instruccionBase}
-INSTRUCCIONES:
-- Responde de forma concisa y académica.
-- Respeta la numeración original.
-
-PREGUNTAS A RESOLVER:
-""" ${preguntas} """
-REFERENCIA: """ ${ap} """`;
-};
-
-// -----------------------------------------------------------------------
-
-function respuestasValidas(texto) {
-  if (!texto) return false
-  if (texto.length < 5) return false
-  const t = texto.toLowerCase()
-  if (t.includes("no puedo") || t.includes("lo siento") || t.includes("contexto")) return false
-  return true
-}
-
+// --- GUARDAR EN BASE DE DATOS ---
 async function guardarExamen() {
   if (!userStore.token) return
   try {
@@ -340,93 +198,65 @@ async function guardarExamen() {
       tipo: tipoExamen.value,
       dificultad: dificultad.value,
       numPreguntas: Number(numPreguntas.value),
-      apuntes: 'Apuntes procesados', // No guardamos todo el tocho de texto
+      apuntes: 'Apuntes procesados', // Guardamos un placeholder para no llenar la DB con el PDF entero
       preguntas: resultado.value,
       respuestas: respuestasInternas.value
     })
+    console.log("Examen guardado correctamente en historial")
   } catch (e) {
-    console.error("Error guardando examen:", e)
+    console.error("Error guardando examen en historial:", e)
+    // No mostramos error al usuario si falla el guardado automático,
+    // ya que ya tienen el examen generado en pantalla.
   }
 }
 
-// Lógica principal de generación
-async function generarExamen() {
+// --- LÓGICA PRINCIPAL (NUEVA: CONEXIÓN A BACKEND) ---
+async function manejarGeneracion() {
   if (!apuntes.value || !dificultad.value || !tipoExamen.value) {
     error.value = "Por favor completa todos los campos (apuntes, dificultad, tipo)."
+    esErrorDeLimite.value = false
     return
   }
 
   loading.value = true
   error.value = null
+  esErrorDeLimite.value = false
   resultado.value = ""
   respuestas.value = ""
   respuestasInternas.value = ""
   mostrarResuelto.value = false
   hayRespuestas.value = false
 
-  // Variables para controlar el flujo
-  let contextoGenerado = ""; // ACUMULADOR DE PREGUNTAS PREVIAS
-  let contadorPreguntas = 1;
-  const bloques = dividirBloques(numPreguntas.value)
-
   try {
-    for (let bloqueSize of bloques) {
+    // 1. Llamada al Backend (Endpoints: /api/exams/generate)
+    // El backend verifica el límite FREE y gestiona OLLAMA.
+    const data = await generateExam({
+      tipo: tipoExamen.value,
+      dificultad: dificultad.value,
+      numPreguntas: Number(numPreguntas.value),
+      apuntes: apuntes.value
+    });
 
-      // 1. Generar Preguntas (Pasando historial para evitar duplicados)
-      const promptPreg = promptPreguntas(bloqueSize, contadorPreguntas, contextoGenerado)
+    // 2. Procesar respuesta del Backend
+    resultado.value = data.preguntas;
+    respuestasInternas.value = data.respuestas;
+    hayRespuestas.value = true;
 
-      const respPreg = await sendChat([
-        { role: "system", content: "Eres una máquina estricta de generación de exámenes. No añadas texto de relleno." },
-        { role: "user", content: promptPreg }
-      ])
-
-      // Limpieza agresiva de Markdown y metatexto
-      let preguntasBloque = respPreg.message?.content?.trim() || ""
-      preguntasBloque = preguntasBloque
-        .replace(/```json/g, '')
-        .replace(/```text/g, '')
-        .replace(/```/g, '')
-        .replace(/Aqui tienes.*/gi, '') // Elimina saludos típicos
-        .trim();
-
-      // Acumulamos para mostrar al usuario
-      resultado.value += preguntasBloque + "\n\n"
-
-      // Acumulamos en el historial para la IA (para que no repita en la siguiente vuelta)
-      contextoGenerado += preguntasBloque + "\n";
-
-      // 2. Generar Respuestas para este bloque
-      let respuestasBloque = ""
-      let intentos = 0
-
-      // Pequeño reintento si la IA falla al responder
-      while (!respuestasValidas(respuestasBloque) && intentos < 2) {
-        const promptResp = promptRespuestas(preguntasBloque)
-
-        const resp = await sendChat([
-          { role: "system", content: "Eres un profesor corrigiendo un examen. Sé directo." },
-          { role: "user", content: promptResp }
-        ])
-
-        respuestasBloque = resp.message?.content?.trim() || ""
-        respuestasBloque = respuestasBloque.replace(/```/g, '').trim()
-        intentos++
-      }
-
-      respuestasInternas.value += respuestasBloque + "\n"
-
-      // Avanzamos el contador para que el siguiente bloque empiece bien (ej. 6, 11, etc.)
-      contadorPreguntas += bloqueSize;
-    }
-
-    hayRespuestas.value = true
-    await guardarExamen()
+    // 3. Guardar automáticamente (para historial y conteo futuro)
+    await guardarExamen();
 
   } catch (e) {
-    console.error(e)
-    error.value = "Hubo un error al generar el examen. Por favor, intenta con un texto más corto o prueba de nuevo."
+    console.error("Error en generación:", e);
+
+    // 4. Manejo específico del error 403 (Límite alcanzado)
+    if (e.response && e.response.status === 403) {
+      error.value = e.response.data.message || "Has alcanzado el límite de exámenes para tu plan.";
+      esErrorDeLimite.value = true;
+    } else {
+      error.value = "Hubo un error al generar el examen. Intenta con un texto más corto o prueba más tarde.";
+    }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
@@ -435,3 +265,14 @@ function toggleResuelto() {
   respuestas.value = mostrarResuelto.value ? respuestasInternas.value : ""
 }
 </script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>

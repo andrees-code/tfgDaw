@@ -2,7 +2,7 @@ import axios from 'axios'
 import { userStore } from "@/stores/userStores"
 
 const api = axios.create({
-  baseURL: 'https://bakend-murex.vercel.app/api/api',
+  baseURL: 'http://localhost:3000/api/api',
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -60,6 +60,13 @@ export async function updateExamTitle(id, title) {
   const res = await api.patch(`/exams/${id}/title`, { title });
   return res.data;
 }
+
+// 🧠 Generar examen con IA (pasa por backend y aplica límite FREE)
+export async function generateExam(dto) {
+  const res = await api.post("/exams/generate", dto);
+  return res.data;
+}
+
 
 
 

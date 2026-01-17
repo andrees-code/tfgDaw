@@ -19,7 +19,8 @@
       </div>
 
       <!-- Menú derecho -->
-      <div class="flex items-center gap-3 z-10">
+      <div class="flex items-center gap-3 z-10" ref="menuContainer">
+
         <!-- Icono hamburguesa -->
         <i
           class="fa-solid fa-bars text-white text-2xl cursor-pointer"
@@ -29,7 +30,7 @@
 
         <!-- Usuario logueado -->
         <template v-if="userStore.isAuthenticated">
-          <div class="relative">
+          <div class="relative" ref="dropdownContainer">
             <img
               :src="userStore.user?.avatar ?? '/img/perfil.jpg'"
               alt="Avatar"
@@ -65,7 +66,6 @@
               </button>
 
             </div>
-
           </div>
         </template>
 
@@ -81,9 +81,8 @@
   </header>
 </template>
 
-
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { userStore } from '@/stores/userStores'
 import { useRouter } from 'vue-router'
 import Menu from '@/components/BarsMenu.vue'
@@ -91,6 +90,10 @@ import Menu from '@/components/BarsMenu.vue'
 const menuAbierto = ref(false)
 const dropdownAbierto = ref(false)
 const router = useRouter()
+
+// Refs para detectar clicks fuera
+const menuContainer = ref(null)
+const dropdownContainer = ref(null)
 
 function abrirMenu() {
   menuAbierto.value = !menuAbierto.value
@@ -106,4 +109,22 @@ function logout() {
   userStore.logout()
   router.push('/login')
 }
+
+// Listener global para clicks fuera
+const handleClickOutside = (event) => {
+  if (menuAbierto.value && menuContainer.value && !menuContainer.value.contains(event.target)) {
+    menuAbierto.value = false
+  }
+  if (dropdownAbierto.value && dropdownContainer.value && !dropdownContainer.value.contains(event.target)) {
+    dropdownAbierto.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>

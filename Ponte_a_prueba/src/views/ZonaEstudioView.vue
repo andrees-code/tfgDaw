@@ -38,15 +38,17 @@
           </div>
 
           <!-- Buscador -->
-          <div class="relative">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Buscar..."
-              class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3978D7]"
-            >
-            <IconSearch class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          </div>
+          <!-- BUSCADOR -->
+<div class="relative">
+  <input
+    v-model="searchQuery"
+    type="text"
+    placeholder="Buscar..."
+    class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#3978D7]"
+  >
+  <IconSearch class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+</div>
+
         </div>
 
         <!-- LISTA -->

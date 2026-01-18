@@ -10,14 +10,9 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-8 items-start">
-        <aside class="hidden lg:block">
-          <div class="h-[900px] bg-white border rounded-2xl shadow-sm flex items-center justify-center">
-            <span class="text-slate-400 text-sm">Espacio publicitario</span>
-          </div>
-        </aside>
+      <div class="max-w-5xl mx-auto gap-8 items-start">
 
-        <section class="bg-white rounded-2xl shadow-sm border p-8 md:p-10">
+        <section class="bg-white rounded-2xl shadow-sm border p-8 md:p-10 w-full">
           <div class="mb-8">
             <label class="block text-sm font-medium text-slate-600 mb-2">
               Apuntes o contenido del examen
@@ -145,12 +140,7 @@
 
         </section>
 
-        <aside class="hidden lg:block">
-          <div class="h-[900px] bg-white border rounded-2xl shadow-sm flex items-center justify-center">
-            <span class="text-slate-400 text-sm">Espacio publicitario</span>
-          </div>
-        </aside>
-      </div>
+        </div>
     </main>
 
     <Footer />
@@ -158,6 +148,7 @@
 </template>
 
 <script setup>
+// ... El script permanece exactamente igual ...
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as pdfjsLib from 'pdfjs-dist'
@@ -199,25 +190,14 @@ onMounted(() => {
     `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 })
 
-// --- UTILIDAD: CORREGIR NUMERACIÓN (NUEVO) ---
-// Busca patrones como "1.", "1)", "1-" al inicio de línea y los renombra secuencialmente
 function corregirNumeracion(texto) {
   if (!texto) return "";
   let contador = 1;
-  
-  // Regex explicado:
-  // (^|\n)   -> Inicio de string o salto de línea (comienzo de línea visual)
-  // \s* -> Posibles espacios en blanco
-  // \d+      -> Uno o más dígitos (el número incorrecto)
-  // ([\.\)-]) -> El separador (punto, paréntesis o guion)
-  // \s       -> Un espacio obligatorio después
   return texto.replace(/(^|\n)\s*\d+([\.\)-])\s/g, (match, inicio, separador) => {
-    // Retorna el salto de línea original + el contador nuevo + el separador original + espacio
     return `${inicio}${contador++}${separador} `;
   });
 }
 
-// --- MANEJO DE PDF ---
 async function handlePdfUploadCustom(event) {
   const file = event.target.files[0]
   if (!file) return
@@ -236,7 +216,6 @@ async function handlePdfUploadCustom(event) {
   apuntes.value = text
 }
 
-// --- GUARDAR EN BASE DE DATOS ---
 async function guardarExamen() {
   if (!userStore.token) return
   try {
@@ -255,7 +234,6 @@ async function guardarExamen() {
   }
 }
 
-// --- LÓGICA PRINCIPAL ---
 async function manejarGeneracion() {
   if (!apuntes.value || !dificultad.value || !tipoExamen.value) {
     error.value = "Por favor completa todos los campos (apuntes, dificultad, tipo)."
@@ -289,11 +267,9 @@ async function manejarGeneracion() {
       apuntes: apuntes.value
     });
 
-    // --- APLICAMOS LA CORRECCIÓN AQUÍ ---
-    // Procesamos el texto crudo para arreglar los números 1,2,3...1,2,3
     resultado.value = corregirNumeracion(data.preguntas);
     respuestasInternas.value = corregirNumeracion(data.respuestas);
-    
+
     hayRespuestas.value = true;
 
     await guardarExamen();

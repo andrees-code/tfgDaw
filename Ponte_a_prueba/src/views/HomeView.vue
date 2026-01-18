@@ -190,36 +190,37 @@ const tipos = [
 
 // Ciclo de vida: onMounted
 onMounted(() => {
+  // Sesión de usuario
   userStore.loadSession()
+
+  // Worker de PDF.js
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 
-  // --- LÓGICA DE PUBLICIDAD ---
-  if (adContainer.value) {
-    // 1. Crear un div interno para asegurar que appendChild funcione limpio
-    adContainer.value.innerHTML = ''; // Limpiar por si acaso
-    const adDiv = document.createElement('div');
-    adContainer.value.appendChild(adDiv);
+  // --- LÓGICA DE PUBLICIDAD (Adsterra) ---
+  if (!adContainer.value) return
 
-    // 2. Definir las opciones globales para este anuncio específico
-    window.atOptions = {
-      'key' : '61c5ff75921e650e6548be96f6641978',
-      'format' : 'iframe',
-      'height' : 250,
-      'width' : 300,
-      'params' : {}
-    };
+  // 1️⃣ Limpiar el contenedor (por si Vue reusa la vista)
+  adContainer.value.innerHTML = ''
 
-    // 3. Crear el script de invoke.js
-    const script = document.createElement('script');
-    script.src = "https://www.highperformanceformat.com/61c5ff75921e650e6548be96f6641978/invoke.js";
-    script.async = true;
-    script.crossOrigin = "anonymous";
-
-    // 4. Inyectar el script en el div interno
-    adDiv.appendChild(script);
+  // 2️⃣ Definir atOptions ANTES de cargar el script
+  window.atOptions = {
+    key: '61c5ff75921e650e6548be96f6641978',
+    format: 'iframe',
+    height: 250,
+    width: 300,
+    params: {}
   }
+
+  // 3️⃣ Crear el script de Adsterra
+  const script = document.createElement('script')
+  script.src = 'https://www.highperformanceformat.com/61c5ff75921e650e6548be96f6641978/invoke.js'
+  script.async = true
+
+  // 4️⃣ Insertar DIRECTAMENTE el script en el contenedor visible
+  adContainer.value.appendChild(script)
 })
+
 
 // Ciclo de vida: onBeforeUnmount (Limpieza)
 onBeforeUnmount(() => {

@@ -14,4 +14,9 @@ export class CreateNoteDto {
   @IsString()
   @IsOptional()
   color?: string
+
+  // NUEVO CAMPO
+  @IsString()
+  @IsOptional()
+  calendarDate?: string
 }

@@ -9,7 +9,7 @@
       </transition>
 
       <aside
-        class="fixed md:static inset-y-0 left-0 w-[85vw] md:w-80 bg-[#f1f5f9] text-slate-700 flex flex-col z-40 
+        class="fixed md:static inset-y-0 left-0 w-[85vw] md:w-80 bg-[#f1f5f9] text-slate-700 flex flex-col z-40
                transform transition-transform duration-300 ease-in-out border-r border-slate-300 shadow-2xl"
         :class="showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
       >
@@ -38,7 +38,7 @@
             <input v-model="searchQuery" type="text" placeholder="Buscar..." class="w-full pl-9 pr-4 py-2 bg-slate-200 border-none rounded text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-sm">
           </div>
 
-          <button 
+          <button
             @click="currentView = 'calendar'; selectedItem = null; showSidebar = false"
             class="w-full flex items-center gap-3 px-4 py-3 rounded mb-4 transition-all"
             :class="currentView === 'calendar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'"
@@ -77,7 +77,7 @@
       </aside>
 
       <main class="flex-1 flex flex-col relative bg-[#293548] text-slate-200 overflow-hidden w-full">
-        
+
         <div class="md:hidden flex items-center justify-between p-4 bg-[#0f172a] border-b border-slate-700 shrink-0">
           <button @click="showSidebar = true" class="text-slate-200 hover:text-white">
             <IconMenu class="w-6 h-6" />
@@ -98,22 +98,44 @@
 
           <div class="flex-1 grid grid-cols-7 grid-rows-[auto_1fr_1fr_1fr_1fr_1fr_1fr] md:grid-rows-6 gap-px bg-slate-700 border border-slate-700 rounded-xl overflow-hidden shadow-2xl min-h-0">
             <div v-for="dayName in weekDays" :key="dayName" class="bg-[#1e293b] p-1 md:p-2 text-center text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-center">{{ dayName }}</div>
-            
-            <div 
+
+            <div
               v-for="(day, index) in calendarDays" :key="index"
               @dragover.prevent @drop="onDrop($event, day.dateStr)"
               class="bg-[#1e293b] min-h-[60px] md:min-h-[100px] p-1 md:p-2 transition-colors relative group flex flex-col overflow-hidden"
               :class="[day.isCurrentMonth ? 'text-slate-200' : 'text-slate-600 bg-[#1e293b]/50', isToday(day.dateStr) ? 'ring-1 ring-inset ring-blue-500' : '']"
             >
-              <span class="text-[10px] md:text-xs font-mono font-bold">{{ day.dayNumber }}</span>
-              <div class="mt-1 space-y-1 overflow-y-auto flex-1 custom-scrollbar-dark no-scrollbar-mobile">
-                <div v-for="item in getItemsByDate(day.dateStr)" :key="item.id" @click="selectItem(item); currentView = 'editor'" class="cursor-pointer transition-transform hover:scale-105">
-                  <div v-if="item.type === 'Documento'" class="text-[8px] md:text-[10px] bg-blue-600/20 text-blue-300 border border-blue-500/30 px-1 py-0.5 rounded truncate">📄 <span class="hidden md:inline">{{ item.title || 'Doc' }}</span></div>
-                  <div v-else :class="item.color" class="p-1 rounded shadow-sm text-slate-900 border border-black/5 transform -rotate-2">
-                    <p class="text-[8px] md:text-[9px] leading-tight font-handwriting font-bold truncate md:line-clamp-2">{{ item.content || item.title || 'Nota' }}</p>
+              <span class="text-[10px] md:text-xs font-mono font-bold z-10 pointer-events-none opacity-50">{{ day.dayNumber }}</span>
+
+              <div class="absolute inset-0 p-1 flex flex-col justify-end">
+
+                  <div class="flex flex-col gap-0.5 z-20 w-full max-w-[70%]">
+                    <div
+                        v-for="item in getDocsForDate(day.dateStr)"
+                        :key="item.id"
+                        draggable="true"
+                        @dragstart="onDragStart($event, item)"
+                        @click="selectItem(item); currentView = 'editor'"
+                        class="cursor-grab active:cursor-grabbing text-[8px] md:text-[10px] bg-blue-600/30 text-blue-200 border border-blue-500/30 px-1 py-0.5 rounded truncate hover:bg-blue-600 transition-colors"
+                    >
+                        📄 {{ item.title || 'Doc' }}
+                    </div>
                   </div>
-                </div>
+
+                  <div
+                    v-if="getPostItForDate(day.dateStr)"
+                    draggable="true"
+                    @dragstart="onDragStart($event, getPostItForDate(day.dateStr))"
+                    @click="selectItem(getPostItForDate(day.dateStr)); currentView = 'editor'"
+                    class="absolute top-1 right-1 w-[65%] aspect-square max-w-[120px] p-2 rounded shadow-lg transform rotate-2 cursor-grab active:cursor-grabbing transition-transform hover:scale-110 hover:rotate-0 hover:z-30 border border-black/10 flex items-center justify-center text-center overflow-hidden"
+                    :class="getPostItForDate(day.dateStr).color"
+                  >
+                     <p class="text-[10px] md:text-sm leading-tight font-handwriting font-bold text-slate-900 break-words line-clamp-4 pointer-events-none">
+                        {{ getPostItForDate(day.dateStr).content || getPostItForDate(day.dateStr).title || 'Nota' }}
+                     </p>
+                  </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -121,28 +143,28 @@
         <div v-else-if="selectedItem" class="flex-1 flex flex-col h-full min-h-0">
             <header class="h-12 md:h-14 flex items-center justify-between px-4 md:px-6 shrink-0 bg-[#0f172a] border-b border-slate-700">
                 <div class="flex items-center gap-4">
-                     <span class="text-[10px] md:text-xs font-mono text-slate-400 uppercase tracking-widest">{{ selectedItem.type }}</span>
-                     <div v-if="isSaving" class="text-[10px] md:text-xs text-blue-400 flex items-center gap-2"><IconLoader class="w-3 h-3 animate-spin" /> <span class="hidden sm:inline">Guardando...</span></div>
-                     <div v-else class="text-[10px] md:text-xs text-emerald-400 flex items-center gap-2"><IconCheck class="w-3 h-3" /> <span class="hidden sm:inline">Guardado</span></div>
+                      <span class="text-[10px] md:text-xs font-mono text-slate-400 uppercase tracking-widest">{{ selectedItem.type }}</span>
+                      <div v-if="isSaving" class="text-[10px] md:text-xs text-blue-400 flex items-center gap-2"><IconLoader class="w-3 h-3 animate-spin" /> <span class="hidden sm:inline">Guardando...</span></div>
+                      <div v-else class="text-[10px] md:text-xs text-emerald-400 flex items-center gap-2"><IconCheck class="w-3 h-3" /> <span class="hidden sm:inline">Guardado</span></div>
                 </div>
-                
+
                 <div v-if="selectedItem.type === 'Post-it'" class="flex gap-2">
                   <button v-for="color in postItColors" :key="color.bg" @click="selectedItem.color = color.bg; triggerAutoSave()" class="w-4 h-4 md:w-5 md:h-5 rounded-full ring-2 ring-offset-2 ring-offset-[#0f172a] hover:scale-110 transition-transform" :class="[color.bg, selectedItem.color === color.bg ? 'ring-white' : 'ring-transparent']"></button>
                 </div>
             </header>
 
             <div class="flex-1 overflow-y-auto custom-scrollbar-dark bg-[#334155]/50 flex justify-center p-2 md:p-10">
-                
+
                 <div v-if="selectedItem.type === 'Documento'" class="w-full max-w-[850px] bg-white text-slate-800 shadow-2xl min-h-[60vh] md:min-h-[1000px] animate-fade-in relative mx-auto flex flex-col">
                     <div class="md:h-24 px-4 py-4 md:px-12 flex flex-col md:flex-row md:items-end justify-between border-b-2 border-slate-100 mb-6 md:mb-10 gap-4">
-                         <div class="md:pb-4 flex-1">
+                          <div class="md:pb-4 flex-1">
                             <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Título</h3>
                              <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Título..." class="w-full bg-transparent text-xl md:text-2xl font-serif font-bold text-slate-900 placeholder:text-slate-300 border-none p-0 focus:ring-0" />
-                         </div>
-                         <div class="md:pb-4 text-left md:text-right">
+                          </div>
+                          <div class="md:pb-4 text-left md:text-right">
                              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fecha</div>
                              <div class="text-xs md:text-sm font-serif text-slate-600">{{ formatDate(selectedItem.updatedAt) }}</div>
-                         </div>
+                          </div>
                     </div>
                     <div class="px-4 md:px-12 pb-12 flex-1">
                         <textarea v-model="selectedItem.content" @input="triggerAutoSave" @keydown.tab.prevent="handleTab" placeholder="Escribe aquí..." class="w-full h-full min-h-[400px] bg-transparent resize-none border-none focus:outline-none focus:ring-0 text-base md:text-lg text-slate-700 leading-7 md:leading-8 font-serif p-0 placeholder:text-slate-300"></textarea>
@@ -178,12 +200,12 @@ import Header from '@/components/HeaderCompleto.vue'
 import {
   FileText as IconFile, StickyNote as IconSticky, Search as IconSearch,
   Trash2 as IconTrash, Check as IconCheck, Loader2 as IconLoader,
-  BookOpen as IconNotebook, Calendar as IconCalendar, ChevronLeft as IconLeft, 
+  BookOpen as IconNotebook, Calendar as IconCalendar, ChevronLeft as IconLeft,
   ChevronRight as IconRight, Menu as IconMenu, X as IconX
 } from 'lucide-vue-next'
 
 const showSidebar = ref(false)
-const currentView = ref('editor')
+const currentView = ref('calendar') // Vista por defecto: Calendario
 const selectedItem = ref(null)
 const searchQuery = ref('')
 const isSaving = ref(false)
@@ -193,7 +215,7 @@ let saveTimeout = null
 const viewDate = ref(new Date())
 const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 const postItColors = [
-  { bg: 'bg-[#fef08a]' }, { bg: 'bg-[#bbf7d0]' }, { bg: 'bg-[#bfdbfe]' }, { bg: 'bg-[#fbcfe8]' }, { bg: 'bg-[#ddd6fe]' }  
+  { bg: 'bg-[#fef08a]' }, { bg: 'bg-[#bbf7d0]' }, { bg: 'bg-[#bfdbfe]' }, { bg: 'bg-[#fbcfe8]' }, { bg: 'bg-[#ddd6fe]' }
 ]
 
 const sections = ref([
@@ -201,17 +223,24 @@ const sections = ref([
   { type: 'Post-it', title: 'Recordatorios', items: [] }
 ])
 
-// PERSISTENCIA: CARGA 
+// PERSISTENCIA: CARGA (BACKEND)
 onMounted(async () => {
   if (!userStore.token) return
-  const notes = await loadNotes()
-  notes.forEach(note => {
-    const section = sections.value.find(s => s.type === note.type)
-    if (section) section.items.push(note)
-  })
+  try {
+      const notes = await loadNotes()
+      sections.value[0].items = []
+      sections.value[1].items = []
+
+      notes.forEach(note => {
+        const section = sections.value.find(s => s.type === note.type)
+        if (section) section.items.push(note)
+      })
+  } catch (e) {
+      console.error("Error cargando notas:", e)
+  }
 })
 
-// PERSISTENCIA: GUARDADO 
+// PERSISTENCIA: GUARDADO (BACKEND)
 const triggerAutoSave = () => {
   if (!selectedItem.value) return
   isSaving.value = true
@@ -220,7 +249,10 @@ const triggerAutoSave = () => {
   clearTimeout(saveTimeout)
   saveTimeout = setTimeout(async () => {
     try {
-      await saveNote(selectedItem.value)
+      const savedNote = await saveNote(selectedItem.value)
+      if (!selectedItem.value.idBackend && savedNote.idBackend) {
+          selectedItem.value.idBackend = savedNote.idBackend
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -229,7 +261,7 @@ const triggerAutoSave = () => {
   }, 700)
 }
 
-// PERSISTENCIA: ELIMINACIÓN 
+// PERSISTENCIA: ELIMINACIÓN (BACKEND)
 const deleteItemFromSection = async (id, sectionType) => {
   const section = sections.value.find(s => s.type === sectionType)
   if (!section) return
@@ -237,7 +269,9 @@ const deleteItemFromSection = async (id, sectionType) => {
   if (!item || !confirm('¿Eliminar definitivamente?')) return
 
   try {
-    await deleteNote(item.idBackend)
+    if (item.idBackend) {
+        await deleteNote(item.idBackend)
+    }
   } catch (e) {
     console.error(e)
   }
@@ -251,13 +285,13 @@ const addItemToSection = (type) => {
   if (!section) return
   const newItem = {
     id: uuidv4(),
+    idBackend: null,
     type,
-    title: '', 
+    title: '',
     content: '',
     updatedAt: new Date().toISOString(),
     calendarDate: null,
     color: type === 'Post-it' ? 'bg-[#fef08a]' : null,
-    idBackend: null,
   }
   section.items.unshift(newItem)
   selectedItem.value = newItem
@@ -291,19 +325,42 @@ const calendarDays = computed(() => {
 
 const changeMonth = (offset) => { viewDate.value = new Date(viewDate.value.getFullYear(), viewDate.value.getMonth() + offset, 1) }
 const isToday = (dateStr) => dateStr === new Date().toISOString().split('T')[0]
-const getItemsByDate = (dateStr) => sections.value.flatMap(s => s.items).filter(item => item.calendarDate === dateStr)
+
+// Helpers para renderizado en plantilla
+const getDocsForDate = (dateStr) => {
+    return sections.value.find(s => s.type === 'Documento').items.filter(item => item.calendarDate === dateStr)
+}
+const getPostItForDate = (dateStr) => {
+    return sections.value.find(s => s.type === 'Post-it').items.find(item => item.calendarDate === dateStr)
+}
 
 // Drag & Drop
 const onDragStart = (e, item) => {
   e.dataTransfer.setData('itemId', item.id)
   e.dataTransfer.effectAllowed = 'move'
 }
+
 const onDrop = (e, dateStr) => {
   const itemId = e.dataTransfer.getData('itemId')
-  const item = sections.value.flatMap(s => s.items).find(i => i.id === itemId)
+  const allItems = sections.value.flatMap(s => s.items)
+  const item = allItems.find(i => i.id === itemId)
+
   if (item) {
+    if (item.type === 'Post-it') {
+        const existingPostIt = sections.value
+            .find(s => s.type === 'Post-it').items
+            .find(i => i.calendarDate === dateStr && i.id !== item.id)
+
+        if (existingPostIt) {
+            alert('Solo se permite un Post-it por día.')
+            return
+        }
+    }
+
+    // Al asignar el nuevo dateStr, estamos MOVIENDO el item (es la misma referencia de objeto)
     item.calendarDate = dateStr
-    triggerAutoSave() 
+    selectedItem.value = item
+    triggerAutoSave()
   }
 }
 
@@ -332,7 +389,6 @@ const formatDate = (iso) => iso ? new Intl.DateTimeFormat('es-ES', { day: '2-dig
 .font-handwriting { font-family: 'Caveat', cursive; }
 .custom-scrollbar-dark::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar-dark::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 4px; }
-/* Ocultar scrollbar en celdas pequeñas de móvil para limpieza visual */
 @media (max-width: 768px) {
   .no-scrollbar-mobile::-webkit-scrollbar { display: none; }
   .no-scrollbar-mobile { -ms-overflow-style: none; scrollbar-width: none; }

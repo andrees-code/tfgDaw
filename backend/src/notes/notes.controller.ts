@@ -47,4 +47,10 @@ export class NotesController {
   updateColor(@Param('id') id: string, @Req() req, @Body('color') color: string) {
     return this.notesService.updateColor(id, req.user.id, color)
   }
+
+  // NUEVO ENDPOINT
+  @Patch(':id/date')
+  updateDate(@Param('id') id: string, @Req() req, @Body('date') date: string) {
+    return this.notesService.updateDate(id, req.user.id, date)
+  }
 }

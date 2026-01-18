@@ -20,6 +20,10 @@ export class Note extends Document {
 
   @Prop({ default: false })
   favorito: boolean
+
+  // NUEVO CAMPO
+  @Prop({ type: String, required: false, default: null })
+  calendarDate: string | null 
 }
 
 export const NoteSchema = SchemaFactory.createForClass(Note)

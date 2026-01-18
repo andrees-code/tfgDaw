@@ -59,4 +59,12 @@ export class NotesService {
     note.color = color
     return note.save()
   }
+
+  // NUEVO MÉTODO
+  async updateDate(id: string, userId: string, date: string | null) {
+    const note = await this.noteModel.findOne({ _id: id, userId })
+    if (!note) throw new NotFoundException('Nota no encontrada')
+    note.calendarDate = date
+    return note.save()
+  }
 }

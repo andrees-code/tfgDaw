@@ -88,7 +88,9 @@
             <span v-else>Generar examen</span>
           </button>
 
-          <div v-if="resultado" class="mt-12 animate-fade-in">
+          <div class="mt-8 flex justify-center w-full" ref="adContainer">
+              </div>
+          <div v-if="resultado" class="mt-8 animate-fade-in">
             <h3 class="font-semibold text-slate-800 mb-4">Examen generado</h3>
             <div class="prose max-w-none bg-slate-50 p-6 rounded-xl border border-slate-200 text-slate-700" v-html="resultado.replace(/\n/g, '<br/>')"></div>
 
@@ -140,7 +142,7 @@
 
         </section>
 
-        </div>
+      </div>
     </main>
 
     <Footer />
@@ -148,8 +150,7 @@
 </template>
 
 <script setup>
-// ... El script permanece exactamente igual ...
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue' // Agregado onBeforeUnmount
 import { useRouter } from 'vue-router'
 import * as pdfjsLib from 'pdfjs-dist'
 import Header from '@/components/HeaderCompleto.vue'
@@ -176,6 +177,9 @@ const esErrorDeAuth = ref(false)
 
 const archivoNombre = ref("Ningún archivo seleccionado")
 
+// Referencia para la publicidad
+const adContainer = ref(null)
+
 const tipos = [
   "Test (4 opciones)",
   "Verdadero/Falso",
@@ -184,10 +188,45 @@ const tipos = [
   "Mix"
 ]
 
+// Ciclo de vida: onMounted
 onMounted(() => {
   userStore.loadSession()
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+
+  // --- LÓGICA DE PUBLICIDAD ---
+  if (adContainer.value) {
+    // 1. Crear un div interno para asegurar que appendChild funcione limpio
+    adContainer.value.innerHTML = ''; // Limpiar por si acaso
+    const adDiv = document.createElement('div');
+    adContainer.value.appendChild(adDiv);
+
+    // 2. Definir las opciones globales para este anuncio específico
+    window.atOptions = {
+      'key' : '61c5ff75921e650e6548be96f6641978',
+      'format' : 'iframe',
+      'height' : 250,
+      'width' : 300,
+      'params' : {}
+    };
+
+    // 3. Crear el script de invoke.js
+    const script = document.createElement('script');
+    script.src = "https://www.highperformanceformat.com/61c5ff75921e650e6548be96f6641978/invoke.js";
+    script.async = true;
+    script.crossOrigin = "anonymous";
+
+    // 4. Inyectar el script en el div interno
+    adDiv.appendChild(script);
+  }
+})
+
+// Ciclo de vida: onBeforeUnmount (Limpieza)
+onBeforeUnmount(() => {
+    // Es buena práctica limpiar las variables globales si salimos de la vista
+    if (window.atOptions) {
+        delete window.atOptions;
+    }
 })
 
 function corregirNumeracion(texto) {

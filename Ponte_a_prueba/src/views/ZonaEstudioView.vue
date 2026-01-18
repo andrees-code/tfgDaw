@@ -1,28 +1,35 @@
 <template>
-  <div>
-    <Header />
-    <div class="h-screen flex bg-[#1e293b] font-sans overflow-hidden selection:bg-blue-500 selection:text-white">
+  <div class="flex flex-col h-screen overflow-hidden">
+    <Header class="flex-shrink-0" />
 
-      <div v-if="showSidebar" @click="showSidebar = false" class="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"></div>
+    <div class="flex-1 flex bg-[#1e293b] font-sans overflow-hidden selection:bg-blue-500 selection:text-white relative">
+
+      <transition enter-active-class="transition-opacity duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition-opacity duration-300" leave-from-class="opacity-100" leave-to-class="opacity-0">
+        <div v-if="showSidebar" @click="showSidebar = false" class="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"></div>
+      </transition>
 
       <aside
-        class="fixed md:static inset-y-0 left-0 w-80 bg-[#f1f5f9] text-slate-700 flex flex-col z-40 
-               transform transition-transform duration-500 md:translate-x-0 border-r border-slate-300 shadow-2xl"
+        class="fixed md:static inset-y-0 left-0 w-[85vw] md:w-80 bg-[#f1f5f9] text-slate-700 flex flex-col z-40 
+               transform transition-transform duration-300 ease-in-out border-r border-slate-300 shadow-2xl"
         :class="showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
       >
-        
-        <div class="p-6 pb-4">
-          <h1 class="font-serif text-3xl font-bold text-slate-800 tracking-tight mb-8 flex items-center gap-2">
-            <IconNotebook class="w-8 h-8 text-[#0f172a]" />
-            <span>Notas<span class="text-blue-600">.</span></span>
-          </h1>
+        <div class="p-6 pb-4 shrink-0">
+          <div class="flex items-center justify-between mb-8">
+            <h1 class="font-serif text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+              <IconNotebook class="w-8 h-8 text-[#0f172a]" />
+              <span>Notas<span class="text-blue-600">.</span></span>
+            </h1>
+            <button @click="showSidebar = false" class="md:hidden p-2 text-slate-500 hover:text-red-500">
+              <IconX class="w-6 h-6" />
+            </button>
+          </div>
 
           <div class="flex gap-2 mb-8">
               <button @click="addItemToSection('Documento')" class="flex-1 py-3 bg-white hover:bg-blue-600 hover:text-white text-slate-700 rounded shadow-sm border border-slate-300 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 group">
-                  <IconFile class="w-4 h-4" /> Doc
+                  <IconFile class="w-4 h-4" /> <span class="hidden sm:inline">Doc</span>
               </button>
                <button @click="addItemToSection('Post-it')" class="flex-1 py-3 bg-white hover:bg-amber-500 hover:text-white text-slate-700 rounded shadow-sm border border-slate-300 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 group">
-                  <IconSticky class="w-4 h-4" /> Post
+                  <IconSticky class="w-4 h-4" /> <span class="hidden sm:inline">Post</span>
               </button>
           </div>
 
@@ -32,7 +39,7 @@
           </div>
 
           <button 
-            @click="currentView = 'calendar'; selectedItem = null"
+            @click="currentView = 'calendar'; selectedItem = null; showSidebar = false"
             class="w-full flex items-center gap-3 px-4 py-3 rounded mb-4 transition-all"
             :class="currentView === 'calendar' ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'"
           >
@@ -57,10 +64,10 @@
               >
                   <div class="flex justify-between items-start">
                       <span class="font-medium text-sm truncate pr-4">{{ item.title || 'Sin Título' }}</span>
-                      <component :is="getIconByType(item.type)" class="w-3.5 h-3.5 mt-0.5" :class="getColorByType(item.type)"/>
+                      <component :is="getIconByType(item.type)" class="w-3.5 h-3.5 mt-0.5 shrink-0" :class="getColorByType(item.type)"/>
                   </div>
                   <span class="text-[10px] opacity-60 mt-1 block">{{ formatDate(item.updatedAt) }}</span>
-                  <button @click.stop="deleteItemFromSection(item.id, section.type)" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button @click.stop="deleteItemFromSection(item.id, section.type)" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity md:group-hover:opacity-100 opacity-100 md:opacity-0">
                     <IconTrash class="w-3.5 h-3.5" />
                   </button>
               </div>
@@ -69,31 +76,41 @@
         </div>
       </aside>
 
-      <main class="flex-1 flex flex-col relative bg-[#293548] text-slate-200 overflow-hidden">
+      <main class="flex-1 flex flex-col relative bg-[#293548] text-slate-200 overflow-hidden w-full">
         
-        <div v-if="currentView === 'calendar'" class="flex-1 flex flex-col p-6 overflow-hidden">
-          <div class="flex items-center justify-between mb-6 bg-[#0f172a] p-4 rounded-xl border border-slate-700 shadow-xl">
-            <h2 class="text-2xl font-serif font-bold text-white capitalize">{{ currentMonthName }} {{ currentYear }}</h2>
+        <div class="md:hidden flex items-center justify-between p-4 bg-[#0f172a] border-b border-slate-700 shrink-0">
+          <button @click="showSidebar = true" class="text-slate-200 hover:text-white">
+            <IconMenu class="w-6 h-6" />
+          </button>
+          <span class="text-sm font-bold tracking-widest uppercase text-slate-400">
+            {{ currentView === 'calendar' ? 'Calendario' : (selectedItem?.type || 'App Notas') }}
+          </span>
+          <div class="w-6"></div> </div>
+
+        <div v-if="currentView === 'calendar'" class="flex-1 flex flex-col p-2 md:p-6 overflow-hidden">
+          <div class="flex items-center justify-between mb-4 md:mb-6 bg-[#0f172a] p-3 md:p-4 rounded-xl border border-slate-700 shadow-xl shrink-0">
+            <h2 class="text-lg md:text-2xl font-serif font-bold text-white capitalize">{{ currentMonthName }} <span class="hidden sm:inline">{{ currentYear }}</span></h2>
             <div class="flex gap-2">
-              <button @click="changeMonth(-1)" class="p-2 hover:bg-slate-700 rounded-lg transition-colors"><IconLeft /></button>
-              <button @click="changeMonth(1)" class="p-2 hover:bg-slate-700 rounded-lg transition-colors"><IconRight /></button>
+              <button @click="changeMonth(-1)" class="p-1.5 md:p-2 hover:bg-slate-700 rounded-lg transition-colors"><IconLeft /></button>
+              <button @click="changeMonth(1)" class="p-1.5 md:p-2 hover:bg-slate-700 rounded-lg transition-colors"><IconRight /></button>
             </div>
           </div>
 
-          <div class="flex-1 grid grid-cols-7 grid-rows-6 gap-px bg-slate-700 border border-slate-700 rounded-xl overflow-hidden shadow-2xl">
-            <div v-for="dayName in weekDays" :key="dayName" class="bg-[#1e293b] p-2 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ dayName }}</div>
+          <div class="flex-1 grid grid-cols-7 grid-rows-[auto_1fr_1fr_1fr_1fr_1fr_1fr] md:grid-rows-6 gap-px bg-slate-700 border border-slate-700 rounded-xl overflow-hidden shadow-2xl min-h-0">
+            <div v-for="dayName in weekDays" :key="dayName" class="bg-[#1e293b] p-1 md:p-2 text-center text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-center">{{ dayName }}</div>
+            
             <div 
               v-for="(day, index) in calendarDays" :key="index"
               @dragover.prevent @drop="onDrop($event, day.dateStr)"
-              class="bg-[#1e293b] min-h-[100px] p-2 transition-colors relative group"
+              class="bg-[#1e293b] min-h-[60px] md:min-h-[100px] p-1 md:p-2 transition-colors relative group flex flex-col overflow-hidden"
               :class="[day.isCurrentMonth ? 'text-slate-200' : 'text-slate-600 bg-[#1e293b]/50', isToday(day.dateStr) ? 'ring-1 ring-inset ring-blue-500' : '']"
             >
-              <span class="text-xs font-mono font-bold">{{ day.dayNumber }}</span>
-              <div class="mt-2 space-y-1 overflow-y-auto max-h-[80%] custom-scrollbar-dark">
+              <span class="text-[10px] md:text-xs font-mono font-bold">{{ day.dayNumber }}</span>
+              <div class="mt-1 space-y-1 overflow-y-auto flex-1 custom-scrollbar-dark no-scrollbar-mobile">
                 <div v-for="item in getItemsByDate(day.dateStr)" :key="item.id" @click="selectItem(item); currentView = 'editor'" class="cursor-pointer transition-transform hover:scale-105">
-                  <div v-if="item.type === 'Documento'" class="text-[10px] bg-blue-600/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded truncate">📄 {{ item.title || 'Doc' }}</div>
-                  <div v-else :class="item.color" class="p-1.5 rounded shadow-sm text-slate-900 border border-black/5 transform -rotate-2">
-                    <p class="text-[9px] leading-tight font-handwriting font-bold line-clamp-2">{{ item.content || item.title || 'Nota...' }}</p>
+                  <div v-if="item.type === 'Documento'" class="text-[8px] md:text-[10px] bg-blue-600/20 text-blue-300 border border-blue-500/30 px-1 py-0.5 rounded truncate">📄 <span class="hidden md:inline">{{ item.title || 'Doc' }}</span></div>
+                  <div v-else :class="item.color" class="p-1 rounded shadow-sm text-slate-900 border border-black/5 transform -rotate-2">
+                    <p class="text-[8px] md:text-[9px] leading-tight font-handwriting font-bold truncate md:line-clamp-2">{{ item.content || item.title || 'Nota' }}</p>
                   </div>
                 </div>
               </div>
@@ -101,48 +118,51 @@
           </div>
         </div>
 
-        <div v-else-if="selectedItem" class="flex-1 flex flex-col h-full">
-            <header class="h-14 flex items-center justify-between px-6 shrink-0 bg-[#0f172a] border-b border-slate-700">
+        <div v-else-if="selectedItem" class="flex-1 flex flex-col h-full min-h-0">
+            <header class="h-12 md:h-14 flex items-center justify-between px-4 md:px-6 shrink-0 bg-[#0f172a] border-b border-slate-700">
                 <div class="flex items-center gap-4">
-                     <span class="text-xs font-mono text-slate-400 uppercase tracking-widest">{{ selectedItem.type }}</span>
-                     <div v-if="isSaving" class="text-xs text-blue-400 flex items-center gap-2"><IconLoader class="w-3 h-3 animate-spin" /> Guardando...</div>
-                     <div v-else class="text-xs text-emerald-400 flex items-center gap-2"><IconCheck class="w-3 h-3" /> Guardado</div>
+                     <span class="text-[10px] md:text-xs font-mono text-slate-400 uppercase tracking-widest">{{ selectedItem.type }}</span>
+                     <div v-if="isSaving" class="text-[10px] md:text-xs text-blue-400 flex items-center gap-2"><IconLoader class="w-3 h-3 animate-spin" /> <span class="hidden sm:inline">Guardando...</span></div>
+                     <div v-else class="text-[10px] md:text-xs text-emerald-400 flex items-center gap-2"><IconCheck class="w-3 h-3" /> <span class="hidden sm:inline">Guardado</span></div>
                 </div>
+                
                 <div v-if="selectedItem.type === 'Post-it'" class="flex gap-2">
-                  <button v-for="color in postItColors" :key="color.bg" @click="selectedItem.color = color.bg; triggerAutoSave()" class="w-5 h-5 rounded-full ring-2 ring-offset-2 ring-offset-[#0f172a] hover:scale-110 transition-transform" :class="[color.bg, selectedItem.color === color.bg ? 'ring-white' : 'ring-transparent']"></button>
+                  <button v-for="color in postItColors" :key="color.bg" @click="selectedItem.color = color.bg; triggerAutoSave()" class="w-4 h-4 md:w-5 md:h-5 rounded-full ring-2 ring-offset-2 ring-offset-[#0f172a] hover:scale-110 transition-transform" :class="[color.bg, selectedItem.color === color.bg ? 'ring-white' : 'ring-transparent']"></button>
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar-dark bg-[#334155]/50 flex justify-center p-4 md:p-10">
-                <div v-if="selectedItem.type === 'Documento'" class="w-full max-w-[850px] bg-white text-slate-800 shadow-2xl min-h-[1000px] animate-fade-in relative mx-auto">
-                    <div class="h-24 px-12 flex items-end justify-between border-b-2 border-slate-100 mb-10">
-                         <div class="pb-4">
-                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Título del documento</h3>
-                             <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Escribe el título aquí..." class="w-full min-w-[400px] bg-transparent text-2xl font-serif font-bold text-slate-900 placeholder:text-slate-300 border-none p-0 focus:ring-0" />
+            <div class="flex-1 overflow-y-auto custom-scrollbar-dark bg-[#334155]/50 flex justify-center p-2 md:p-10">
+                
+                <div v-if="selectedItem.type === 'Documento'" class="w-full max-w-[850px] bg-white text-slate-800 shadow-2xl min-h-[60vh] md:min-h-[1000px] animate-fade-in relative mx-auto flex flex-col">
+                    <div class="md:h-24 px-4 py-4 md:px-12 flex flex-col md:flex-row md:items-end justify-between border-b-2 border-slate-100 mb-6 md:mb-10 gap-4">
+                         <div class="md:pb-4 flex-1">
+                            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Título</h3>
+                             <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Título..." class="w-full bg-transparent text-xl md:text-2xl font-serif font-bold text-slate-900 placeholder:text-slate-300 border-none p-0 focus:ring-0" />
                          </div>
-                         <div class="pb-4 text-right">
+                         <div class="md:pb-4 text-left md:text-right">
                              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fecha</div>
-                             <div class="text-sm font-serif text-slate-600">{{ formatDate(selectedItem.updatedAt) }}</div>
+                             <div class="text-xs md:text-sm font-serif text-slate-600">{{ formatDate(selectedItem.updatedAt) }}</div>
                          </div>
                     </div>
-                    <div class="px-12 pb-12">
-                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" @keydown.tab.prevent="handleTab" placeholder="Comienza a redactar tu documento..." class="w-full h-[800px] bg-transparent resize-none border-none focus:outline-none focus:ring-0 text-lg text-slate-700 leading-8 font-serif p-0 placeholder:text-slate-300"></textarea>
+                    <div class="px-4 md:px-12 pb-12 flex-1">
+                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" @keydown.tab.prevent="handleTab" placeholder="Escribe aquí..." class="w-full h-full min-h-[400px] bg-transparent resize-none border-none focus:outline-none focus:ring-0 text-base md:text-lg text-slate-700 leading-7 md:leading-8 font-serif p-0 placeholder:text-slate-300"></textarea>
                     </div>
                 </div>
 
-                <div v-else class="flex flex-col items-center justify-center w-full h-full pb-20">
-                     <div class="relative w-[350px] h-[350px] p-8 shadow-2xl transition-colors duration-300 rotate-1 animate-pop-in flex flex-col" :class="selectedItem.color">
-                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-32 h-8 bg-white/20 backdrop-blur-sm transform -rotate-2 shadow-sm border border-white/30"></div>
-                        <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Asunto..." class="w-full bg-transparent text-3xl font-bold mb-4 text-slate-800/80 placeholder-slate-900/20 border-b border-slate-900/10 focus:border-slate-900/30 focus:outline-none text-center font-handwriting" />
-                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" placeholder="Escribe tu recordatorio..." class="flex-1 w-full bg-transparent resize-none border-none focus:outline-none text-2xl font-bold text-slate-800/80 font-handwriting text-center leading-normal placeholder-slate-900/20"></textarea>
+                <div v-else class="flex flex-col items-center justify-center w-full h-full py-10 px-4">
+                     <div class="relative w-full max-w-[350px] aspect-square p-6 md:p-8 shadow-2xl transition-colors duration-300 rotate-1 animate-pop-in flex flex-col" :class="selectedItem.color">
+                        <div class="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 w-24 md:w-32 h-6 md:h-8 bg-white/20 backdrop-blur-sm transform -rotate-2 shadow-sm border border-white/30"></div>
+                        <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Asunto..." class="w-full bg-transparent text-2xl md:text-3xl font-bold mb-4 text-slate-800/80 placeholder-slate-900/20 border-b border-slate-900/10 focus:border-slate-900/30 focus:outline-none text-center font-handwriting" />
+                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" placeholder="Recordatorio..." class="flex-1 w-full bg-transparent resize-none border-none focus:outline-none text-xl md:text-2xl font-bold text-slate-800/80 font-handwriting text-center leading-normal placeholder-slate-900/20"></textarea>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div v-else class="flex-1 flex flex-col items-center justify-center opacity-20">
-            <IconNotebook class="w-24 h-24 text-slate-100 mb-6" />
-            <h1 class="font-serif text-3xl text-slate-300">Selecciona un elemento</h1>
+        <div v-else class="flex-1 flex flex-col items-center justify-center opacity-20 p-6 text-center">
+            <IconNotebook class="w-16 h-16 md:w-24 md:h-24 text-slate-100 mb-6" />
+            <h1 class="font-serif text-xl md:text-3xl text-slate-300">Selecciona un elemento</h1>
+            <button @click="showSidebar = true" class="mt-4 md:hidden px-4 py-2 bg-blue-600 text-white rounded text-sm">Abrir Menú</button>
         </div>
       </main>
     </div>
@@ -158,7 +178,8 @@ import Header from '@/components/HeaderCompleto.vue'
 import {
   FileText as IconFile, StickyNote as IconSticky, Search as IconSearch,
   Trash2 as IconTrash, Check as IconCheck, Loader2 as IconLoader,
-  BookOpen as IconNotebook, Calendar as IconCalendar, ChevronLeft as IconLeft, ChevronRight as IconRight
+  BookOpen as IconNotebook, Calendar as IconCalendar, ChevronLeft as IconLeft, 
+  ChevronRight as IconRight, Menu as IconMenu, X as IconX
 } from 'lucide-vue-next'
 
 const showSidebar = ref(false)
@@ -180,7 +201,7 @@ const sections = ref([
   { type: 'Post-it', title: 'Recordatorios', items: [] }
 ])
 
-// PERSISTENCIA: CARGA (Basado en tu código)
+// PERSISTENCIA: CARGA 
 onMounted(async () => {
   if (!userStore.token) return
   const notes = await loadNotes()
@@ -190,7 +211,7 @@ onMounted(async () => {
   })
 })
 
-// PERSISTENCIA: GUARDADO (Basado en tu código)
+// PERSISTENCIA: GUARDADO 
 const triggerAutoSave = () => {
   if (!selectedItem.value) return
   isSaving.value = true
@@ -208,7 +229,7 @@ const triggerAutoSave = () => {
   }, 700)
 }
 
-// PERSISTENCIA: ELIMINACIÓN (Basado en tu código)
+// PERSISTENCIA: ELIMINACIÓN 
 const deleteItemFromSection = async (id, sectionType) => {
   const section = sections.value.find(s => s.type === sectionType)
   if (!section) return
@@ -282,7 +303,7 @@ const onDrop = (e, dateStr) => {
   const item = sections.value.flatMap(s => s.items).find(i => i.id === itemId)
   if (item) {
     item.calendarDate = dateStr
-    triggerAutoSave() // Guarda el cambio de fecha automáticamente
+    triggerAutoSave() 
   }
 }
 
@@ -311,6 +332,11 @@ const formatDate = (iso) => iso ? new Intl.DateTimeFormat('es-ES', { day: '2-dig
 .font-handwriting { font-family: 'Caveat', cursive; }
 .custom-scrollbar-dark::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar-dark::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 4px; }
+/* Ocultar scrollbar en celdas pequeñas de móvil para limpieza visual */
+@media (max-width: 768px) {
+  .no-scrollbar-mobile::-webkit-scrollbar { display: none; }
+  .no-scrollbar-mobile { -ms-overflow-style: none; scrollbar-width: none; }
+}
 .animate-fade-in { animation: fadeIn 0.3s ease-out; }
 .animate-pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

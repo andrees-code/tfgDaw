@@ -159,14 +159,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router' // 1. Importamos router para redirección
+import { useRouter } from 'vue-router'
 import * as pdfjsLib from 'pdfjs-dist'
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
 import { saveExam, generateExam } from '@/services/examService'
 import { userStore } from "@/stores/userStores"
 
-const router = useRouter() // 2. Inicializamos router
+const router = useRouter()
 
 const apuntes = ref("")
 const dificultad = ref("")
@@ -179,10 +179,9 @@ const respuestas = ref("")
 const mostrarResuelto = ref(false)
 const hayRespuestas = ref(false)
 
-// Estados de error
 const error = ref(null)
 const esErrorDeLimite = ref(false)
-const esErrorDeAuth = ref(false) // 3. Nuevo estado para control de login
+const esErrorDeAuth = ref(false)
 
 const archivoNombre = ref("Ningún archivo seleccionado")
 
@@ -199,6 +198,24 @@ onMounted(() => {
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 })
+
+// --- UTILIDAD: CORREGIR NUMERACIÓN (NUEVO) ---
+// Busca patrones como "1.", "1)", "1-" al inicio de línea y los renombra secuencialmente
+function corregirNumeracion(texto) {
+  if (!texto) return "";
+  let contador = 1;
+  
+  // Regex explicado:
+  // (^|\n)   -> Inicio de string o salto de línea (comienzo de línea visual)
+  // \s* -> Posibles espacios en blanco
+  // \d+      -> Uno o más dígitos (el número incorrecto)
+  // ([\.\)-]) -> El separador (punto, paréntesis o guion)
+  // \s       -> Un espacio obligatorio después
+  return texto.replace(/(^|\n)\s*\d+([\.\)-])\s/g, (match, inicio, separador) => {
+    // Retorna el salto de línea original + el contador nuevo + el separador original + espacio
+    return `${inicio}${contador++}${separador} `;
+  });
+}
 
 // --- MANEJO DE PDF ---
 async function handlePdfUploadCustom(event) {
@@ -240,7 +257,6 @@ async function guardarExamen() {
 
 // --- LÓGICA PRINCIPAL ---
 async function manejarGeneracion() {
-  // 1. Validaciones básicas de formulario
   if (!apuntes.value || !dificultad.value || !tipoExamen.value) {
     error.value = "Por favor completa todos los campos (apuntes, dificultad, tipo)."
     esErrorDeLimite.value = false
@@ -248,7 +264,6 @@ async function manejarGeneracion() {
     return
   }
 
-  // 2. Validación PREVIA de autenticación (Ahorra llamada al server)
   if (!userStore.token) {
       error.value = "Debes iniciar sesión para generar exámenes."
       esErrorDeAuth.value = true
@@ -274,8 +289,11 @@ async function manejarGeneracion() {
       apuntes: apuntes.value
     });
 
-    resultado.value = data.preguntas;
-    respuestasInternas.value = data.respuestas;
+    // --- APLICAMOS LA CORRECCIÓN AQUÍ ---
+    // Procesamos el texto crudo para arreglar los números 1,2,3...1,2,3
+    resultado.value = corregirNumeracion(data.preguntas);
+    respuestasInternas.value = corregirNumeracion(data.respuestas);
+    
     hayRespuestas.value = true;
 
     await guardarExamen();
@@ -283,24 +301,19 @@ async function manejarGeneracion() {
   } catch (e) {
     console.error("Error en generación:", e);
 
-    // 3. Gestión de errores HTTP
     if (e.response) {
-        // ERROR 401: No autorizado (Token expirado o no login)
         if (e.response.status === 401) {
             error.value = "Tu sesión ha expirado o no estás registrado.";
             esErrorDeAuth.value = true;
         }
-        // ERROR 403: Límite de plan (Endpoint devuelve Forbidden)
         else if (e.response.status === 403) {
             error.value = e.response.data.message || "Has alcanzado el límite de exámenes para tu plan.";
             esErrorDeLimite.value = true;
         }
-        // ERROR Genérico del servidor
         else {
              error.value = "Hubo un error al generar el examen. Intenta con un texto más corto.";
         }
     } else {
-        // ERROR de Red (Backend apagado, CORS, Internet)
         error.value = "Error de conexión con el servidor.";
     }
 
@@ -315,7 +328,6 @@ function toggleResuelto() {
 }
 
 function irAlLogin() {
-    // Ajusta esta ruta a la de tu pantalla de login/registro
     router.push('/login')
 }
 </script>

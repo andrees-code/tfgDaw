@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="min-h-screen flex flex-col bg-slate-50">
     <Header />
 
-    <div class="flex justify-center items-start gap-4 px-4 md:px-6 py-6">
+    <div class="flex-grow w-full flex justify-center items-start gap-4 px-4 md:px-6 py-6">
 
       <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="leftAd">
       </div>
@@ -169,6 +169,8 @@
       </div>
 
     </div>
+
+    <Footer />
   </div>
 </template>
 
@@ -183,6 +185,8 @@ import {
 } from '@/services/examService'
 import { userStore } from '@/stores/userStores'
 import Header from '@/components/HeaderCompleto.vue'
+// 4. AÑADIDO: Importación del Footer
+import Footer from '@/components/FooterComponent.vue'
 
 const exams = ref([])
 const asignaturas = ref([])

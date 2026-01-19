@@ -1,8 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
+  <div class="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
     <Header />
 
-    <main class="mx-auto max-w-[1400px] px-4 py-10">
+    <main class="flex-grow w-full mx-auto max-w-[1400px] px-4 py-10">
+
       <div class="text-center mb-10">
         <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Generador de Exámenes</h1>
         <p class="mt-2 text-slate-500 max-w-2xl mx-auto">
@@ -10,11 +11,11 @@
         </p>
       </div>
 
-      <div class="flex flex-col xl:flex-row justify-center items-start gap-6">
+      <div class="flex flex-col xl:flex-row justify-center items-center xl:items-start gap-6">
 
         <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="leftAd"></div>
 
-        <div class="w-full max-w-5xl">
+        <div class="w-full max-w-5xl mx-auto">
           <section class="bg-white rounded-2xl shadow-sm border p-8 md:p-10 w-full">
 
             <div class="mb-8">
@@ -139,6 +140,7 @@
 
       </div>
     </main>
+
     <Footer />
   </div>
 </template>

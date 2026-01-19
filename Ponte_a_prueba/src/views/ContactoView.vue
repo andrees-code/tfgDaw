@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
+  <div class="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
     <Header />
 
-    <div class="flex justify-center items-start gap-4 px-4 py-12">
+    <div class="flex-grow w-full flex justify-center items-start gap-4 px-4 py-12">
 
       <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="leftAd">
       </div>
@@ -111,9 +111,8 @@
   </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted } from "vue" // Añadido onMounted
+import { ref, onMounted } from "vue"
 import emailjs from "emailjs-com"
 import Header from "@/components/HeaderCompleto.vue"
 import Footer from '@/components/FooterComponent.vue'

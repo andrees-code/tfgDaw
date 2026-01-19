@@ -379,7 +379,7 @@ async function guardarCambios() {
     password.value = ''
     passwordConfirm.value = ''
 
-    setTimeout(() => mensaje.value = '', 3000)
+    out(() => mensaje.value = '', 3000)
   } catch (e) {
     console.error(e)
     error.value = e.response?.data?.message || 'Error al guardar cambios'

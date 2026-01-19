@@ -2,10 +2,7 @@
   <div class="min-h-screen flex flex-col bg-slate-50">
     <Header />
 
-    <div class="flex-grow w-full flex justify-center items-start gap-4 px-4 md:px-6 py-6">
-
-      <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="leftAd">
-      </div>
+    <div class="flex-grow w-full flex justify-center items-start px-4 md:px-6 py-6">
 
       <div class="w-full max-w-6xl flex flex-col md:flex-row gap-6">
 
@@ -159,13 +156,7 @@
             </RouterLink>
           </div>
 
-          <div class="mt-6 md:mt-8 flex justify-center w-full min-h-[60px]" ref="bottomAd">
-          </div>
-
         </main>
-      </div>
-
-      <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="rightAd">
       </div>
 
     </div>
@@ -185,7 +176,6 @@ import {
 } from '@/services/examService'
 import { userStore } from '@/stores/userStores'
 import Header from '@/components/HeaderCompleto.vue'
-// 4. AÑADIDO: Importación del Footer
 import Footer from '@/components/FooterComponent.vue'
 
 const exams = ref([])
@@ -193,10 +183,8 @@ const asignaturas = ref([])
 const openAsignaturas = ref({})
 const tab = ref('historial')
 
-// Referencias para publicidad
-const leftAd = ref(null)
-const rightAd = ref(null)
-const bottomAd = ref(null)
+// --- PUBLICIDAD ELIMINADA ---
+// Se eliminaron referencias (leftAd, rightAd, bottomAd) y funciones de carga.
 
 userStore.loadSession()
 
@@ -209,69 +197,7 @@ onMounted(async () => {
 
   // 3. Inicializar estado de acordeón
   asignaturas.value.forEach(a => { openAsignaturas.value[a] = false })
-
-  // 4. Cargar anuncios
-  cargarAnuncios()
 })
-
-/* =========================================
-   LÓGICA DE PUBLICIDAD AISLADA
-   ========================================= */
-function cargarAnuncios() {
-  const sideConfig = {
-    key: 'c767c5331b742c5410e5e3d193dc4291',
-    format: 'iframe',
-    height: 600,
-    width: 160,
-    params: {}
-  }
-  const sideScript = 'https://www.highperformanceformat.com/c767c5331b742c5410e5e3d193dc4291/invoke.js'
-
-  const width = window.innerWidth
-  let bottomConfig = {}
-  let bottomScript = ''
-
-  if (width >= 500) {
-    bottomConfig = {
-      key: 'a5b39c8d227fe8cf72a19bb7e4c104ed',
-      format: 'iframe',
-      height: 60,
-      width: 468,
-      params: {}
-    }
-    bottomScript = 'https://www.highperformanceformat.com/a5b39c8d227fe8cf72a19bb7e4c104ed/invoke.js'
-  } else {
-    bottomConfig = {
-      key: '61c5ff75921e650e6548be96f6641978',
-      format: 'iframe',
-      height: 250,
-      width: 300,
-      params: {}
-    }
-    bottomScript = 'https://www.highperformanceformat.com/61c5ff75921e650e6548be96f6641978/invoke.js'
-  }
-
-  renderAdInIframe(leftAd.value, sideConfig, sideScript)
-  renderAdInIframe(rightAd.value, sideConfig, sideScript)
-  renderAdInIframe(bottomAd.value, bottomConfig, bottomScript)
-}
-
-function renderAdInIframe(container, config, scriptUrl) {
-  if (!container) return;
-  container.innerHTML = '';
-  const iframe = document.createElement('iframe');
-  iframe.style.width = config.width + 'px';
-  iframe.style.height = config.height + 'px';
-  iframe.style.border = '0';
-  iframe.style.overflow = 'hidden';
-  iframe.scrolling = 'no';
-  container.appendChild(iframe);
-
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(`<html><body style="margin:0;padding:0;background-color:transparent;"><script>var atOptions = ${JSON.stringify(config)};<\/script><script type="text/javascript" src="${scriptUrl}"><\/script></body></html>`);
-  doc.close();
-}
 
 /* =========================================
    LÓGICA DE ASIGNATURAS Y EXÁMENES
@@ -286,25 +212,20 @@ const addAsignatura = () => {
   if (!name) return
   if (!asignaturas.value.includes(name)) {
     asignaturas.value.push(name)
-    openAsignaturas.value[name] = true // La abrimos automáticamente al crearla
+    openAsignaturas.value[name] = true 
   }
 }
 
-// 🔥 CAMBIO IMPORTANTE: Lógica de borrado persistente
 const removeAsignatura = async (asig) => {
   if (!confirm(`¿Eliminar la asignatura "${asig}" y desasignar todos los exámenes?`)) return
 
-  // 1. Identificar exámenes afectados
   const examsToUpdate = exams.value.filter(e => e.asignatura === asig)
 
   try {
-    // 2. Actualizar en Base de Datos (Backend)
-    // Hacemos todas las peticiones en paralelo para que sea rápido
     await Promise.all(examsToUpdate.map(exam =>
         updateExamAsignatura(exam._id, '')
     ))
 
-    // 3. Actualizar estado Local (Frontend) solo si el backend respondió bien
     exams.value.forEach(e => {
       if (e.asignatura === asig) e.asignatura = ''
     })
@@ -322,7 +243,6 @@ const handleAsignaturaChange = async (exam) => {
   try {
     await updateExamAsignatura(exam._id, exam.asignatura)
 
-    // Si la asignatura seleccionada no estaba en la lista visual, la añadimos al momento
     if (exam.asignatura && !asignaturas.value.includes(exam.asignatura)) {
         asignaturas.value.push(exam.asignatura)
         openAsignaturas.value[exam.asignatura] = true

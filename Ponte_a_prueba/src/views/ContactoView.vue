@@ -2,10 +2,7 @@
   <div class="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
     <Header />
 
-    <div class="flex-grow w-full flex justify-center items-start gap-4 px-4 py-12">
-
-      <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="leftAd">
-      </div>
+    <div class="flex-grow w-full flex justify-center items-start px-4 py-12">
 
       <main class="w-full max-w-5xl">
         <div class="text-center mb-10">
@@ -102,9 +99,6 @@
         </div>
       </main>
 
-      <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="rightAd">
-      </div>
-
     </div>
 
     <Footer />
@@ -112,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref } from "vue" // Se ha eliminado onMounted ya que solo se usaba para ads
 import emailjs from "emailjs-com"
 import Header from "@/components/HeaderCompleto.vue"
 import Footer from '@/components/FooterComponent.vue'
@@ -122,10 +116,6 @@ const loading = ref(false)
 const error = ref(null)
 const success = ref(false)
 
-// Referencias para publicidad
-const leftAd = ref(null)
-const rightAd = ref(null)
-
 const form = ref({
   nombre: "",
   email: "",
@@ -134,41 +124,8 @@ const form = ref({
   website: "" // honeypot
 })
 
-// --- PUBLICIDAD ---
-onMounted(() => {
-  cargarAnunciosLaterales()
-})
-
-function cargarAnunciosLaterales() {
-  const adConfig = {
-    key: 'c767c5331b742c5410e5e3d193dc4291',
-    format: 'iframe',
-    height: 600,
-    width: 160,
-    params: {}
-  }
-  const scriptUrl = 'https://www.highperformanceformat.com/c767c5331b742c5410e5e3d193dc4291/invoke.js'
-
-  renderAdInIframe(leftAd.value, adConfig, scriptUrl)
-  renderAdInIframe(rightAd.value, adConfig, scriptUrl)
-}
-
-function renderAdInIframe(container, config, scriptUrl) {
-  if (!container) return;
-  container.innerHTML = '';
-  const iframe = document.createElement('iframe');
-  iframe.style.width = config.width + 'px';
-  iframe.style.height = config.height + 'px';
-  iframe.style.border = '0';
-  iframe.style.overflow = 'hidden';
-  iframe.scrolling = 'no';
-  container.appendChild(iframe);
-
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(`<html><body style="margin:0;padding:0;background-color:transparent;"><script>var atOptions = ${JSON.stringify(config)};<\/script><script type="text/javascript" src="${scriptUrl}"><\/script></body></html>`);
-  doc.close();
-}
+// --- PUBLICIDAD ELIMINADA ---
+// Se han borrado las referencias leftAd, rightAd, onMounted y las funciones de carga.
 
 // --- LOGICA FORMULARIO ---
 

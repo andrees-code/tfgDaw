@@ -11,9 +11,7 @@
         </p>
       </div>
 
-      <div class="flex flex-col xl:flex-row justify-center items-center xl:items-start gap-6">
-
-        <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="leftAd"></div>
+      <div class="flex justify-center">
 
         <div class="w-full max-w-5xl mx-auto">
           <section class="bg-white rounded-2xl shadow-sm border p-8 md:p-10 w-full">
@@ -93,8 +91,6 @@
               <span v-else>Generar examen</span>
             </button>
 
-            <div class="mt-8 flex justify-center w-full min-h-[60px]" ref="bottomAd"></div>
-
             <div v-if="resultado" class="mt-8 animate-fade-in">
                 <h3 class="font-semibold text-slate-800 mb-4 text-lg">Examen generado</h3>
 
@@ -136,8 +132,6 @@
           </section>
         </div>
 
-        <div class="hidden xl:flex justify-center w-[160px] flex-shrink-0 sticky top-4" ref="rightAd"></div>
-
       </div>
     </main>
 
@@ -172,54 +166,13 @@ const archivoNombre = ref("Ningún archivo seleccionado")
 
 const tipos = ["Test (4 opciones)", "Verdadero/Falso", "Respuestas cortas", "Respuestas largas", "Mix"]
 
-// --- REFERENCIAS DE PUBLICIDAD ---
-const leftAd = ref(null)
-const rightAd = ref(null)
-const bottomAd = ref(null)
+// --- SIN PUBLICIDAD ---
+// Se han eliminado las referencias y funciones de Adsterra
 
 onMounted(() => {
   userStore.loadSession()
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
-  cargarAnuncios()
 })
-
-// --- PUBLICIDAD ---
-function cargarAnuncios() {
-  const sideConfig = { key: 'c767c5331b742c5410e5e3d193dc4291', format: 'iframe', height: 600, width: 160, params: {} }
-  const sideScript = 'https://www.highperformanceformat.com/c767c5331b742c5410e5e3d193dc4291/invoke.js'
-
-  const width = window.innerWidth
-  let bottomConfig = {}
-  let bottomScript = ''
-
-  if (width >= 500) {
-    bottomConfig = { key: 'a5b39c8d227fe8cf72a19bb7e4c104ed', format: 'iframe', height: 60, width: 468, params: {} }
-    bottomScript = 'https://www.highperformanceformat.com/a5b39c8d227fe8cf72a19bb7e4c104ed/invoke.js'
-  } else {
-    bottomConfig = { key: '61c5ff75921e650e6548be96f6641978', format: 'iframe', height: 250, width: 300, params: {} }
-    bottomScript = 'https://www.highperformanceformat.com/61c5ff75921e650e6548be96f6641978/invoke.js'
-  }
-
-  renderAdInIframe(leftAd.value, sideConfig, sideScript)
-  renderAdInIframe(rightAd.value, sideConfig, sideScript)
-  renderAdInIframe(bottomAd.value, bottomConfig, bottomScript)
-}
-
-function renderAdInIframe(container, config, scriptUrl) {
-  if (!container) return;
-  container.innerHTML = '';
-  const iframe = document.createElement('iframe');
-  iframe.style.width = config.width + 'px';
-  iframe.style.height = config.height + 'px';
-  iframe.style.border = '0';
-  iframe.style.overflow = 'hidden';
-  iframe.scrolling = 'no';
-  container.appendChild(iframe);
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(`<html><body style="margin:0;padding:0;background-color:transparent;"><script>var atOptions = ${JSON.stringify(config)};<\/script><script type="text/javascript" src="${scriptUrl}"><\/script></body></html>`);
-  doc.close();
-}
 
 // --- LÓGICA DE PDF ---
 async function handlePdfUploadCustom(event) {
@@ -239,29 +192,21 @@ async function handlePdfUploadCustom(event) {
 
 // --- LÓGICA DEL EXAMEN ---
 
-/**
- * Función CLAVE: Formatea el texto para darle "aire".
- * 1. Separa las preguntas con doble salto de línea.
- * 2. Separa las opciones (a, b, c, d) a su propia línea.
- */
 function darFormatoVisual(texto) {
   if (!texto) return "";
 
   let t = texto;
 
-  // 1. Corregir numeración básica (por si acaso viene rota tipo "1-")
+  // 1. Corregir numeración básica
   let contador = 1;
   t = t.replace(/(^|\n)\s*\d+([\.\)-])\s/g, (match, inicio, separador) => {
     return `${inicio}${contador++}. `;
   });
 
-  // 2. Asegurar que las opciones (a), b), etc.) tengan un salto de línea antes.
-  //    Busca: un espacio, seguido de letra+paréntesis. Reemplaza con salto de línea.
+  // 2. Asegurar que las opciones tengan un salto de línea antes.
   t = t.replace(/(\s)([a-e]\))/g, "\n   $2");
 
   // 3. Separación GRANDE entre preguntas.
-  //    Busca: Un salto de línea (o inicio) seguido de un número y punto (ej: "2.").
-  //    Reemplaza con: Dos saltos de línea extra para crear el hueco.
   t = t.replace(/(\n)(\d+\.)/g, "\n\n\n$2");
 
   return t;
@@ -306,7 +251,6 @@ async function manejarGeneracion() {
       apuntes: apuntes.value
     });
 
-    // APLICAMOS EL NUEVO FORMATO AQUÍ
     resultado.value = darFormatoVisual(data.preguntas);
     respuestasInternas.value = darFormatoVisual(data.respuestas);
 

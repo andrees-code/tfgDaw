@@ -52,13 +52,13 @@ export const updateProfile = async (userId, data) => {
 
 export const sendPasswordResetEmail = async (payload) => {
   // Asegúrate de que la URL coincida con la ruta de tu Backend
-  const response = await axios.post('/auth/forgot-password', payload)
+  const response = await axios.post('https://bakend-murex.vercel.app/api/api/v1/users/auth/forgot-password', payload)
   return response.data
 }
 
 // Añade esto al final
 export const resetPassword = async (payload) => {
   // payload = { token, newPassword }
-  const response = await axios.post('/auth/reset-password', payload)
+  const response = await axios.post('https://bakend-murex.vercel.app/api/api/v1/users/auth/reset-password', payload)
   return response.data
 }

@@ -44,7 +44,7 @@ const menu = ref([
   },
   {
     id: 2,
-    label: 'Modo Tinder',
+    label: 'Modo Reto',
     route: '/modotinder',
     icon: 'fire',
   },

@@ -15,7 +15,7 @@
     <main class="flex-grow w-full mx-auto max-w-5xl px-4 py-8 md:py-12 relative z-10">
 
       <div v-if="!modoExamenActivo" class="animate-fade-in-up">
-         <div class="text-center mb-10">
+          <div class="text-center mb-10">
           <span class="inline-block py-1 px-3 rounded-full bg-slate-800/50 backdrop-blur-sm text-indigo-300 text-xs font-bold tracking-wider uppercase mb-3 border border-indigo-500/20 shadow-lg shadow-indigo-900/20">
             Modo Estudio 2.0
           </span>
@@ -30,12 +30,12 @@
         <div class="w-full bg-slate-900/60 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/10 p-6 md:p-10 relative overflow-hidden ring-1 ring-white/5">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
 
-             <div class="space-y-8">
+              <div class="space-y-8">
                 <div class="group relative">
                     <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
                     <div class="relative transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-xl focus-within:shadow-black/20 rounded-2xl">
                         <textarea v-model="apuntes" rows="6" class="w-full rounded-2xl bg-slate-950/50 border border-white/10 px-6 py-5 text-slate-200 resize-none placeholder:text-transparent focus:bg-slate-900 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/50 focus:outline-none transition-all text-base shadow-inner custom-scrollbar" placeholder=" "></textarea>
-                         <div v-if="!apuntes && !archivoNombre" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-500 gap-3">
+                          <div v-if="!apuntes && !archivoNombre" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-500 gap-3">
                             <div class="w-12 h-12 rounded-full bg-slate-800 shadow-lg border border-white/5 flex items-center justify-center text-indigo-400">
                                 <i class="fa-solid fa-pen-nib text-xl"></i>
                             </div>
@@ -73,7 +73,7 @@
                             <span class="text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">{{ numPreguntas }} preguntas</span>
                         </label>
                         <div class="relative px-2">
-                             <input type="range" min="5" max="20" step="5" v-model.number="numPreguntas" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 slider-custom" />
+                              <input type="range" min="5" max="20" step="5" v-model.number="numPreguntas" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 slider-custom" />
                             <div class="flex justify-between mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest"><span>5</span><span>10</span><span>15</span><span>20</span></div>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
 
                 <div>
                    <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Formato de preguntas</label>
-                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                   <div class="grid grid-cols-1 gap-3">
                      <button v-for="tipo in tipos" :key="tipo" @click="tipoExamen = tipo" :class="['px-4 py-4 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden', tipoExamen === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-500 hover:border-white/10 hover:bg-white/5']">
                         <div v-if="tipoExamen === tipo" class="absolute top-0 right-0 w-8 h-8 -mr-4 -mt-4 bg-indigo-500 rotate-45"></div>
                         <span class="relative z-10">{{ tipo }}</span>
@@ -95,7 +95,7 @@
                   <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
                   <span v-if="loading" class="flex items-center justify-center gap-3 relative z-10">
                     <svg class="animate-spin h-5 w-5 text-indigo-200" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span class="animate-pulse">Diseñando tu examen...</span>
+                    <span class="animate-pulse">Diseñando tu reto...</span>
                   </span>
                   <span v-else class="flex items-center justify-center gap-2 relative z-10">
                     Comenzar Reto <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-indigo-200"></i>
@@ -144,20 +144,20 @@
 
             <div v-else class="absolute inset-0 flex flex-col transition-all duration-500 ease-out transform origin-bottom z-30" :class="{'translate-x-[150%] rotate-12 opacity-0': animandoSalida}">
                 <div class="flex-grow bg-slate-900/90 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col overflow-hidden relative">
-                     <div class="flex-grow overflow-y-auto p-6 md:p-8 custom-scrollbar">
-                        <div class="flex items-start gap-3 mb-6">
-                           <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-black border border-indigo-500/20">Q</span>
-                           <h3 class="text-xl md:text-2xl font-bold text-slate-200 leading-snug">{{ preguntaActual.pregunta }}</h3>
-                        </div>
-                        <div class="space-y-3">
-                            <button v-for="(opcion, index) in preguntaActual.opciones" :key="index" @click="seleccionarRespuesta(index)" :disabled="respuestaSeleccionada !== null" class="w-full text-left p-4 md:p-5 rounded-2xl border-2 transition-all duration-200 relative overflow-hidden group" :class="claseOpcion(index)">
-                                <div class="flex items-center gap-4 relative z-10">
-                                    <span class="flex-shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center text-sm font-bold transition-colors shadow-sm" :class="claseBotonLetra(index)">{{ obtenerLetraVisual(index) }}</span>
-                                    <span class="font-medium text-sm md:text-base leading-snug transition-colors">{{ opcion.texto }}</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
+                      <div class="flex-grow overflow-y-auto p-6 md:p-8 custom-scrollbar">
+                         <div class="flex items-start gap-3 mb-6">
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-black border border-indigo-500/20">Q</span>
+                            <h3 class="text-xl md:text-2xl font-bold text-slate-200 leading-snug">{{ preguntaActual.pregunta }}</h3>
+                         </div>
+                         <div class="space-y-3">
+                             <button v-for="(opcion, index) in preguntaActual.opciones" :key="index" @click="seleccionarRespuesta(index)" :disabled="respuestaSeleccionada !== null" class="w-full text-left p-4 md:p-5 rounded-2xl border-2 transition-all duration-200 relative overflow-hidden group" :class="claseOpcion(index)">
+                                 <div class="flex items-center gap-4 relative z-10">
+                                     <span class="flex-shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center text-sm font-bold transition-colors shadow-sm" :class="claseBotonLetra(index)">{{ obtenerLetraVisual(index) }}</span>
+                                     <span class="font-medium text-sm md:text-base leading-snug transition-colors">{{ opcion.texto }}</span>
+                                 </div>
+                             </button>
+                         </div>
+                     </div>
 
                     <div v-if="respuestaSeleccionada !== null" class="bg-slate-950/80 backdrop-blur border-t border-white/10 p-5 md:p-6 animate-slide-up-fade">
                         <div v-if="esRespuestaCorrecta" class="flex items-center gap-3 mb-3 p-3 bg-green-900/20 rounded-xl text-green-400 border border-green-500/20">
@@ -204,7 +204,9 @@ const archivoNombre = ref("")
 // Estado General
 const loading = ref(false)
 const error = ref(null)
-const tipos = ["Test (4 opciones)", "Verdadero/Falso", "Mix"]
+
+// MODIFICADO: Dejamos solo "Test (4 opciones)" visible. Los otros están comentados para no romper lógica.
+const tipos = ["Test (4 opciones)"] //, "Verdadero/Falso", "Mix"]
 
 // --- ESTADO DEL MODO EXAMEN ---
 const modoExamenActivo = ref(false)

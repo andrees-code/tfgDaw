@@ -6,6 +6,6 @@ export class ResetPasswordDto {
   token: string;
 
   @IsString()
-  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  @MinLength(8, { message: 'La contraseña debe tener al menos 6 caracteres' })
   newPassword: string;
 }

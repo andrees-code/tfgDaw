@@ -26,7 +26,7 @@
                 v-model="form.password"
                 type="password"
                 class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3978D7]/20 focus:border-[#3978D7] transition-all"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 required
               />
             </div>
@@ -91,7 +91,6 @@ const success = ref(false)
 const token = ref('')
 
 onMounted(() => {
-  // Capturar el token de la URL (?token=xyz...)
   token.value = route.query.token
   if (!token.value) {
     error.value = "Token inválido o faltante. Vuelve a solicitar el correo."
@@ -104,8 +103,9 @@ async function handleReset() {
     return
   }
 
-  if (form.value.password.length < 6) {
-    error.value = "La contraseña debe tener al menos 6 caracteres"
+  // 👇 CAMBIO AQUÍ: Validación de 8 caracteres
+  if (form.value.password.length < 8) {
+    error.value = "La contraseña debe tener al menos 8 caracteres"
     return
   }
 
@@ -113,7 +113,6 @@ async function handleReset() {
     loading.value = true
     error.value = null
 
-    // Enviar token y nueva contraseña al backend
     await resetPassword({
       token: token.value,
       newPassword: form.value.password
@@ -121,9 +120,8 @@ async function handleReset() {
 
     success.value = true
 
-    // Redirigir al login después de 2 segundos
     setTimeout(() => {
-      router.push('/login') // O la ruta donde tengas tu AuthView
+      router.push('/login')
     }, 2000)
 
   } catch (e) {

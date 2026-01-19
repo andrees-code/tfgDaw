@@ -295,7 +295,7 @@ function cerrarNovedad() {
 }
 
 function irAlModoReto() {
-    router.push('/modo-reto')
+    router.push('/modotinder')
 }
 
 async function handlePdfUploadCustom(event) {

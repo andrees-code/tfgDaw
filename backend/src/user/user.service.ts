@@ -152,7 +152,7 @@ export class UserService {
 
     // 4. ENVÍO DE EMAIL
     // Ajusta esta URL al puerto donde corre tu Frontend (Vite suele ser 5173)
-    const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+    const resetUrl = `https://bakend-murex.vercel.app/reset-password?token=${resetToken}`;
 
     try {
       await this.mailerService.sendMail({

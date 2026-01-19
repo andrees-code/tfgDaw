@@ -17,8 +17,8 @@
             Modo Estudio 2.0
           </span>
           <h1 class="text-3xl md:text-5xl font-extrabold text-slate-800 tracking-tight mb-4">
-            Transforma tus apuntes en <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">retos</span>
-          </h1>
+            🔥Transforma tus apuntes en <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">retos</span>
+          🔥</h1>
           <p class="text-slate-500 max-w-lg mx-auto text-base md:text-lg leading-relaxed">
             Sube tu temario y deja que la IA genere un examen interactivo.
           </p>

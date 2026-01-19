@@ -16,6 +16,9 @@
 
             <div class="relative flex flex-col items-center text-center pt-4">
               <div class="relative group">
+                <div v-if="loadingAvatar" class="absolute inset-0 flex items-center justify-center bg-white/50 rounded-full z-10">
+                   <span class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></span>
+                </div>
                 <img
                   :src="previewFoto || userStore.user.avatar || fotoPlaceholder"
                   class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md group-hover:shadow-lg transition-all bg-slate-200"
@@ -27,11 +30,14 @@
                 >
                   <i class="fa-solid fa-camera text-sm"></i>
                 </label>
-                <input id="foto" type="file" accept="image/*" class="hidden" @change="cambiarFoto" />
+                <input id="foto" type="file" accept="image/*" class="hidden" @change="updateAvatar" />
               </div>
 
-              <h2 class="mt-4 text-xl font-bold text-slate-800">{{ username || 'Usuario' }}</h2>
-              <p class="text-sm text-slate-500 font-medium">{{ email }}</p>
+              <h2 class="mt-4 text-xl font-bold text-slate-800">{{ userStore.user.username || 'Usuario' }}</h2>
+              <p class="text-sm text-slate-500 font-medium">{{ userStore.user.email }}</p>
+
+              <p v-if="msgAvatar" class="text-xs text-green-600 mt-2 font-medium">{{ msgAvatar }}</p>
+              <p v-if="errAvatar" class="text-xs text-red-500 mt-2">{{ errAvatar }}</p>
 
               <div
                 class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border"
@@ -56,35 +62,57 @@
         <section class="lg:col-span-8 xl:col-span-9 space-y-8">
 
           <div id="general" class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 scroll-mt-24">
-            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-              <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                <i class="fa-regular fa-id-card text-lg"></i>
-              </div>
-              <div>
-                <h3 class="text-lg font-bold text-slate-800">Información Personal</h3>
-                <p class="text-xs text-slate-500">Actualiza tus datos de identificación</p>
+            <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <i class="fa-regular fa-id-card text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-slate-800">Información Personal</h3>
+                  <p class="text-xs text-slate-500">Actualiza tus datos de identificación</p>
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-slate-700">Nombre de usuario</label>
-                <input
-                  v-model="username"
-                  type="text"
-                  class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white transition-all outline-none border"
-                  placeholder="Tu nombre"
-                />
+            <form @submit.prevent="updateInfo" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-700">Nombre de usuario</label>
+                  <input
+                    v-model="username"
+                    type="text"
+                    class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white transition-all outline-none border"
+                    placeholder="Tu nombre"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-700">Correo electrónico</label>
+                  <input
+                    v-model="email"
+                    type="email"
+                    class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white transition-all outline-none border"
+                  />
+                </div>
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-slate-700">Correo electrónico</label>
-                <input
-                  v-model="email"
-                  type="email"
-                  class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white transition-all outline-none border"
-                />
+
+              <div class="flex items-center gap-4 pt-2">
+                <button
+                  type="submit"
+                  :disabled="loadingInfo"
+                  class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center gap-2 text-sm"
+                >
+                  <span v-if="loadingInfo" class="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></span>
+                  {{ loadingInfo ? 'Guardando...' : 'Guardar Información' }}
+                </button>
+
+                <transition name="fade">
+                  <p v-if="msgInfo" class="text-green-600 text-sm font-medium flex items-center"><i class="fa-solid fa-check-circle mr-1.5"></i> {{ msgInfo }}</p>
+                </transition>
+                <transition name="fade">
+                  <p v-if="errInfo" class="text-red-500 text-sm font-medium flex items-center"><i class="fa-solid fa-circle-exclamation mr-1.5"></i> {{ errInfo }}</p>
+                </transition>
               </div>
-            </div>
+            </form>
           </div>
 
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8">
@@ -98,34 +126,36 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-slate-700">Nueva contraseña</label>
-                <input v-model="password" type="password" placeholder="••••••••" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 transition-all outline-none border" />
+            <form @submit.prevent="updatePassword" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-700">Nueva contraseña</label>
+                  <input v-model="password" type="password" placeholder="••••••••" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 transition-all outline-none border" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-700">Confirmar contraseña</label>
+                  <input v-model="passwordConfirm" type="password" placeholder="••••••••" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 transition-all outline-none border" />
+                </div>
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-slate-700">Confirmar contraseña</label>
-                <input v-model="passwordConfirm" type="password" placeholder="••••••••" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 transition-all outline-none border" />
+
+              <div class="flex items-center gap-4 pt-2">
+                <button
+                  type="submit"
+                  :disabled="loadingPass || !password"
+                  class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 text-sm"
+                >
+                  <span v-if="loadingPass" class="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></span>
+                  {{ loadingPass ? 'Actualizando...' : 'Actualizar Contraseña' }}
+                </button>
+
+                <transition name="fade">
+                  <p v-if="msgPass" class="text-green-600 text-sm font-medium flex items-center"><i class="fa-solid fa-check-circle mr-1.5"></i> {{ msgPass }}</p>
+                </transition>
+                <transition name="fade">
+                  <p v-if="errPass" class="text-red-500 text-sm font-medium flex items-center"><i class="fa-solid fa-circle-exclamation mr-1.5"></i> {{ errPass }}</p>
+                </transition>
               </div>
-            </div>
-
-             <div class="mt-8 flex flex-col sm:flex-row items-center gap-4">
-              <button
-                @click="guardarCambios"
-                :disabled="loadingSave"
-                class="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed transition-all w-full sm:w-auto flex items-center justify-center gap-2"
-              >
-                <span v-if="loadingSave" class="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></span>
-                {{ loadingSave ? 'Guardando...' : 'Guardar cambios' }}
-              </button>
-
-              <transition name="fade">
-                <p v-if="mensaje" class="text-green-600 text-sm font-medium flex items-center"><i class="fa-solid fa-check-circle mr-1.5"></i> {{ mensaje }}</p>
-              </transition>
-              <transition name="fade">
-                <p v-if="error" class="text-red-500 text-sm font-medium flex items-center"><i class="fa-solid fa-circle-exclamation mr-1.5"></i> {{ error }}</p>
-              </transition>
-            </div>
+            </form>
           </div>
 
           <div id="billing" class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 md:p-8 overflow-hidden relative scroll-mt-24">
@@ -139,7 +169,6 @@
             </div>
 
            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-
              <div class="rounded-2xl border p-6 flex flex-col items-start transition-colors bg-slate-50/50"
                   :class="activePlan === 'free' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-slate-200 hover:border-slate-300'">
                <span class="bg-slate-200 text-slate-700 text-xs font-bold px-2 py-1 rounded mb-4">BÁSICO</span>
@@ -231,23 +260,34 @@
 <script setup>
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
-import { ref, onMounted, computed, watch } from 'vue' // Añadido watch
+import { ref, onMounted, computed } from 'vue'
 import { userStore } from '@/stores/userStores'
 import { SubscriptionService } from '@/services/subscriptionService'
 import { updateProfile, loginUser } from '@/services/userService'
 
 const fotoPlaceholder = '/img/perfil.jpg'
-const previewFoto = ref(null) // Solo para mostrar en el <img>
-const fotoFile = ref(null)    // IMPORTANTE: Para guardar el archivo real a subir
+const previewFoto = ref(null)
 
+// Estados independientes para cada formulario
 const username = ref('')
 const email = ref('')
+
 const password = ref('')
 const passwordConfirm = ref('')
-const mensaje = ref('')
-const error = ref('')
 
-const loadingSave = ref(false)
+// Mensajes independientes
+const msgInfo = ref('')
+const errInfo = ref('')
+const loadingInfo = ref(false)
+
+const msgPass = ref('')
+const errPass = ref('')
+const loadingPass = ref(false)
+
+const msgAvatar = ref('')
+const errAvatar = ref('')
+const loadingAvatar = ref(false)
+
 const loadingSub = ref(null)
 
 // Plan activo
@@ -261,20 +301,15 @@ const activePlanDisplay = computed(() => {
 
 onMounted(async () => {
   await userStore.loadSession()
-
   if (userStore.user) {
     cargarDatosLocales()
-    // Verificación asíncrona fresca
     await refreshSubscriptionStatus()
   }
 })
 
-// Sincronizar inputs con el store al cargar
 function cargarDatosLocales() {
   username.value = userStore.user.username
   email.value = userStore.user.email
-
-  // Lógica del plan con jerarquía
   if (userStore.user.plan) {
     activePlan.value = userStore.user.plan
   } else if (userStore.user.subscription?.plan) {
@@ -285,17 +320,11 @@ function cargarDatosLocales() {
 async function refreshSubscriptionStatus() {
     try {
         const res = await SubscriptionService.getPremiumContent()
-
-        // Determinar el plan basado en la respuesta
         let planDetectado = 'free'
-
         if (res?.plan) planDetectado = res.plan
         else if (res?.data?.plan) planDetectado = res.data.plan
-
-        // Solo actualizamos si es diferente para evitar reactividad innecesaria
         if (activePlan.value !== planDetectado) {
             activePlan.value = planDetectado
-            // Actualizamos store silenciosamente
             userStore.updateUser({ ...userStore.user, plan: planDetectado })
         }
     } catch (e) {
@@ -303,102 +332,137 @@ async function refreshSubscriptionStatus() {
     }
 }
 
-function cambiarFoto(e) {
+// Helper para limpiar el error de array [ "email must be email" ]
+function formatError(errorResponse) {
+    if (!errorResponse) return 'Error desconocido'
+    // Si viene como array, cogemos el primero o los unimos
+    if (Array.isArray(errorResponse.message)) {
+        return errorResponse.message.join(', ')
+    }
+    return errorResponse.message || 'Error al procesar la solicitud'
+}
+
+// -----------------------------------------------------
+// 1. ACTUALIZAR SOLO AVATAR (Inmediato al seleccionar)
+// -----------------------------------------------------
+async function updateAvatar(e) {
   const file = e.target.files[0]
   if (!file) return
 
-  // 1. Guardar el archivo real para el envío
-  fotoFile.value = file
+  loadingAvatar.value = true
+  msgAvatar.value = ''
+  errAvatar.value = ''
 
-  // 2. Crear URL para vista previa
+  // Preview inmediato
   previewFoto.value = URL.createObjectURL(file)
-}
-
-async function guardarCambios() {
-  if (!username.value || !email.value) {
-    error.value = 'Nombre y correo son obligatorios'
-    return
-  }
-  if (password.value && password.value !== passwordConfirm.value) {
-    error.value = 'Las contraseñas no coinciden'
-    return
-  }
-
-  loadingSave.value = true
-  error.value = ''
-  mensaje.value = ''
 
   try {
-    // IMPORTANTE: Usar FormData si hay archivo, o JSON normal si no
-    // Aunque updateProfile suela esperar JSON, si hay foto se suele requerir FormData.
-    // Asumiremos que tu servicio updateProfile maneja esto o que necesitamos pasar un objeto plano
-    // y el servicio decide.
-    // NOTA: Si tu backend espera 'multipart/form-data', el servicio updateProfile debe estar configurado para ello.
+    // Importante: updateProfile debe soportar recibir un objeto con file
+    // Si tu servicio requiere FormData manual, ajustalo aqui
+    const updatedUser = await updateProfile(userStore.user._id, { avatar: file })
 
-    // Preparar objeto de actualización
+    // Actualizar store
+    userStore.updateUser({ ...userStore.user, avatar: updatedUser.avatar })
+    msgAvatar.value = 'Foto actualizada'
+
+    // Limpiar mensaje tras 3s
+    setTimeout(() => msgAvatar.value = '', 3000)
+
+  } catch (e) {
+    console.error(e)
+    errAvatar.value = formatError(e.response?.data)
+    previewFoto.value = null // Revertir si falla
+  } finally {
+    loadingAvatar.value = false
+  }
+}
+
+// -----------------------------------------------------
+// 2. ACTUALIZAR SOLO INFO (Nombre y Email)
+// -----------------------------------------------------
+async function updateInfo() {
+  if (!username.value || !email.value) {
+    errInfo.value = 'Nombre y correo son obligatorios'
+    return
+  }
+
+  loadingInfo.value = true
+  errInfo.value = ''
+  msgInfo.value = ''
+
+  try {
     const updateData = {
       username: username.value,
       email: email.value
     }
+    // NOTA: No enviamos password ni avatar aquí
 
-    if (password.value) updateData.password = password.value
-
-    // Si hay archivo nuevo, lo pasamos. Si no, no enviamos 'avatar' para no borrar el existente.
-    if (fotoFile.value) {
-        updateData.avatar = fotoFile.value
-    }
-
-    // Llamada al servicio (asegúrate de que updateProfile convierta a FormData si hay archivo)
     const updatedUser = await updateProfile(userStore.user._id, updateData)
 
-    // Manejo de token si la contraseña cambió
-    let token = userStore.token
-    if (password.value) {
-      const loginRes = await loginUser({ email: updatedUser.email, password: password.value })
-      token = loginRes.token
-      userStore.setToken(token)
-    }
+    userStore.updateUser({ ...userStore.user, username: updatedUser.username, email: updatedUser.email })
+    msgInfo.value = 'Información guardada'
+    setTimeout(() => msgInfo.value = '', 3000)
 
-    // Actualizar Store preservando el plan actual (importante para que no se resetee a Free visualmente)
-    // Usamos el activePlan actual como backup si el backend no devuelve el plan en updatedUser
-    const planPreservado = updatedUser.plan || activePlan.value
-
-    userStore.updateUser({
-        ...updatedUser,
-        token,
-        plan: planPreservado
-    })
-
-    // Actualizar vista local
-    username.value = updatedUser.username
-    email.value = updatedUser.email
-    previewFoto.value = null // Limpiar preview temporal, usar el nuevo avatar del userStore
-    fotoFile.value = null // Limpiar archivo seleccionado
-
-    mensaje.value = 'Perfil actualizado correctamente'
-    password.value = ''
-    passwordConfirm.value = ''
-
-    out(() => mensaje.value = '', 3000)
   } catch (e) {
     console.error(e)
-    error.value = e.response?.data?.message || 'Error al guardar cambios'
+    errInfo.value = formatError(e.response?.data)
   } finally {
-    loadingSave.value = false
+    loadingInfo.value = false
+  }
+}
+
+// -----------------------------------------------------
+// 3. ACTUALIZAR SOLO CONTRASEÑA
+// -----------------------------------------------------
+async function updatePassword() {
+  if (password.value !== passwordConfirm.value) {
+    errPass.value = 'Las contraseñas no coinciden'
+    return
+  }
+  if (!password.value) {
+      errPass.value = 'Introduce una contraseña'
+      return
+  }
+
+  loadingPass.value = true
+  errPass.value = ''
+  msgPass.value = ''
+
+  try {
+    // Solo enviamos password
+    const updatedUser = await updateProfile(userStore.user._id, { password: password.value })
+
+    // Relogin silencioso para obtener nuevo token si cambia el hash
+    let token = userStore.token
+    if (updatedUser.email) {
+       const loginRes = await loginUser({ email: updatedUser.email, password: password.value })
+       token = loginRes.token
+       userStore.setToken(token)
+    }
+
+    password.value = ''
+    passwordConfirm.value = ''
+    msgPass.value = 'Contraseña actualizada'
+    setTimeout(() => msgPass.value = '', 3000)
+
+  } catch (e) {
+    console.error(e)
+    errPass.value = formatError(e.response?.data)
+  } finally {
+    loadingPass.value = false
   }
 }
 
 async function suscribirse(plan) {
   loadingSub.value = plan
-  error.value = ''
+  // Usamos una alerta global o específica para billing si quisieras
   try {
     const res = await SubscriptionService.createCheckoutSession(plan)
     if (res.url) window.location.href = res.url
     else throw new Error('No se recibió URL de pago')
   } catch (e) {
     console.error(e)
-    error.value = e.response?.data?.message || 'Error al conectar con la pasarela de pago'
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    alert(formatError(e.response?.data))
   } finally {
     loadingSub.value = null
   }
@@ -408,7 +472,6 @@ async function suscribirse(plan) {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-/* Asegura que el scroll suave respete el header sticky si lo hubiera o el margen */
 .scroll-mt-24 {
     scroll-margin-top: 6rem;
 }

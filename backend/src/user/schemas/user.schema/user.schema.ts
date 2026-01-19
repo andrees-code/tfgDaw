@@ -15,6 +15,10 @@ export interface UserDocument extends Document {
     endDate?: Date;
   };
 
+  // 👇 AGREGA ESTAS DOS LÍNEAS AQUÍ PARA QUE TS NO SE QUEJE
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,4 +46,9 @@ export const UserSchema = new Schema<UserDocument>({
     startDate: { type: Date, default: null },
     endDate: { type: Date, default: null },
   },
+  
+  // 👇 Ahora esto ya no dará error
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
+
 }, { timestamps: true });

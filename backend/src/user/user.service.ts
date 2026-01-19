@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import * as crypto from 'crypto';
+// 👇 1. IMPORTAR MAILER SERVICE
+import { MailerService } from '@nestjs-modules/mailer';
 
 import { User } from './interfaces/user/user.interface';
 import { UserDocument } from './interfaces/user/user-document';
@@ -15,6 +18,8 @@ export class UserService {
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
     private readonly jwtService: JwtService,
+    // 👇 2. INYECTARLO AQUÍ
+    private readonly mailerService: MailerService,
   ) {}
 
   // ➕ Crear usuario manual/admin
@@ -124,5 +129,85 @@ export class UserService {
     if (!deletedUser) throw new NotFoundException('User not found');
     const { password, ...rest } = deletedUser.toObject();
     return { ...rest, _id: deletedUser._id.toString() } as User;
+  }
+
+  // 📧 Forgot Password (CON ENVÍO REAL)
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      // Retardo artificial para evitar enumeración de usuarios (timing attacks)
+      // await new Promise(resolve => setTimeout(resolve, 500)); 
+      return { message: 'Si el correo existe, se ha enviado un enlace de recuperación.' };
+    }
+
+    // 2. Generar Token aleatorio
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    // 3. Guardar token y expiración (1 hora)
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); 
+
+    await user.save();
+
+    // 4. ENVÍO DE EMAIL
+    // Ajusta esta URL al puerto donde corre tu Frontend (Vite suele ser 5173)
+    const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Recuperación de contraseña 🔒',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #3978D7;">Solicitud de restablecimiento</h2>
+            <p>Hola,</p>
+            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.</p>
+            <p>Haz clic en el siguiente botón para continuar:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background-color: #3978D7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Restablecer contraseña</a>
+            </div>
+            <p style="font-size: 12px; color: #666;">Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+            <p style="font-size: 12px; color: #666; word-break: break-all;">${resetUrl}</p>
+            <p>Este enlace expirará en 1 hora.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 11px; color: #999;">Si no has solicitado este cambio, puedes ignorar este correo.</p>
+          </div>
+        `,
+      });
+      console.log(`[Email enviado] Recuperación para: ${user.email}`);
+    } catch (error) {
+      console.error('Error enviando email:', error);
+      // No lanzamos error al cliente para no romper el flujo, pero lo logueamos
+    }
+
+    return { 
+      message: 'Si el correo existe, se ha enviado un enlace de recuperación.' 
+    };
+  }
+  // 🔄 Reset Password (Validar token y cambiar contraseña)
+  async resetPassword(token: string, newPassword: string): Promise<User> {
+    // 1. Buscar usuario por token Y verificar que la fecha no haya expirado ($gt = greater than)
+    const user = await this.userModel.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      throw new BadRequestException('El enlace es inválido o ha expirado');
+    }
+
+    // 2. Encriptar nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 3. Actualizar usuario y limpiar el token
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    const { password, ...rest } = user.toObject();
+    return { ...rest, _id: user._id.toString() } as User;
   }
 }

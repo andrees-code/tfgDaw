@@ -21,6 +21,8 @@ import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto/user.dto';
 import { CreateUserDto } from './dto/user.dto/CreateUserDto';
 import { LoginUserDto } from './dto/user.dto/LoginUserDto';
+import { ForgotPasswordDto } from './dto/user.dto/ForgotPasswordDto';
+import { ResetPasswordDto } from './dto/user.dto/ResetPasswordDto';
 
 @Controller('api/v1/users')
 export class UserController {
@@ -54,6 +56,28 @@ export class UserController {
     try {
       await this.userService.addUser(userDto);
       return { status: true, message: 'User successfully created' };
+    } catch (e: any) {
+      throw new BadRequestException({ status: false, message: e.message });
+    }
+  }
+
+  // 📧 Endpoint para solicitar recuperación
+  @Post('auth/forgot-password') // Nota: ajusta la ruta si prefieres 'forgot-password' directo
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    try {
+      const result = await this.userService.forgotPassword(forgotPasswordDto.email);
+      return { status: true, ...result };
+    } catch (e: any) {
+      // Incluso si falla algo interno, intentamos no dar muchas pistas por seguridad,
+      // a menos que sea error crítico de servidor.
+      throw new InternalServerErrorException({ status: false, message: e.message });
+    }
+  }
+  @Post('auth/reset-password')
+  async resetPassword(@Body() resetDto: ResetPasswordDto) {
+    try {
+      await this.userService.resetPassword(resetDto.token, resetDto.newPassword);
+      return { status: true, message: 'Contraseña actualizada correctamente' };
     } catch (e: any) {
       throw new BadRequestException({ status: false, message: e.message });
     }

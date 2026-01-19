@@ -34,12 +34,13 @@
         <div class="w-full lg:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-white relative">
 
           <div class="max-w-md mx-auto w-full">
+
             <div class="lg:hidden text-center mb-8">
               <h2 class="text-2xl font-bold text-slate-800">Acceso Usuario</h2>
-              <p class="text-slate-500 text-sm">Ingresa a tu cuenta para continuar</p>
+              <p class="text-slate-500 text-sm">Gestiona tu acceso desde aquí</p>
             </div>
 
-            <div class="flex p-1 bg-slate-100 rounded-xl mb-8 relative">
+            <div v-if="modo !== 'forgot'" class="flex p-1 bg-slate-100 rounded-xl mb-8 relative">
               <button
                 class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
                 :class="modo === 'login' ? 'bg-white text-[#3978D7] shadow-sm' : 'text-slate-500 hover:text-slate-700'"
@@ -56,7 +57,14 @@
               </button>
             </div>
 
+            <div v-else class="mb-8">
+              <button @click="cambiarModo('login')" class="text-slate-500 hover:text-[#3978D7] text-sm flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-arrow-left"></i> Volver al inicio de sesión
+              </button>
+            </div>
+
             <transition name="fade" mode="out-in">
+
               <form v-if="modo === 'login'" @submit.prevent="login" key="login" class="space-y-5">
                 <div>
                   <h2 class="text-2xl font-bold text-slate-800 mb-1 hidden lg:block">Hola de nuevo 👋</h2>
@@ -79,7 +87,7 @@
                 <div>
                   <div class="flex justify-between items-center mb-1.5 ml-1">
                     <label class="block text-sm font-medium text-slate-700">Contraseña</label>
-                    <a href="#" class="text-xs text-[#3978D7] hover:underline">¿Olvidaste tu contraseña?</a>
+                    <a href="#" @click.prevent="cambiarModo('forgot')" class="text-xs text-[#3978D7] hover:underline">¿Olvidaste tu contraseña?</a>
                   </div>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -105,7 +113,7 @@
                 </button>
               </form>
 
-              <form v-else @submit.prevent="register" key="register" class="space-y-5">
+              <form v-else-if="modo === 'register'" @submit.prevent="register" key="register" class="space-y-5">
                  <div>
                   <h2 class="text-2xl font-bold text-slate-800 mb-1 hidden lg:block">Crea tu cuenta 🚀</h2>
                   <p class="text-slate-500 text-sm mb-6 hidden lg:block">Empieza tu prueba gratuita de 30 días.</p>
@@ -164,12 +172,49 @@
                   <span v-else>Crear cuenta</span>
                 </button>
               </form>
+
+              <form v-else-if="modo === 'forgot'" @submit.prevent="forgotPassword" key="forgot" class="space-y-5">
+                <div>
+                  <h2 class="text-2xl font-bold text-slate-800 mb-1">Recuperar acceso 🔒</h2>
+                  <p class="text-slate-500 text-sm mb-6">Ingresa tu email y te enviaremos las instrucciones.</p>
+
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5 ml-1">Correo electrónico</label>
+                  <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <i class="fa-solid fa-paper-plane text-slate-400 group-focus-within:text-[#3978D7] transition-colors"></i>
+                    </div>
+                    <input
+                      v-model="forgotEmail"
+                      type="email"
+                      class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3978D7]/20 focus:border-[#3978D7] transition-all"
+                      placeholder="nombre@ejemplo.com"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  :disabled="loading"
+                  class="w-full bg-[#3978D7] hover:bg-[#2d62b3] active:scale-[0.98] text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2 mt-4"
+                >
+                  <span v-if="loading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
+                  <span v-else>Enviar enlace de recuperación</span>
+                </button>
+              </form>
+
             </transition>
 
             <transition name="slide-up">
               <div v-if="error" class="mt-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
                 <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5"></i>
                 <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+              </div>
+            </transition>
+
+            <transition name="slide-up">
+              <div v-if="success" class="mt-6 p-4 rounded-xl bg-green-50 border border-green-100 flex items-start gap-3">
+                <i class="fa-solid fa-circle-check text-green-500 mt-0.5"></i>
+                <p class="text-sm text-green-600 font-medium">{{ success }}</p>
               </div>
             </transition>
 
@@ -190,25 +235,28 @@ import { ref } from "vue"
 import { useRouter } from "vue-router"
 import Header from "@/components/HeaderCompleto.vue"
 import Footer from '@/components/FooterComponent.vue'
-import { loginUser, registerUser } from "@/services/userService"
+// Añade sendPasswordResetEmail a tus imports
+import { loginUser, registerUser, sendPasswordResetEmail } from "@/services/userService"
 import { userStore } from "@/stores/userStores"
 
 const router = useRouter()
 
+// Modos disponibles: 'login', 'register', 'forgot'
 const modo = ref("login")
 const error = ref(null)
+const success = ref(null)
 const loading = ref(false)
 
 const loginForm = ref({ email: "", password: "" })
 const registerForm = ref({ username: "", email: "", password: "" })
+const forgotEmail = ref("")
 
-// Función para limpiar errores al cambiar de tab
 function cambiarModo(nuevoModo) {
   modo.value = nuevoModo
   error.value = null
-  // Opcional: limpiar formularios
-  // loginForm.value = { email: "", password: "" }
-  // registerForm.value = { username: "", email: "", password: "" }
+  success.value = null
+  // Opcional: limpiar formularios al cambiar
+  if (nuevoModo === 'login') forgotEmail.value = ""
 }
 
 async function login() {
@@ -220,6 +268,7 @@ async function login() {
   try {
     loading.value = true
     error.value = null
+    success.value = null
 
     const res = await loginUser(loginForm.value)
     userStore.setSession(res)
@@ -243,6 +292,7 @@ async function register() {
   try {
     loading.value = true
     error.value = null
+    success.value = null
 
     const res = await registerUser(registerForm.value)
     userStore.setSession(res)
@@ -256,14 +306,38 @@ async function register() {
     loading.value = false
   }
 }
+
+async function forgotPassword() {
+  if (!forgotEmail.value) {
+    error.value = "Introduce tu correo electrónico para continuar"
+    return
+  }
+
+  try {
+    loading.value = true
+    error.value = null
+    success.value = null
+
+    // Asegúrate de implementar esta función en tu servicio
+    await sendPasswordResetEmail({ email: forgotEmail.value })
+
+    success.value = "Hemos enviado un enlace a tu correo. Revisa tu bandeja de entrada."
+    // Opcional: Volver al login automáticamente tras unos segundos
+    // setTimeout(() => cambiarModo('login'), 3000)
+
+  } catch (e) {
+    error.value = e.response?.data?.message || "No se pudo enviar el correo. Inténtalo más tarde."
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
-/* Asegúrate de tener FontAwesome importado en tu proyecto o en el index.html */
 /* @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"); */
 
 .font-serif-custom {
-  font-family: 'Jacques Francois', serif; /* Coincide con tu referencia */
+  font-family: 'Jacques Francois', serif;
 }
 
 /* Transición suave entre formularios (Fade) */
@@ -276,7 +350,7 @@ async function register() {
   opacity: 0;
 }
 
-/* Transición para el mensaje de error (Slide Up) */
+/* Transición para alertas (Slide Up) */
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition: all 0.3s ease-out;

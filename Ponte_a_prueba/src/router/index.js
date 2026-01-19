@@ -10,6 +10,7 @@ import ExamenView from '@/views/ExamenView.vue'
 import Estudio from '@/views/ZonaEstudioView.vue'
 import PaypalView from '@/views/PaypalView.vue'
 import ErrorView from '@/views/ErrorView.vue'
+import ResetPasswordView from '@/views/ResetPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,6 +31,11 @@ const router = createRouter({
     {
       path: '/login',
       component: LoginRegister,
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: ResetPasswordView
     },
 
     // 🔒 PRIVADAS

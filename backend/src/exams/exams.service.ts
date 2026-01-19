@@ -15,22 +15,17 @@ export class ExamsService {
     @InjectModel('User')
     private userModel: Model<UserDocument>,
 
-    private ollamaService: OllamaService, // 🔹 inyectamos OllamaService
+    private ollamaService: OllamaService,
   ) {}
 
   // ----------------------------
-  // CREAR EXAMEN EN DB (tu función original)
+  // CREAR EXAMEN EN DB (Sin cambios)
   // ----------------------------
   async create(userId: string, dto: CreateExamDto) {
-    console.log('🔥 create() llamado con userId:', userId);
-
     const userObjectId = new Types.ObjectId(userId);
-
-    // 1️⃣ Buscar usuario
     const user = await this.userModel.findById(userObjectId).lean();
     if (!user) throw new ForbiddenException('Usuario no válido');
 
-    // 2️⃣ Limitar solo usuarios free
     if (user.subscription?.plan === 'free') {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -41,8 +36,6 @@ export class ExamsService {
         createdAt: { $gte: startOfMonth, $lt: startOfNextMonth },
       });
 
-      console.log('Exámenes este mes:', examsThisMonth);
-
       if (examsThisMonth >= 5) {
         throw new ForbiddenException(
           'Has alcanzado el límite de 5 exámenes este mes. Actualiza tu plan.'
@@ -50,7 +43,6 @@ export class ExamsService {
       }
     }
 
-    // 3️⃣ Crear examen
     return this.examModel.create({
       ...dto,
       userId: userObjectId,
@@ -58,7 +50,7 @@ export class ExamsService {
   }
 
   // ----------------------------
-  // GENERAR EXAMEN CON IA Y LÍMITE PARA FREE
+  // GENERAR EXAMEN CON IA (Lógica principal igual, prompts cambiados abajo)
   // ----------------------------
   async generateExamWithLimit(userId: string, dto: {
     tipo: string,
@@ -68,11 +60,10 @@ export class ExamsService {
   }) {
     const userObjectId = new Types.ObjectId(userId);
 
-    // 1️⃣ Buscar usuario
+    // Validación usuario (igual que antes)
     const user = await this.userModel.findById(userObjectId).lean();
     if (!user) throw new ForbiddenException('Usuario no válido');
 
-    // 2️⃣ Limitar si es FREE
     if (user.subscription?.plan === 'free') {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -83,14 +74,12 @@ export class ExamsService {
         createdAt: { $gte: startOfMonth, $lt: startOfNextMonth },
       });
 
-      console.log('Exámenes generados este mes:', examsThisMonth);
-
       if (examsThisMonth >= 5) {
         throw new ForbiddenException('Has alcanzado el límite de 5 exámenes este mes para plan FREE.');
       }
     }
 
-    // 3️⃣ Generación de bloques
+    // Generación de bloques (igual que antes)
     const bloques: number[] = [];
     let restantes = dto.numPreguntas;
     while (restantes > 0) {
@@ -103,22 +92,24 @@ export class ExamsService {
     let contadorPreguntas = 1;
 
     for (let bloqueSize of bloques) {
-      // Generar preguntas
+      // 1. Generar preguntas
       const promptPreg = this.buildPromptPreguntas(bloqueSize, contadorPreguntas, resultado, dto);
       const respPreg = await this.ollamaService.chat([
-        { role: 'system', content: 'Eres una máquina estricta de generación de exámenes. No añadas texto de relleno.' },
+        { role: 'system', content: 'Eres un profesor experto creando exámenes académicos de alta precisión.' },
         { role: 'user', content: promptPreg }
       ]);
+      
       let preguntasBloque = respPreg.message?.content?.trim() || '';
-      preguntasBloque = preguntasBloque.replace(/```/g, '').trim();
+      preguntasBloque = preguntasBloque.replace(/```/g, '').trim(); // Limpieza básica
       resultado += preguntasBloque + "\n\n";
 
-      // Generar respuestas
+      // 2. Generar respuestas
       const promptResp = this.buildPromptRespuestas(preguntasBloque, dto);
       const resp = await this.ollamaService.chat([
-        { role: 'system', content: 'Eres un profesor corrigiendo un examen. Sé directo.' },
+        { role: 'system', content: 'Eres un corrector académico experto. Tu prioridad es la veracidad fáctica.' },
         { role: 'user', content: promptResp }
       ]);
+      
       let respuestasBloque = resp.message?.content?.trim() || '';
       respuestasBloque = respuestasBloque.replace(/```/g, '').trim();
       respuestasInternas += respuestasBloque + "\n";
@@ -133,159 +124,216 @@ export class ExamsService {
   }
 
   // ----------------------------
-  // FUNCIONES AUXILIARES PARA PROMPTS
+  // FUNCIONES AUXILIARES PARA PROMPTS (MODIFICADAS)
   // ----------------------------
+  
   private buildPromptPreguntas(cantidad: number, inicio: number, preguntasPrevias: string, dto: any) {
     const tipo = dto.tipo;
+    const dificultad = dto.dificultad || 'media';
     const ap = dto.apuntes.substring(0, 15000);
+
+    // INSTRUCCIÓN CLAVE: Usar apuntes como contexto, conocimiento propio para la precisión.
     const instruccionBase = `
-ROL: Eres un generador de exámenes académico estricto.
-TAREA: Generar preguntas de examen basadas en el texto proporcionado.
-REGLA DE ORO: NO converses. SOLO entrega el contenido del examen.
+ROL: Eres un profesor universitario experto diseñando exámenes.
+FUENTE DE TEMAS: Usa el siguiente texto SOLO para identificar los temas, conceptos y contexto clave que el alumno debe estudiar.
+CALIDAD: Usa TU PROPIO conocimiento académico general para formular las preguntas. Asegúrate de que sean rigurosas, precisas y no ambiguas.
+DIFICULTAD: ${dificultad}.
+REGLA: No inventes información falsa, pero si los apuntes son vagos, complétalos con definiciones académicas estándar correctas.
 `;
 
     const contextoNegativo = preguntasPrevias.length > 10
-      ? `HISTORIAL: Ya generaste estas preguntas anteriormente:
-"""
-${preguntasPrevias}
-"""
-NO repitas preguntas ni temas exactos.`
+      ? `HISTORIAL: Ya has creado estas preguntas (evita repetirlas): """${preguntasPrevias}"""`
       : '';
 
+    // --- TIPO TEST (4 opciones) ---
     if (tipo === "Test (4 opciones)") {
-      return `${instruccionBase}${contextoNegativo}
-Genera EXACTAMENTE ${cantidad} preguntas de opción múltiple.
-La primera pregunta DEBE ser la número ${inicio}.
-Formato:
-${inicio}. Enunciado
-a) Opción
-b) Opción
-c) Opción
-d) Opción
+      return `${instruccionBase}
+${contextoNegativo}
 
-TEXTO BASE:
+TAREA: Genera ${cantidad} preguntas de selección múltiple (Test).
+FORMATO OBLIGATORIO:
+${inicio}. [Enunciado claro y académico]
+a) [Opción correcta o distractor plausible]
+b) [Opción correcta o distractor plausible]
+c) [Opción correcta o distractor plausible]
+d) [Opción correcta o distractor plausible]
+
+REQUISITOS:
+1. Solo una opción debe ser indiscutiblemente correcta.
+2. Evita preguntas con respuestas "Todas las anteriores" o "Ninguna de las anteriores".
+3. Las definiciones deben ser precisas (ej: diferencia bien área de perímetro).
+4. La numeración empieza en ${inicio}.
+
+TEXTO GUÍA (APUNTES):
 """${ap}"""`;
     }
 
+    // --- TIPO VERDADERO/FALSO ---
     if (tipo === "Verdadero/Falso") {
-      return `${instruccionBase}${contextoNegativo}
-Genera EXACTAMENTE ${cantidad} afirmaciones.
-La primera afirmación DEBE ser la número ${inicio}.
-Formato:
-${inicio}. [Afirmación]
+      return `${instruccionBase}
+${contextoNegativo}
 
-TEXTO BASE:
+TAREA: Genera ${cantidad} afirmaciones para responder con Verdadero o Falso.
+FORMATO OBLIGATORIO:
+${inicio}. [Afirmación completa]
+
+REQUISITOS:
+1. Las afirmaciones deben ser objetivamente verdaderas o falsas, sin ambigüedades.
+2. Evita opiniones subjetivas.
+3. La numeración empieza en ${inicio}.
+
+TEXTO GUÍA (APUNTES):
 """${ap}"""`;
     }
 
-    if (tipo === "Respuestas cortas" || tipo === "Respuestas largas") {
-      return `${instruccionBase}${contextoNegativo}
-Genera EXACTAMENTE ${cantidad} preguntas abiertas.
-La primera pregunta DEBE ser la número ${inicio}.
+    // --- TIPO RESPUESTAS CORTAS ---
+    if (tipo === "Respuestas cortas") {
+      return `${instruccionBase}
+${contextoNegativo}
 
-TEXTO BASE:
+TAREA: Genera ${cantidad} preguntas abiertas de respuesta breve.
+FORMATO OBLIGATORIO:
+${inicio}. [Pregunta directa y concisa]
+
+REQUISITOS:
+1. La pregunta debe poder responderse en 1 o 2 frases.
+2. Enfócate en definiciones, fechas clave, nombres o conceptos específicos del texto.
+3. La numeración empieza en ${inicio}.
+
+TEXTO GUÍA (APUNTES):
 """${ap}"""`;
     }
 
-    return `${instruccionBase}${contextoNegativo}
-Genera ${cantidad} preguntas variadas (Test, V/F, Abiertas) empezando por el número ${inicio}.
-TEXTO BASE: """${ap}"""`;
+    // --- TIPO RESPUESTAS LARGAS ---
+    if (tipo === "Respuestas largas") {
+      return `${instruccionBase}
+${contextoNegativo}
+
+TAREA: Genera ${cantidad} preguntas de desarrollo.
+FORMATO OBLIGATORIO:
+${inicio}. [Pregunta compleja o de desarrollo]
+
+REQUISITOS:
+1. Pide explicaciones, relaciones entre conceptos, causas y consecuencias.
+2. La numeración empieza en ${inicio}.
+
+TEXTO GUÍA (APUNTES):
+"""${ap}"""`;
+    }
+
+    // --- TIPO MIX ---
+    return `${instruccionBase}
+${contextoNegativo}
+
+TAREA: Genera ${cantidad} preguntas variadas sobre los temas del texto.
+Mezcla aleatoriamente estos formatos:
+- Opción múltiple (a,b,c,d)
+- Verdadero/Falso
+- Preguntas abiertas
+
+REQUISITOS:
+1. Asegura precisión académica máxima.
+2. La numeración empieza en ${inicio}.
+
+TEXTO GUÍA (APUNTES):
+"""${ap}"""`;
   }
+
 
   private buildPromptRespuestas(preguntas: string, dto: any) {
     const tipo = dto.tipo;
     const ap = dto.apuntes.substring(0, 15000);
-    const instruccionBase = `Eres un motor de corrección automatizado.
-TU OBJETIVO: Proveer la clave de respuestas correcta basada en el texto.
-FORMATO DE SALIDA: Lista numerada simple.`;
 
+    // INSTRUCCIÓN CLAVE: Priorizar la verdad factual sobre el texto proporcionado si hay conflicto.
+    const instruccionBase = `
+ROL: Eres un corrector oficial de exámenes.
+OBJETIVO: Generar la hoja de respuestas correcta.
+IMPORTANTE: Basa tus respuestas en la VERDAD ACADÉMICA ESTÁNDAR. Usa el texto proporcionado como contexto para entender a qué se refieren las preguntas, pero si el texto es ambiguo, prioriza la definición universalmente correcta.
+`;
+
+    // --- RESPUESTAS TEST ---
     if (tipo === "Test (4 opciones)") {
       return `${instruccionBase}
+
 INSTRUCCIONES:
-- Devuelve solo el número y la letra.
+- Analiza cada pregunta y determina cuál es la opción correcta.
+- Devuelve SOLO el número y la letra correcta.
+- Formato: "1. a", "2. c", etc.
+
 PREGUNTAS A RESOLVER:
 """${preguntas}"""
-REFERENCIA: """${ap}"""`;
+
+CONTEXTO DEL TEMA:
+"""${ap}"""`;
     }
 
+    // --- RESPUESTAS V/F ---
     if (tipo === "Verdadero/Falso") {
       return `${instruccionBase}
+
 INSTRUCCIONES:
-- Devuelve número y "Verdadero" o "Falso".
+- Analiza la veracidad de cada afirmación.
+- Devuelve SOLO el número y la palabra "Verdadero" o "Falso".
+- Formato: "1. Verdadero", "2. Falso".
+
 PREGUNTAS A RESOLVER:
 """${preguntas}"""
-REFERENCIA: """${ap}"""`;
+
+CONTEXTO DEL TEMA:
+"""${ap}"""`;
     }
 
+    // --- RESPUESTAS ABIERTAS Y MIX ---
     return `${instruccionBase}
-- Responde de forma concisa y académica.
+
+INSTRUCCIONES:
+- Proporciona la respuesta correcta o la pauta de corrección ideal.
+- Sé conciso pero preciso.
+- Formato lista numerada.
+
 PREGUNTAS A RESOLVER:
 """${preguntas}"""
-REFERENCIA: """${ap}"""`;
+
+CONTEXTO DEL TEMA:
+"""${ap}"""`;
   }
 
   // ----------------------------
-  // RESTO DE FUNCIONES ORIGINALES
+  // RESTO DE FUNCIONES (Find, Delete, etc.) - Sin cambios
   // ----------------------------
   findAllByUser(userId: string) {
-    return this.examModel
-      .find({ userId: new Types.ObjectId(userId) })
-      .sort({ createdAt: -1 })
-      .exec();
+    return this.examModel.find({ userId: new Types.ObjectId(userId) }).sort({ createdAt: -1 }).exec();
   }
 
   findOne(userId: string, examId: string) {
-    return this.examModel
-      .findOne({ _id: examId, userId: new Types.ObjectId(userId) })
-      .exec();
+    return this.examModel.findOne({ _id: examId, userId: new Types.ObjectId(userId) }).exec();
   }
 
   delete(userId: string, examId: string) {
-    return this.examModel.deleteOne({
-      _id: examId,
-      userId: new Types.ObjectId(userId),
-    });
+    return this.examModel.deleteOne({ _id: examId, userId: new Types.ObjectId(userId) });
   }
 
   async toggleFavorite(id: string, userId: string) {
-    const exam = await this.examModel.findOne({
-      _id: id,
-      userId: new Types.ObjectId(userId),
-    });
-
+    const exam = await this.examModel.findOne({ _id: id, userId: new Types.ObjectId(userId) });
     if (!exam) throw new NotFoundException();
-
     exam.favorito = !exam.favorito;
     return exam.save();
   }
 
   async getFavorites(userId: string) {
-    return this.examModel.find({
-      userId: new Types.ObjectId(userId),
-      favorito: true,
-    });
+    return this.examModel.find({ userId: new Types.ObjectId(userId), favorito: true });
   }
 
   async updateAsignatura(examId: string, userId: string, asignatura: string) {
-    const exam = await this.examModel.findOne({
-      _id: examId,
-      userId: new Types.ObjectId(userId),
-    });
-
+    const exam = await this.examModel.findOne({ _id: examId, userId: new Types.ObjectId(userId) });
     if (!exam) throw new NotFoundException('Examen no encontrado');
-
     exam.asignatura = asignatura;
     return exam.save();
   }
 
   async updateTitle(examId: string, userId: string, title: string) {
-    const exam = await this.examModel.findOne({
-      _id: examId,
-      userId: new Types.ObjectId(userId),
-    });
-
+    const exam = await this.examModel.findOne({ _id: examId, userId: new Types.ObjectId(userId) });
     if (!exam) throw new NotFoundException('Examen no encontrado');
-
     exam.title = title;
     return exam.save();
   }

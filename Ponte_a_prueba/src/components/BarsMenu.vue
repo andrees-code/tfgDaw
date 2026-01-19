@@ -33,20 +33,26 @@ let menu = ref([
     route: "/home",
     icon: "file-alt", // 📄 o "clipboard" para examenes
   },
-  {
+   {
     id: 2,
+    label: 'Modo tinder',
+    route: '/modotinder',
+    icon: 'fire', // 📚 correcto
+  },
+  {
+    id: 3,
     label: 'Biblioteca',
     route: '/biblioteca',
     icon: 'book', // 📚 correcto
   },
   {
-    id: 3,
+    id: 4,
     label: 'Estudio',
     route: '/estudio',
     icon: 'graduation-cap', // 🎓 más representativo que "book"
   },
     {
-    id: 4,
+    id: 5,
     label: "Contacto",
     route: "/contacto",
     icon: "envelope", // ✉️ ya está perfecto

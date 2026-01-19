@@ -1,13 +1,13 @@
 <template>
-  <footer class="py-6 text-center text-gray-500 text-xs bg-white">
+  <footer class="py-8 text-center text-slate-500 text-xs border-t border-white/5 bg-slate-950/30 backdrop-blur-sm relative z-10">
       © 2025 Ponte a Prueba. Todos los derechos reservados.
-    </footer>
+  </footer>
 </template>
 
 <script setup>
 
 </script>
 
-<style>
+<style scoped>
 
 </style>

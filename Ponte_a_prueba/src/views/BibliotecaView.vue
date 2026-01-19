@@ -1,43 +1,64 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-50">
-    <Header />
+  <div class="min-h-screen flex flex-col font-sans text-slate-300 bg-slate-950 overflow-hidden relative selection:bg-indigo-500 selection:text-white">
 
-    <div class="flex-grow w-full flex justify-center items-start px-4 md:px-6 py-6">
+    <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
 
-      <div class="w-full max-w-6xl flex flex-col md:flex-row gap-6">
+      <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
 
-        <aside class="w-full md:w-64 border rounded-xl p-4 flex flex-col h-fit bg-white shadow-sm">
-          <div class="flex justify-between items-center mb-3">
-            <h2 class="font-semibold text-slate-700 text-sm md:text-base">📘 Asignaturas</h2>
+      <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px] animate-blob mix-blend-screen"></div>
+      <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-900/30 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-screen"></div>
+      <div class="absolute top-[20%] left-[30%] w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-[80px] animate-blob animation-delay-4000 mix-blend-screen"></div>
+
+      <div class="absolute top-[15%] left-[5%] text-slate-700 text-9xl opacity-20 animate-float">
+        ✎
+      </div>
+      <div class="absolute bottom-[20%] right-[10%] text-indigo-900 text-9xl opacity-30 animate-float animation-delay-1000">
+        📘
+      </div>
+    </div>
+
+    <div class="relative z-20">
+        <Header />
+    </div>
+
+    <div class="flex-grow w-full flex justify-center items-start px-4 md:px-6 py-8 relative z-10 animate-fade-in-up">
+
+      <div class="w-full max-w-6xl flex flex-col md:flex-row gap-8">
+
+        <aside class="w-full md:w-72 flex flex-col h-fit bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-[1.5rem] shadow-2xl shadow-black/20 p-6 relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-70"></div>
+
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-bold text-slate-100 text-lg tracking-tight">📘 Asignaturas</h2>
             <button
               v-if="asignaturas.length"
               @click="addAsignatura()"
-              class="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition"
+              class="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg text-xs font-bold border border-indigo-500/20 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
             >
               ➕ Añadir
             </button>
           </div>
 
-          <div v-if="asignaturas.length">
+          <div v-if="asignaturas.length" class="space-y-2">
             <div
               v-for="asig in asignaturas"
               :key="asig"
-              class="mb-2 border rounded p-2 hover:bg-slate-50 transition"
+              class="group border border-transparent hover:border-white/10 rounded-xl p-2 transition-all hover:bg-white/5"
             >
               <div class="flex justify-between items-center">
                 <button
                   @click="toggleAsignatura(asig)"
-                  class="font-medium flex-1 text-left text-slate-700 text-sm"
+                  class="font-semibold flex-1 text-left text-slate-400 group-hover:text-indigo-300 text-sm transition-colors"
                 >
                   {{ asig }}
-                  <span class="ml-1 text-xs">
+                  <span class="ml-1 text-[10px] opacity-50">
                     {{ openAsignaturas[asig] ? '▼' : '▶' }}
                   </span>
                 </button>
 
                 <button
                   @click="removeAsignatura(asig)"
-                  class="text-red-400 hover:text-red-600 text-xs px-1"
+                  class="text-slate-600 hover:text-red-400 text-xs px-2 py-1 rounded-md hover:bg-red-900/20 transition-colors"
                   title="Borrar asignatura y desasignar exámenes"
                 >
                   🗑
@@ -46,113 +67,136 @@
 
               <ul
                 v-if="openAsignaturas[asig]"
-                class="text-xs text-gray-500 ml-3 mt-2 border-l-2 border-slate-200 pl-2"
+                class="text-xs text-slate-500 ml-2 mt-2 border-l-2 border-slate-700 pl-3 space-y-1.5"
               >
                 <li
                   v-for="exam in examsByAsignatura(asig)"
                   :key="exam._id"
-                  class="break-words mb-1"
+                  class="break-words"
                 >
-                  • {{ exam.title }}
+                  <span class="text-indigo-500 mr-1">•</span> {{ exam.title }}
                 </li>
-                <li v-if="!examsByAsignatura(asig).length" class="italic text-gray-400">
+                <li v-if="!examsByAsignatura(asig).length" class="italic text-slate-600">
                   Sin exámenes
                 </li>
               </ul>
             </div>
           </div>
 
-          <div v-else class="flex flex-1 justify-center items-center py-4">
+          <div v-else class="flex flex-1 justify-center items-center py-8 flex-col gap-2">
+             <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-xl mb-2 animate-float border border-white/5">📚</div>
             <button
               @click="addAsignatura()"
-              class="px-3 py-1.5 bg-blue-600 text-white rounded text-xs md:text-sm hover:bg-blue-700 transition"
+              class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-900/20"
             >
-              ➕ Crear asignatura
+              Crear tu primera asignatura
             </button>
           </div>
         </aside>
 
         <main class="flex-1 min-w-0">
 
-          <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-slate-800">📚 Biblioteca</h1>
+          <header class="mb-8">
+              <h1 class="text-3xl md:text-4xl font-extrabold text-slate-100 tracking-tight mb-2">Biblioteca <span class="text-indigo-500">.</span></h1>
+              <p class="text-slate-400">Gestiona tus retos y repasa tu historial.</p>
+          </header>
 
-          <div class="flex flex-col sm:flex-row gap-2 md:gap-3 mb-4 md:mb-6">
+          <div class="flex p-1.5 bg-slate-900/80 backdrop-blur-sm rounded-2xl w-fit mb-8 gap-1 border border-white/10">
             <button
               @click="tab = 'historial'"
-              :class="tabClass('historial')"
-              class="w-full sm:w-auto transition-colors text-sm md:text-base"
+              :class="tab === 'historial' ? 'bg-slate-800 text-indigo-400 shadow-sm font-bold ring-1 ring-white/5' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'"
+              class="px-6 py-2.5 rounded-xl text-sm transition-all duration-300"
             >
               🕒 Historial
             </button>
 
             <button
               @click="tab = 'favoritos'"
-              :class="tabClass('favoritos')"
-              class="w-full sm:w-auto transition-colors text-sm md:text-base"
+              :class="tab === 'favoritos' ? 'bg-slate-800 text-indigo-400 shadow-sm font-bold ring-1 ring-white/5' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'"
+              class="px-6 py-2.5 rounded-xl text-sm transition-all duration-300"
             >
               ⭐ Favoritos
             </button>
           </div>
 
-          <div
-            v-for="exam in filteredExams"
-            :key="exam._id"
-            class="bg-white border rounded-xl p-4 md:p-5 mb-4 shadow-sm hover:shadow-md transition flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3 md:gap-4"
-          >
-            <div class="flex-1 w-full">
-              <input
-                v-model="exam.title"
-                @blur="saveTitle(exam)"
-                class="text-base md:text-lg font-semibold w-full border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent transition-colors mb-1 text-slate-800"
-              />
-
-              <div class="text-slate-500 text-xs md:text-sm flex flex-wrap gap-2 md:gap-3 items-center mt-1">
-                <select
-                  v-model="exam.asignatura"
-                  @change="handleAsignaturaChange(exam)"
-                  class="border border-slate-200 bg-slate-50 rounded px-2 py-1 focus:ring-2 focus:ring-blue-100 outline-none max-w-[140px] truncate"
+          <div class="space-y-4">
+            <transition-group name="slide-fade">
+                <div
+                    v-for="exam in filteredExams"
+                    :key="exam._id"
+                    class="group bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 md:p-6 shadow-lg hover:shadow-indigo-500/10 hover:border-white/10 hover:-translate-y-1 transition-all duration-300 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 relative overflow-hidden"
                 >
-                  <option value="">Sin asignatura</option>
-                  <option v-for="a in asignaturas" :key="a" :value="a">{{ a }}</option>
-                </select>
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
 
-                <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium truncate">{{ exam.tipo }}</span>
-                <span class="text-slate-400 whitespace-nowrap">· {{ exam.numPreguntas }} pregs.</span>
-              </div>
-            </div>
+                    <div class="flex-1 w-full relative z-10">
+                    <input
+                        v-model="exam.title"
+                        @blur="saveTitle(exam)"
+                        class="text-lg md:text-xl font-bold w-full bg-transparent border-b border-transparent hover:border-indigo-500/50 focus:border-indigo-500 focus:outline-none transition-colors mb-2 text-slate-200 placeholder-slate-600 py-1"
+                    />
 
-            <div class="flex flex-row items-center gap-2 md:gap-3 justify-end lg:self-center mt-1 lg:mt-0">
-              <RouterLink
-                :to="`/examen/${exam._id}`"
-                class="px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white rounded-lg text-xs md:text-sm font-medium hover:bg-blue-700 transition shadow-sm"
-              >
-                Abrir
-              </RouterLink>
+                    <div class="flex flex-wrap gap-2 md:gap-3 items-center mt-1">
+                        <div class="relative group/select">
+                            <select
+                            v-model="exam.asignatura"
+                            @change="handleAsignaturaChange(exam)"
+                            class="appearance-none cursor-pointer border border-white/10 bg-slate-950/50 hover:bg-slate-900 rounded-lg pl-3 pr-8 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-400 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none transition-all max-w-[150px] truncate"
+                            >
+                            <option value="" class="bg-slate-900 text-slate-300">Sin asignatura</option>
+                            <option v-for="a in asignaturas" :key="a" :value="a" class="bg-slate-900 text-slate-300">{{ a }}</option>
+                            </select>
+                            <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs">▼</div>
+                        </div>
 
-              <button
-                @click="toggleFav(exam)"
-                class="p-1.5 md:p-2 text-lg md:text-xl hover:scale-110 transition"
-                :class="exam.favorito ? 'text-yellow-400' : 'text-slate-300 hover:text-yellow-400'"
-              >
-                {{ exam.favorito ? '★' : '☆' }}
-              </button>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                            {{ exam.tipo }}
+                        </span>
+                        <span class="text-xs text-slate-500 font-medium">
+                            <i class="mr-1">📝</i>{{ exam.numPreguntas }} pregs.
+                        </span>
+                    </div>
+                    </div>
 
-              <button
-                @click="removeExam(exam._id)"
-                class="p-1.5 md:p-2 text-slate-400 hover:text-red-600 transition text-base md:text-lg"
-              >
-                🗑
-              </button>
-            </div>
+                    <div class="flex flex-row items-center gap-3 justify-end lg:self-center mt-1 lg:mt-0 relative z-10 border-t lg:border-t-0 border-white/5 pt-3 lg:pt-0 w-full lg:w-auto">
+
+                    <button
+                        @click="toggleFav(exam)"
+                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-slate-800 border border-white/5 hover:border-yellow-500/50 shadow-sm"
+                        :class="exam.favorito ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' : 'text-slate-600 hover:text-yellow-400'"
+                        title="Favorito"
+                    >
+                        <span class="text-lg leading-none mt-1">{{ exam.favorito ? '★' : '☆' }}</span>
+                    </button>
+
+                    <button
+                        @click="removeExam(exam._id)"
+                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-slate-800 border border-white/5 hover:border-red-500/30 hover:bg-red-900/20 text-slate-600 hover:text-red-400 shadow-sm"
+                        title="Eliminar"
+                    >
+                        <span class="text-sm">🗑</span>
+                    </button>
+
+                    <RouterLink
+                        :to="`/examen/${exam._id}`"
+                        class="ml-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/20 hover:-translate-y-0.5 flex items-center gap-2 overflow-hidden group/btn relative"
+                    >
+                        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-shimmer"></div>
+                        <span class="relative z-10">Abrir</span> <span class="text-xs relative z-10">→</span>
+                    </RouterLink>
+                    </div>
+                </div>
+            </transition-group>
           </div>
 
           <div
             v-if="!filteredExams.length"
-            class="text-center py-10 md:py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300"
+            class="text-center py-16 px-6 bg-slate-900/30 backdrop-blur-md rounded-[2rem] border border-dashed border-slate-700 mt-4 animate-slide-up-fade"
           >
-            <p class="text-slate-500 mb-2 text-sm md:text-base">No hay exámenes en esta sección.</p>
-            <RouterLink to="/" class="text-blue-600 font-medium hover:underline text-sm md:text-base">
-              Crear nuevo examen
+            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-slate-600 animate-float border border-white/5">📭</div>
+            <p class="text-slate-300 font-medium mb-1">No hay exámenes en esta sección.</p>
+            <p class="text-slate-500 text-sm mb-6">Parece que aún no has empezado.</p>
+            <RouterLink to="/" class="inline-flex px-6 py-3 bg-slate-800 text-indigo-400 font-bold rounded-xl shadow-md border border-white/10 hover:bg-slate-700 transition-all">
+              Crear nuevo reto
             </RouterLink>
           </div>
 
@@ -161,7 +205,9 @@
 
     </div>
 
-    <Footer />
+    <div class="relative z-20">
+        <Footer />
+    </div>
   </div>
 </template>
 
@@ -182,9 +228,6 @@ const exams = ref([])
 const asignaturas = ref([])
 const openAsignaturas = ref({})
 const tab = ref('historial')
-
-// --- PUBLICIDAD ELIMINADA ---
-// Se eliminaron referencias (leftAd, rightAd, bottomAd) y funciones de carga.
 
 userStore.loadSession()
 
@@ -212,7 +255,7 @@ const addAsignatura = () => {
   if (!name) return
   if (!asignaturas.value.includes(name)) {
     asignaturas.value.push(name)
-    openAsignaturas.value[name] = true 
+    openAsignaturas.value[name] = true
   }
 }
 
@@ -263,11 +306,6 @@ const toggleFav = async (exam) => {
   exam.favorito = updated.favorito
 }
 
-const tabClass = (name) => `
-  px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-medium transition-all duration-200
-  ${tab.value === name ? 'bg-blue-600 text-white shadow-md transform scale-105' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}
-`
-
 const saveTitle = async (exam) => {
   try {
     await updateExamTitle(exam._id, exam.title)
@@ -276,3 +314,139 @@ const saveTitle = async (exam) => {
   }
 }
 </script>
+
+<style scoped>
+/* =========================================
+   1. NUEVOS ESTILOS PARA LA HOME (Fondo y Decoración)
+   ========================================= */
+
+/* Patrón de cuadrícula técnica (Grid) - AHORA EN BLANCO/CLARO PARA FONDO OSCURO */
+/* Cambiado el stroke a #ffffff */
+.bg-grid-white {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='%23ffffff'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+}
+
+/* Animación de flotación para los iconos decorativos laterales */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Utilitario para retrasar animaciones (útil para que no se muevan a la vez) */
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+/* =========================================
+   2. SLIDER PERSONALIZADO (Rango de preguntas)
+   ========================================= */
+
+.slider-custom {
+  background-image: linear-gradient(#4f46e5, #4f46e5); /* Indigo 600 */
+  background-repeat: no-repeat;
+  /* background-size se calcula dinámicamente en el template */
+}
+
+.slider-custom::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #4f46e5;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  transition: all 0.1s ease-in-out;
+}
+
+.slider-custom::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.2);
+  transform: scale(1.1);
+}
+
+/* =========================================
+   3. ANIMACIONES GENERALES
+   ========================================= */
+
+.animate-blob {
+  animation: blob 10s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 0.6s ease-out;
+}
+
+/* Transiciones de Vue (Transition Group) */
+.slide-fade-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.slide-fade-leave-active {
+  transition: all 0.3s ease-out;
+}
+.slide-fade-enter-from {
+  transform: translateX(20px) translateY(20px);
+  opacity: 0;
+}
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+/* =========================================
+   4. KEYFRAMES (Definición de movimientos)
+   ========================================= */
+
+/* Nuevo: Flotación suave arriba/abajo */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Movimiento de las manchas de color (blobs) */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+/* Brillo que pasa por el botón */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Vibración para errores */
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Entrada suave desde abajo */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Entrada con fade para resultados */
+@keyframes slideUpFade {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+</style>

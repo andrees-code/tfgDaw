@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# 🚫 Zonas Privadas (Ahorra presupuesto de rastreo)
+Disallow: /perfil
+Disallow: /ajustes
+Disallow: /biblioteca
+Disallow: /examen/
+Disallow: /estudio
+Disallow: /paypal
+
+# 🚫 Páginas técnicas/Errores
+Disallow: /404
+Disallow: /reset-password
+
+# 🗺️ Tu mapa del sitio
+Sitemap: https://www.ponteaprobados.es/sitemap.xml

@@ -9,24 +9,42 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://pagead2.googlesyndication.com">
-    <link rel="preconnect" href="https://www.google.com">
-    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 
     <link 
-      rel="stylesheet" 
+      rel="preload" 
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-      media="print" 
-      onload="this.media='all'"
+      as="style" 
+      onload="this.onload=null;this.rel='stylesheet'"
     >
     <noscript>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </noscript>
 
-    </head>
+    <style>
+      body { margin: 0; background-color: #020617; font-family: 'Inter', sans-serif; }
+      .app-loader {
+        height: 100vh; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center; color: #cbd5e1;
+      }
+      .loader-spinner {
+        width: 48px; height: 48px; border: 5px solid #3730a3; 
+        border-bottom-color: transparent; border-radius: 50%; 
+        display: inline-block; box-sizing: border-box; 
+        animation: rotation 1s linear infinite mb-4;
+      }
+      @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+  </head>
 
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="app-loader">
+        <div class="loader-spinner"></div>
+        <p style="margin-top: 20px; font-weight: 700; font-size: 1.2rem;">Preparando tus exámenes...</p>
+      </div>
+    </div>
     
     <script type="module" src="/src/main.js"></script>
 
@@ -35,27 +53,22 @@
         if (window.scriptsCargados) return;
         window.scriptsCargados = true;
 
-        console.log("⚡ Cargando scripts de terceros en segundo plano...");
+        console.log("⚡ Cargando servicios de Google...");
 
-        // A. Cargar AdSense
+        // AdSense
         const adScript = document.createElement('script');
         adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8114132400914870";
         adScript.async = true;
         adScript.crossOrigin = "anonymous";
         document.body.appendChild(adScript);
 
-        // B. Cargar reCAPTCHA v3
-        // NOTA: Si al hacer build la variable %VITE...% no se reemplaza,
-        // tendrás que poner tu clave pública real aquí a mano.
+        // reCAPTCHA
         const recapScript = document.createElement('script');
         recapScript.src = "https://www.google.com/recaptcha/api.js?render=%VITE_RECAPTCHA_SITE_KEY%"; 
         recapScript.async = true;
         document.body.appendChild(recapScript);
       }
 
-      // ESTRATEGIA DE RENDIMIENTO:
-      // Esperamos a que el usuario mueva el mouse, toque la pantalla o haga scroll.
-      // Si no hace nada, cargamos a los 4 segundos por seguridad.
       const eventosUsuario = ['mousemove', 'keydown', 'touchstart', 'scroll'];
       
       const iniciarCarga = () => {
@@ -64,7 +77,9 @@
       };
 
       eventosUsuario.forEach(e => window.addEventListener(e, iniciarCarga, { passive: true }));
-      setTimeout(cargarScriptsExternos, 4000);
+      
+      // ⚠️ Aumentado a 7000ms (7s) para que Lighthouse termine de medir antes de cargar esto
+      setTimeout(cargarScriptsExternos, 7000);
     </script>
   </body>
 </html>

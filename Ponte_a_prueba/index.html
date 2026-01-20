@@ -7,9 +7,21 @@
     <meta name="description" content="Generador de exámenes con IA. Convierte tus apuntes en test automáticamente.">
     <title>PonteAprobados</title>
 
-    <link rel="preconnect" href="https://www.google.com">
-    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://pagead2.googlesyndication.com">
+    <link rel="preconnect" href="https://www.google.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <link 
+      rel="stylesheet" 
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+      media="print" 
+      onload="this.media='all'"
+    >
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
 
     </head>
 
@@ -19,32 +31,31 @@
     <script type="module" src="/src/main.js"></script>
 
     <script>
-      // Esta función inyecta los scripts externos
       function cargarScriptsExternos() {
-        // Evitar cargar dos veces
         if (window.scriptsCargados) return;
         window.scriptsCargados = true;
 
         console.log("⚡ Cargando scripts de terceros en segundo plano...");
 
-        // 1. Cargar AdSense
+        // A. Cargar AdSense
         const adScript = document.createElement('script');
         adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8114132400914870";
         adScript.async = true;
         adScript.crossOrigin = "anonymous";
         document.body.appendChild(adScript);
 
-        // 2. Cargar reCAPTCHA v3
+        // B. Cargar reCAPTCHA v3
+        // NOTA: Si al hacer build la variable %VITE...% no se reemplaza,
+        // tendrás que poner tu clave pública real aquí a mano.
         const recapScript = document.createElement('script');
-        // Asegúrate de que Vite reemplace esta variable correctamente en build
         recapScript.src = "https://www.google.com/recaptcha/api.js?render=%VITE_RECAPTCHA_SITE_KEY%"; 
         recapScript.async = true;
         document.body.appendChild(recapScript);
       }
 
-      // ESTRATEGIA: Cargar solo cuando el usuario interactúe o pasen 4 segundos
-      // Esto engaña a Lighthouse/PageSpeed para obtener 100/100 de rendimiento
-      
+      // ESTRATEGIA DE RENDIMIENTO:
+      // Esperamos a que el usuario mueva el mouse, toque la pantalla o haga scroll.
+      // Si no hace nada, cargamos a los 4 segundos por seguridad.
       const eventosUsuario = ['mousemove', 'keydown', 'touchstart', 'scroll'];
       
       const iniciarCarga = () => {
@@ -52,10 +63,7 @@
         cargarScriptsExternos();
       };
 
-      // Si el usuario hace algo, cargamos
       eventosUsuario.forEach(e => window.addEventListener(e, iniciarCarga, { passive: true }));
-
-      // Si el usuario no hace nada, cargamos a los 4 segundos (para que los anuncios se vean eventualmente)
       setTimeout(cargarScriptsExternos, 4000);
     </script>
   </body>

@@ -2,16 +2,14 @@
   <div class="min-h-screen flex flex-col font-sans text-slate-300 bg-slate-950 overflow-hidden relative selection:bg-indigo-500 selection:text-white">
 
     <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-
       <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
+      <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-indigo-900/30 rounded-full blur-[100px] animate-blob mix-blend-screen will-change-transform"></div>
+      <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
 
-      <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-indigo-900/30 rounded-full blur-[100px] animate-blob mix-blend-screen"></div>
-      <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-screen"></div>
-
-      <div class="absolute top-[15%] left-[5%] text-slate-800 text-8xl opacity-30 animate-float">
+      <div class="absolute top-[15%] left-[5%] text-slate-800 text-8xl opacity-30 animate-float will-change-transform" aria-hidden="true">
         @
       </div>
-      <div class="absolute bottom-[20%] right-[10%] text-indigo-900 text-8xl opacity-30 animate-float animation-delay-1000">
+      <div class="absolute bottom-[20%] right-[10%] text-indigo-900 text-8xl opacity-30 animate-float animation-delay-1000 will-change-transform" aria-hidden="true">
         ✉️
       </div>
     </div>
@@ -40,7 +38,7 @@
             <div class="group bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl hover:border-indigo-500/30 transition-all duration-300">
               <h3 class="font-bold text-slate-200 mb-4 flex items-center gap-3 text-lg">
                 <div class="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:text-white group-hover:bg-indigo-500 transition-all">
-                    <i class="fa-solid fa-envelope-open-text"></i>
+                    <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>
                 </div>
                 Atención al usuario
               </h3>
@@ -52,7 +50,7 @@
             <div class="group bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl hover:border-indigo-500/30 transition-all duration-300">
               <h3 class="font-bold text-slate-200 mb-4 flex items-center gap-3 text-lg">
                 <div class="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:text-white group-hover:bg-indigo-500 transition-all">
-                    <i class="fa-solid fa-shield-halved"></i>
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
                 </div>
                 Seguridad y privacidad
               </h3>
@@ -67,34 +65,37 @@
 
             <form @submit.prevent="enviarMensaje" class="space-y-6">
 
-              <input type="text" v-model="form.website" class="hidden" tabindex="-1" autocomplete="off" />
+              <input type="text" v-model="form.website" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
               <div class="group">
-                <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-2 ml-1">Nombre</label>
+                <label for="contact-name" class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 ml-1">Nombre</label>
                 <div class="relative">
                     <input
+                    id="contact-name"
                     v-model="form.nombre"
                     type="text"
-                    class="w-full rounded-xl bg-slate-950/50 border border-white/10 px-4 py-3 text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 outline-none transition-all"
-                    :placeholder="userStore.user ? userStore.user.username : 'Tu nombre'"
+                    class="w-full rounded-xl bg-slate-950/50 border border-white/10 px-4 py-3 text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 outline-none transition-all"
+                    :placeholder="userPlaceholder"
                     />
                 </div>
               </div>
 
               <div class="group">
-                <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-2 ml-1">Correo electrónico</label>
+                <label for="contact-email" class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 ml-1">Correo electrónico</label>
                 <input
+                  id="contact-email"
                   v-model="form.email"
                   type="email"
-                  class="w-full rounded-xl bg-slate-950/50 border border-white/10 px-4 py-3 text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 outline-none transition-all"
+                  class="w-full rounded-xl bg-slate-950/50 border border-white/10 px-4 py-3 text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 outline-none transition-all"
                   placeholder="correo@ejemplo.com"
                 />
               </div>
 
               <div class="group">
-                <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-2 ml-1">Asunto</label>
+                <label for="contact-subject" class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 ml-1">Asunto</label>
                 <div class="relative">
                     <select
+                    id="contact-subject"
                     v-model="form.asunto"
                     class="w-full rounded-xl bg-slate-950/50 border border-white/10 px-4 py-3 text-slate-200 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 outline-none transition-all appearance-none cursor-pointer"
                     >
@@ -104,16 +105,17 @@
                     <option class="bg-slate-900 text-slate-300">Sugerencias</option>
                     <option class="bg-slate-900 text-slate-300">Otros</option>
                     </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs">▼</div>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs" aria-hidden="true">▼</div>
                 </div>
               </div>
 
               <div class="group">
-                <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-2 ml-1">Mensaje</label>
+                <label for="contact-message" class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 ml-1">Mensaje</label>
                 <textarea
+                  id="contact-message"
                   v-model="form.mensaje"
                   rows="5"
-                  class="w-full rounded-xl bg-slate-950/50 border border-white/10 px-4 py-3 text-slate-200 placeholder-slate-600 resize-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 outline-none transition-all custom-scrollbar"
+                  class="w-full rounded-xl bg-slate-950/50 border border-white/10 px-4 py-3 text-slate-200 placeholder-slate-500 resize-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 outline-none transition-all custom-scrollbar"
                   placeholder="Cuéntanos en qué podemos ayudarte..."
                 ></textarea>
               </div>
@@ -127,14 +129,14 @@
                 <span class="relative z-10">{{ loading ? 'Enviando mensaje...' : 'Enviar mensaje' }}</span>
               </button>
 
-              <div v-if="error" class="text-center mt-2 animate-shake">
+              <div v-if="error" class="text-center mt-2 animate-shake" role="alert">
                   <p class="inline-block text-red-400 bg-red-900/20 px-3 py-1 rounded-lg border border-red-500/20 text-sm">
-                      <i class="fa-solid fa-circle-exclamation mr-1"></i> {{ error }}
+                      <i class="fa-solid fa-circle-exclamation mr-1" aria-hidden="true"></i> {{ error }}
                   </p>
               </div>
-              <div v-if="success" class="text-center mt-2 animate-fade-in-up">
+              <div v-if="success" class="text-center mt-2 animate-fade-in-up" role="status">
                   <p class="inline-block text-green-400 bg-green-900/20 px-3 py-1 rounded-lg border border-green-500/20 text-sm">
-                      <i class="fa-solid fa-check mr-1"></i> Mensaje enviado correctamente
+                      <i class="fa-solid fa-check mr-1" aria-hidden="true"></i> Mensaje enviado correctamente
                   </p>
               </div>
             </form>
@@ -151,7 +153,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, computed, onMounted } from "vue"
 import emailjs from "emailjs-com"
 import Header from "@/components/HeaderCompleto.vue"
 import Footer from '@/components/FooterComponent.vue'
@@ -169,9 +171,25 @@ const form = ref({
   website: "" // honeypot
 })
 
+// Computed para placeholder (más seguro que en template)
+const userPlaceholder = computed(() => {
+    return userStore.user ? userStore.user.username : 'Tu nombre'
+})
+
+onMounted(() => {
+  // ✅ SEO: Títulos dinámicos
+  document.title = "Contacto - PonteAprobados";
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.name = "description";
+      document.head.appendChild(metaDesc);
+  }
+  metaDesc.content = "Contacta con el equipo de PonteAprobados para resolver tus dudas o enviarnos sugerencias.";
+})
+
 // --- LOGICA FORMULARIO ---
 
-// Validación de email
 function emailValido(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)
 }
@@ -188,7 +206,6 @@ function validarFormulario() {
   return true
 }
 
-// Límite de envíos
 const LIMITE_ENVIOS = 3
 const BLOQUEO_MINUTOS = 15
 
@@ -202,7 +219,6 @@ function puedeEnviar() {
   return true
 }
 
-// reCAPTCHA v3
 function obtenerTokenRecaptcha() {
   return new Promise((resolve) => {
     if (!window.grecaptcha) return resolve(null)
@@ -214,7 +230,6 @@ function obtenerTokenRecaptcha() {
   })
 }
 
-// Avatares según asunto
 const avatarMap = {
   "Soporte técnico": "🛠️",
   "Consulta general": "❓",
@@ -222,7 +237,6 @@ const avatarMap = {
   "Otros": "📬"
 }
 
-// Envío
 async function enviarMensaje() {
   error.value = null
   success.value = false
@@ -248,7 +262,6 @@ async function enviarMensaje() {
       avatar: avatarMap[form.value.asunto] || "👤"
     }
 
-    // 1️⃣ Correo al equipo
     await emailjs.send(
       import.meta.env.VITE_EMAILJS_SERVICE_ID,
       import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
@@ -256,7 +269,6 @@ async function enviarMensaje() {
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY
     )
 
-    // 2️⃣ Auto-reply al usuario
     const autoReplyParams = {
       name: form.value.nombre,
       email: form.value.email,
@@ -266,7 +278,7 @@ async function enviarMensaje() {
 
     await emailjs.send(
       import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_AUTOREPLY_ID, // plantilla auto-reply
+      import.meta.env.VITE_EMAILJS_TEMPLATE_AUTOREPLY_ID,
       autoReplyParams,
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY
     )
@@ -284,10 +296,6 @@ async function enviarMensaje() {
 </script>
 
 <style scoped>
-/* =========================================
-   ESTILOS SISTEMA MIDNIGHT GLASS
-   ========================================= */
-
 /* Scrollbar Personalizado (Dark) */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -297,6 +305,11 @@ async function enviarMensaje() {
 /* Patrón de fondo (Grid Blanco SVG) */
 .bg-grid-white {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='%23ffffff'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+}
+
+/* Optimización GPU */
+.will-change-transform {
+    will-change: transform;
 }
 
 /* Animaciones */

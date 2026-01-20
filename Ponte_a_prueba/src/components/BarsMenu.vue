@@ -3,26 +3,31 @@
     class="absolute top-full right-0 mt-2 w-56 p-2 rounded-xl z-50
            bg-slate-900/90 backdrop-blur-xl border border-white/10
            shadow-2xl shadow-indigo-500/10
-           transition-all duration-300 ease-in-out"
+           transition-all duration-300 ease-in-out origin-top-right"
+    role="menu"
   >
     <li
       v-for="item in menu"
       :key="item.id"
       class="relative group"
+      role="none"
     >
       <router-link
         :to="item.route"
         @click="emit('cerrar')"
         class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 font-medium
                transition-all duration-200 ease-out
-               hover:bg-white/5 hover:text-white hover:shadow-lg hover:shadow-indigo-500/5"
+               hover:bg-white/5 hover:text-white hover:shadow-lg hover:shadow-indigo-500/5 focus:outline-none focus:bg-white/5"
+        role="menuitem"
       >
         <div class="w-6 text-center transition-transform group-hover:scale-110">
-          <i :class="['fa-solid', `fa-${item.icon}`,
-          'text-slate-400 transition-all duration-200 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400']"></i>
+          <i 
+            :class="['fa-solid', `fa-${item.icon}`, 'text-slate-400 transition-all duration-200 group-hover:text-indigo-400']"
+            aria-hidden="true"
+          ></i>
         </div>
 
-        <span class="tracking-wide transition-all duration-200 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400">
+        <span class="tracking-wide transition-all duration-200 group-hover:text-indigo-300">
             {{ item.label }}
         </span>
       </router-link>
@@ -69,6 +74,10 @@ const menu = ref([
 ]);
 </script>
 
-<style lang="scss">
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
+<style scoped>
+/* ✅ OPTIMIZACIÓN: 
+   Eliminado el @import de FontAwesome.
+   Ya se carga globalmente en index.html de forma asíncrona.
+   Esto reduce el tiempo de bloqueo del menú.
+*/
 </style>

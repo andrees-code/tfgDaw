@@ -5,18 +5,18 @@
 
       <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
 
-      <div class="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-900/20 rounded-full blur-[100px] opacity-70 mix-blend-screen"></div>
+      <div class="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-900/20 rounded-full blur-[100px] opacity-70 mix-blend-screen will-change-transform"></div>
 
-      <div class="absolute top-[10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[80px] opacity-60 animate-blob mix-blend-screen"></div>
-      <div class="absolute bottom-[0%] right-[-10%] w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[80px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen"></div>
+      <div class="absolute top-[10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[80px] opacity-60 animate-blob mix-blend-screen will-change-transform"></div>
+      <div class="absolute bottom-[0%] right-[-10%] w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[80px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
 
-      <div class="hidden lg:block absolute top-[20%] left-[5%] animate-float opacity-30">
+      <div class="hidden lg:block absolute top-[20%] left-[5%] animate-float opacity-30 will-change-transform">
         <div class="w-20 h-28 bg-slate-800/80 border border-white/10 rounded-xl shadow-2xl -rotate-12 flex items-center justify-center backdrop-blur-sm">
             <i class="fa-solid fa-file-lines text-3xl text-indigo-400" aria-hidden="true"></i>
         </div>
       </div>
 
-      <div class="hidden lg:block absolute top-[30%] right-[8%] animate-float animation-delay-1000 opacity-30">
+      <div class="hidden lg:block absolute top-[30%] right-[8%] animate-float animation-delay-1000 opacity-30 will-change-transform">
         <div class="w-20 h-20 bg-slate-800/80 border border-white/10 rounded-2xl shadow-2xl rotate-12 flex items-center justify-center backdrop-blur-sm">
             <i class="fa-solid fa-graduation-cap text-3xl text-purple-400" aria-hidden="true"></i>
         </div>
@@ -46,7 +46,7 @@
               </span>
             </span>
           </h1>
-          <p class="text-slate-400 max-w-xl mx-auto text-lg md:text-xl leading-relaxed font-medium">
+          <p class="text-slate-300 max-w-xl mx-auto text-lg md:text-xl leading-relaxed font-medium">
             Convierte tus apuntes o PDFs en exámenes personalizados en segundos.
           </p>
         </div>
@@ -57,7 +57,7 @@
 
           <div class="space-y-8">
             <div class="group relative">
-               <label for="input-apuntes" class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
+               <label for="input-apuntes" class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
                <div class="relative transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-xl focus-within:shadow-black/20 rounded-2xl h-64">
                 <textarea 
                   id="input-apuntes"
@@ -65,11 +65,11 @@
                   class="w-full h-full rounded-2xl bg-slate-950/50 border border-white/10 px-6 py-5 text-slate-200 resize-none placeholder:text-transparent focus:bg-slate-900 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/50 focus:outline-none transition-all text-base shadow-inner relative z-10 custom-scrollbar"
                   aria-label="Introduce tus apuntes aquí"
                 ></textarea>
-                <div v-if="!apuntes && archivoNombre === 'Ningún archivo seleccionado'" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-500 gap-3 z-0">
+                <div v-if="!apuntes && archivoNombre === 'Ningún archivo seleccionado'" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400 gap-3 z-0">
                   <div class="w-14 h-14 rounded-full bg-slate-800 shadow-lg border border-white/5 flex items-center justify-center text-indigo-400 mb-2">
                     <i class="fa-solid fa-pen-nib text-xl" aria-hidden="true"></i>
                   </div>
-                  <span class="font-medium text-slate-500">Pega tus apuntes aquí</span>
+                  <span class="font-medium text-slate-400">Pega tus apuntes aquí</span>
                 </div>
               </div>
             </div>
@@ -78,14 +78,14 @@
               <div class="flex items-center justify-between flex-wrap gap-4">
                 <div class="flex items-center gap-4">
                   <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
-                       :class="archivoNombre !== 'Ningún archivo seleccionado' ? 'bg-red-900/20 text-red-400' : 'bg-slate-800 text-slate-500 group-hover:bg-indigo-500/20 group-hover:text-indigo-400'">
+                       :class="archivoNombre !== 'Ningún archivo seleccionado' ? 'bg-red-900/20 text-red-400' : 'bg-slate-800 text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-400'">
                     <i class="fa-solid fa-file-pdf text-2xl" aria-hidden="true"></i>
                   </div>
                   <div class="min-w-0">
                       <p class="font-bold text-slate-300 truncate max-w-[150px] md:max-w-xs">
                         {{ archivoNombre !== 'Ningún archivo seleccionado' ? archivoNombre : '¿Prefieres usar un PDF?' }}
                       </p>
-                      <p class="text-slate-500 text-xs mt-0.5">
+                      <p class="text-slate-400 text-xs mt-0.5">
                         {{ archivoNombre !== 'Ningún archivo seleccionado' ? 'Archivo cargado correctamente' : 'Hasta 50 páginas' }}
                       </p>
                   </div>
@@ -99,27 +99,27 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
               <div>
-                <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
+                <label class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
                 <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5" role="group" aria-label="Selecciona la dificultad">
-                  <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" @click="dificultad = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', dificultad === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-[1.02]' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
+                  <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" @click="dificultad = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', dificultad === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-[1.02]' : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
                 </div>
               </div>
               <div>
-                <label for="range-preguntas" class="flex justify-between items-center text-xs font-bold uppercase text-slate-500 tracking-wider mb-4 pl-1">
+                <label for="range-preguntas" class="flex justify-between items-center text-xs font-bold uppercase text-slate-400 tracking-wider mb-4 pl-1">
                   <span>Cantidad</span>
                   <span class="text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-lg shadow-sm">{{ numPreguntas }} preguntas</span>
                 </label>
                 <div class="relative px-1 py-2">
                   <input id="range-preguntas" aria-label="Número de preguntas" type="range" min="5" max="20" step="5" v-model.number="numPreguntas" :style="{ backgroundSize: ((numPreguntas - 5) * 100) / 15 + '% 100%' }" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none slider-custom" />
-                  <div class="flex justify-between mt-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest px-1" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
+                  <div class="flex justify-between mt-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest px-1" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
                 </div>
               </div>
             </div>
 
             <div>
-               <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Formato de preguntas</label>
+               <label class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Formato de preguntas</label>
                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="radiogroup" aria-label="Formato de preguntas">
-                 <button role="radio" :aria-checked="tipoExamen === tipo" v-for="tipo in tipos" :key="tipo" @click="tipoExamen = tipo" :class="['h-full w-full px-5 py-5 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden group', tipoExamen === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-500 hover:border-white/10 hover:bg-white/5']">
+                 <button role="radio" :aria-checked="tipoExamen === tipo" v-for="tipo in tipos" :key="tipo" @click="tipoExamen = tipo" :class="['h-full w-full px-5 py-5 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden group', tipoExamen === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']">
                     <div v-if="tipoExamen === tipo" class="absolute top-0 right-0 w-8 h-8 -mr-4 -mt-4 bg-indigo-500 rotate-45 shadow-sm"></div>
                     <span class="relative z-10 flex items-center gap-2">{{ tipo }}</span>
                  </button>
@@ -193,7 +193,7 @@
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <h4 class="font-bold text-slate-200 text-sm md:text-base">Nuevo: Modo Reto</h4>
+                            <h2 class="font-bold text-slate-200 text-sm md:text-base">Nuevo: Modo Reto</h2>
                             <span class="px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-400 text-[10px] font-bold uppercase tracking-wide border border-pink-500/20">Beta</span>
                         </div>
                         <p class="text-xs text-slate-400 leading-relaxed mb-3">¡Aprende jugando! Desliza tarjetas a la derecha o izquierda.</p>
@@ -458,6 +458,11 @@ function irAlLogin() {
 .slide-fade-leave-to {
   transform: translateX(20px);
   opacity: 0;
+}
+
+/* Optimización GPU para fondos */
+.will-change-transform {
+    will-change: transform;
 }
 
 /* Keyframes */

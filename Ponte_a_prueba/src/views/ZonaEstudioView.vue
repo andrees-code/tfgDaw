@@ -4,9 +4,9 @@
     <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
       <div class="absolute inset-0 bg-grid-white/[0.02] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
 
-      <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[100px] animate-blob"></div>
-      <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
-      <div class="absolute top-[20%] left-[30%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[80px] animate-blob animation-delay-4000"></div>
+      <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[100px] animate-blob mix-blend-screen will-change-transform"></div>
+      <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
+      <div class="absolute top-[20%] left-[30%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[80px] animate-blob animation-delay-4000 mix-blend-screen will-change-transform"></div>
     </div>
 
     <Header class="flex-shrink-0 relative z-20" />
@@ -14,7 +14,7 @@
     <div class="flex-1 flex overflow-hidden relative z-10">
 
       <transition enter-active-class="transition-opacity duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition-opacity duration-300" leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="showSidebar" @click="showSidebar = false" class="fixed inset-0 bg-black/80 z-30 md:hidden backdrop-blur-sm"></div>
+        <div v-if="showSidebar" @click="showSidebar = false" class="fixed inset-0 bg-black/80 z-30 md:hidden backdrop-blur-sm" aria-hidden="true"></div>
       </transition>
 
       <aside
@@ -25,34 +25,35 @@
         <div class="p-6 pb-4 shrink-0">
           <div class="flex items-center justify-between mb-8">
             <h1 class="font-serif text-3xl font-bold text-slate-100 tracking-tight flex items-center gap-2">
-              <IconNotebook class="w-8 h-8 text-indigo-500" />
+              <IconNotebook class="w-8 h-8 text-indigo-500" aria-hidden="true" />
               <span>Notas<span class="text-indigo-500">.</span></span>
             </h1>
-            <button @click="showSidebar = false" class="md:hidden p-2 text-slate-400 hover:text-red-500 transition-colors">
-              <IconX class="w-6 h-6" />
+            <button @click="showSidebar = false" class="md:hidden p-2 text-slate-400 hover:text-red-500 transition-colors" aria-label="Cerrar menú">
+              <IconX class="w-6 h-6" aria-hidden="true" />
             </button>
           </div>
 
           <div class="flex gap-2 mb-8">
-              <button @click="addItemToSection('Documento')" class="flex-1 py-3 bg-slate-800/50 hover:bg-indigo-600 hover:text-white text-slate-300 rounded-xl shadow-lg border border-white/5 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 group hover:border-indigo-500">
-                  <IconFile class="w-4 h-4 text-indigo-400 group-hover:text-white transition-colors" /> <span class="hidden sm:inline">Doc</span>
+              <button @click="addItemToSection('Documento')" class="flex-1 py-3 bg-slate-800/50 hover:bg-indigo-600 hover:text-white text-slate-300 rounded-xl shadow-lg border border-white/5 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 group hover:border-indigo-500" aria-label="Crear nuevo documento">
+                  <IconFile class="w-4 h-4 text-indigo-400 group-hover:text-white transition-colors" aria-hidden="true" /> <span class="hidden sm:inline">Doc</span>
               </button>
-               <button @click="addItemToSection('Post-it')" class="flex-1 py-3 bg-slate-800/50 hover:bg-amber-500 hover:text-white text-slate-300 rounded-xl shadow-lg border border-white/5 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 group hover:border-amber-500">
-                  <IconSticky class="w-4 h-4 text-amber-400 group-hover:text-white transition-colors" /> <span class="hidden sm:inline">Post</span>
+               <button @click="addItemToSection('Post-it')" class="flex-1 py-3 bg-slate-800/50 hover:bg-amber-500 hover:text-white text-slate-300 rounded-xl shadow-lg border border-white/5 transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 group hover:border-amber-500" aria-label="Crear nuevo post-it">
+                  <IconSticky class="w-4 h-4 text-amber-400 group-hover:text-white transition-colors" aria-hidden="true" /> <span class="hidden sm:inline">Post</span>
               </button>
           </div>
 
           <div class="relative group mb-4">
-            <IconSearch class="w-4 h-4 text-slate-500 absolute left-3 top-2.5 transition-colors group-focus-within:text-indigo-400" />
-            <input v-model="searchQuery" type="text" placeholder="Buscar..." class="w-full pl-9 pr-4 py-2 bg-slate-950/50 border border-white/5 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all text-sm">
+            <IconSearch class="w-4 h-4 text-slate-500 absolute left-3 top-2.5 transition-colors group-focus-within:text-indigo-400" aria-hidden="true" />
+            <input v-model="searchQuery" type="text" placeholder="Buscar..." class="w-full pl-9 pr-4 py-2 bg-slate-950/50 border border-white/5 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all text-sm" aria-label="Buscar notas">
           </div>
 
           <button
             @click="currentView = 'calendar'; selectedItem = null; showSidebar = false"
             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-4 transition-all duration-200 border"
             :class="currentView === 'calendar' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/50 border-transparent' : 'bg-slate-800/30 text-slate-400 border-transparent hover:bg-indigo-500/10 hover:text-indigo-400 hover:border-indigo-500/20'"
+            aria-label="Ver calendario"
           >
-            <IconCalendar class="w-5 h-5" />
+            <IconCalendar class="w-5 h-5" aria-hidden="true" />
             <span class="font-bold text-sm uppercase tracking-wider">Calendario</span>
           </button>
         </div>
@@ -73,11 +74,11 @@
               >
                   <div class="flex justify-between items-start">
                       <span class="font-medium text-sm truncate pr-4" :class="selectedItem?.id === item.id ? 'text-indigo-300' : 'text-slate-300 group-hover:text-slate-200'">{{ item.title || 'Sin Título' }}</span>
-                      <component :is="getIconByType(item.type)" class="w-3.5 h-3.5 mt-0.5 shrink-0" :class="getColorByType(item.type)"/>
+                      <component :is="getIconByType(item.type)" class="w-3.5 h-3.5 mt-0.5 shrink-0" :class="getColorByType(item.type)" aria-hidden="true"/>
                   </div>
                   <span class="text-[10px] opacity-40 mt-1 block font-mono">{{ formatDate(item.updatedAt) }}</span>
-                  <button @click.stop="deleteItemFromSection(item.id, section.type)" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity md:group-hover:opacity-100 opacity-100 md:opacity-0">
-                    <IconTrash class="w-3.5 h-3.5" />
+                  <button @click.stop="deleteItemFromSection(item.id, section.type)" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity md:group-hover:opacity-100 opacity-100 md:opacity-0" aria-label="Eliminar nota">
+                    <IconTrash class="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
               </div>
             </div>
@@ -88,8 +89,8 @@
       <main class="flex-1 flex flex-col relative bg-slate-900/50 backdrop-blur-sm overflow-hidden w-full">
 
         <div class="md:hidden flex items-center justify-between p-4 bg-slate-900/80 backdrop-blur border-b border-white/10 shrink-0 shadow-sm z-20">
-          <button @click="showSidebar = true" class="text-slate-400 hover:text-indigo-400">
-            <IconMenu class="w-6 h-6" />
+          <button @click="showSidebar = true" class="text-slate-400 hover:text-indigo-400" aria-label="Abrir menú de notas">
+            <IconMenu class="w-6 h-6" aria-hidden="true" />
           </button>
           <span class="text-sm font-bold tracking-widest uppercase text-slate-500">
             {{ currentView === 'calendar' ? 'Calendario' : (selectedItem?.type || 'App Notas') }}
@@ -102,8 +103,8 @@
           <div class="flex items-center justify-between mb-4 md:mb-6 bg-slate-800/60 backdrop-blur-xl p-3 md:p-4 rounded-2xl border border-white/10 shadow-lg shrink-0">
             <h2 class="text-lg md:text-2xl font-serif font-bold text-slate-200 capitalize">{{ currentMonthName }} <span class="hidden sm:inline text-indigo-400 font-sans">{{ currentYear }}</span></h2>
             <div class="flex gap-2">
-              <button @click="changeMonth(-1)" class="p-1.5 md:p-2 hover:bg-white/5 text-slate-400 hover:text-indigo-400 rounded-xl transition-colors"><IconLeft /></button>
-              <button @click="changeMonth(1)" class="p-1.5 md:p-2 hover:bg-white/5 text-slate-400 hover:text-indigo-400 rounded-xl transition-colors"><IconRight /></button>
+              <button @click="changeMonth(-1)" class="p-1.5 md:p-2 hover:bg-white/5 text-slate-400 hover:text-indigo-400 rounded-xl transition-colors" aria-label="Mes anterior"><IconLeft aria-hidden="true" /></button>
+              <button @click="changeMonth(1)" class="p-1.5 md:p-2 hover:bg-white/5 text-slate-400 hover:text-indigo-400 rounded-xl transition-colors" aria-label="Mes siguiente"><IconRight aria-hidden="true" /></button>
             </div>
           </div>
 
@@ -154,12 +155,12 @@
             <header class="h-12 md:h-14 flex items-center justify-between px-4 md:px-6 shrink-0 bg-slate-900/60 backdrop-blur border-b border-white/5">
                 <div class="flex items-center gap-4">
                       <span class="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-[10px] md:text-xs font-bold text-indigo-300 uppercase tracking-widest">{{ selectedItem.type }}</span>
-                      <div v-if="isSaving" class="text-[10px] md:text-xs text-indigo-400 flex items-center gap-2"><IconLoader class="w-3 h-3 animate-spin" /> <span class="hidden sm:inline">Guardando...</span></div>
-                      <div v-else class="text-[10px] md:text-xs text-emerald-400 flex items-center gap-2"><IconCheck class="w-3 h-3" /> <span class="hidden sm:inline">Guardado</span></div>
+                      <div v-if="isSaving" class="text-[10px] md:text-xs text-indigo-400 flex items-center gap-2"><IconLoader class="w-3 h-3 animate-spin" aria-hidden="true" /> <span class="hidden sm:inline">Guardando...</span></div>
+                      <div v-else class="text-[10px] md:text-xs text-emerald-400 flex items-center gap-2"><IconCheck class="w-3 h-3" aria-hidden="true" /> <span class="hidden sm:inline">Guardado</span></div>
                 </div>
 
                 <div v-if="selectedItem.type === 'Post-it'" class="flex gap-2">
-                  <button v-for="color in postItColors" :key="color.bg" @click="selectedItem.color = color.bg; triggerAutoSave()" class="w-5 h-5 md:w-6 md:h-6 rounded-full shadow-sm ring-2 ring-offset-2 ring-offset-slate-900 hover:scale-110 transition-transform" :class="[color.bg, selectedItem.color === color.bg ? 'ring-slate-400' : 'ring-transparent']"></button>
+                  <button v-for="color in postItColors" :key="color.bg" @click="selectedItem.color = color.bg; triggerAutoSave()" class="w-5 h-5 md:w-6 md:h-6 rounded-full shadow-sm ring-2 ring-offset-2 ring-offset-slate-900 hover:scale-110 transition-transform" :class="[color.bg, selectedItem.color === color.bg ? 'ring-slate-400' : 'ring-transparent']" :aria-label="'Cambiar color a ' + color.bg"></button>
                 </div>
             </header>
 
@@ -169,7 +170,7 @@
                     <div class="md:h-24 px-4 py-4 md:px-12 flex flex-col md:flex-row md:items-end justify-between border-b-2 border-slate-700 mb-6 md:mb-10 gap-4">
                           <div class="md:pb-4 flex-1">
                             <h3 class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Título</h3>
-                             <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Título del documento..." class="w-full bg-transparent text-xl md:text-3xl font-serif font-bold text-slate-100 placeholder:text-slate-600 border-none p-0 focus:ring-0" />
+                             <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Título del documento..." class="w-full bg-transparent text-xl md:text-3xl font-serif font-bold text-slate-100 placeholder:text-slate-600 border-none p-0 focus:ring-0" aria-label="Título del documento" />
                           </div>
                           <div class="md:pb-4 text-left md:text-right">
                              <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Última ed.</div>
@@ -177,7 +178,7 @@
                           </div>
                     </div>
                     <div class="px-4 md:px-12 pb-12 flex-1">
-                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" @keydown.tab.prevent="handleTab" placeholder="Empieza a escribir..." class="w-full h-full min-h-[400px] bg-transparent resize-none border-none focus:outline-none focus:ring-0 text-base md:text-lg text-slate-300 leading-7 md:leading-8 font-serif p-0 placeholder:text-slate-600 selection:bg-indigo-500 selection:text-white"></textarea>
+                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" @keydown.tab.prevent="handleTab" placeholder="Empieza a escribir..." class="w-full h-full min-h-[400px] bg-transparent resize-none border-none focus:outline-none focus:ring-0 text-base md:text-lg text-slate-300 leading-7 md:leading-8 font-serif p-0 placeholder:text-slate-600 selection:bg-indigo-500 selection:text-white" aria-label="Contenido del documento"></textarea>
                     </div>
                 </div>
 
@@ -185,8 +186,8 @@
                       <div class="relative w-full max-w-[350px] aspect-square p-6 md:p-8 shadow-2xl transition-colors duration-300 rotate-1 animate-pop-in flex flex-col" :class="selectedItem.color">
                         <div class="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 w-24 md:w-32 h-8 md:h-10 bg-slate-900/30 backdrop-blur-sm transform -rotate-1 shadow-sm border border-white/10"></div>
 
-                        <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Asunto..." class="w-full bg-transparent text-2xl md:text-3xl font-bold mb-4 text-slate-900/80 placeholder-slate-900/20 border-b border-slate-900/5 focus:border-slate-900/20 focus:outline-none text-center font-handwriting" />
-                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" placeholder="Escribe tu nota..." class="flex-1 w-full bg-transparent resize-none border-none focus:outline-none text-xl md:text-2xl font-bold text-slate-900/80 font-handwriting text-center leading-normal placeholder-slate-900/20"></textarea>
+                        <input v-model="selectedItem.title" @input="triggerAutoSave" placeholder="Asunto..." class="w-full bg-transparent text-2xl md:text-3xl font-bold mb-4 text-slate-900/80 placeholder-slate-900/20 border-b border-slate-900/5 focus:border-slate-900/20 focus:outline-none text-center font-handwriting" aria-label="Asunto de la nota" />
+                        <textarea v-model="selectedItem.content" @input="triggerAutoSave" placeholder="Escribe tu nota..." class="flex-1 w-full bg-transparent resize-none border-none focus:outline-none text-xl md:text-2xl font-bold text-slate-900/80 font-handwriting text-center leading-normal placeholder-slate-900/20" aria-label="Contenido de la nota"></textarea>
                     </div>
                 </div>
             </div>
@@ -194,7 +195,7 @@
 
         <div v-else class="flex-1 flex flex-col items-center justify-center p-6 text-center animate-float opacity-60">
             <div class="w-24 h-24 bg-slate-800/50 backdrop-blur rounded-full flex items-center justify-center mb-6 shadow-lg border border-white/5">
-                <IconNotebook class="w-10 h-10 text-indigo-400" />
+                <IconNotebook class="w-10 h-10 text-indigo-400" aria-hidden="true" />
             </div>
             <h1 class="font-serif text-xl md:text-3xl text-slate-300 mb-2">Selecciona un elemento</h1>
             <p class="text-slate-500 text-sm">O crea uno nuevo desde el menú</p>
@@ -237,8 +238,10 @@ const sections = ref([
   { type: 'Post-it', title: 'Recordatorios', items: [] }
 ])
 
-// PERSISTENCIA: CARGA
 onMounted(async () => {
+  // ✅ SEO Local
+  document.title = "Zona de Estudio - Notas y Calendario";
+  
   if (!userStore.token) return
   try {
       const notes = await loadNotes()
@@ -414,6 +417,8 @@ const formatDate = (iso) => iso ? new Intl.DateTimeFormat('es-ES', { day: '2-dig
 }
 
 /* Animaciones */
+.will-change-transform { will-change: transform; }
+
 .animate-blob {
   animation: blob 10s infinite alternate;
 }

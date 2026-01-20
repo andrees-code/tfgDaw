@@ -3,7 +3,6 @@
 
     <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
       <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-
       <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px] animate-blob mix-blend-screen will-change-transform"></div>
       <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-900/30 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
       <div class="absolute top-[20%] left-[30%] w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-[80px] animate-blob animation-delay-4000 mix-blend-screen will-change-transform"></div>
@@ -52,7 +51,7 @@
                   type="button"
                   class="font-semibold flex-1 text-left text-slate-400 group-hover:text-indigo-300 text-sm transition-colors flex items-center justify-between"
                   :aria-expanded="!!openAsignaturas[asig]"
-                  :aria-controls="'list-' + asig.replace(/\s+/g, '-')"
+                  :aria-label="openAsignaturas[asig] ? 'Colapsar asignatura ' + asig : 'Expandir asignatura ' + asig"
                 >
                   {{ asig }}
                   <span class="ml-1 text-[10px] opacity-50" aria-hidden="true">
@@ -63,9 +62,9 @@
                 <button
                   @click="removeAsignatura(asig)"
                   type="button"
-                  class="text-slate-600 hover:text-red-400 text-xs px-2 py-1 rounded-md hover:bg-red-900/20 transition-colors"
-                  title="Borrar asignatura y desasignar exámenes"
-                  aria-label="Eliminar asignatura"
+                  class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 rounded-md hover:bg-red-900/20 transition-colors"
+                  title="Borrar asignatura"
+                  :aria-label="'Eliminar asignatura ' + asig"
                 >
                   🗑
                 </button>
@@ -73,8 +72,7 @@
 
               <ul
                 v-if="openAsignaturas[asig]"
-                :id="'list-' + asig.replace(/\s+/g, '-')"
-                class="text-xs text-slate-500 ml-2 mt-2 border-l-2 border-slate-700 pl-3 space-y-1.5"
+                class="text-xs text-slate-400 ml-2 mt-2 border-l-2 border-slate-700 pl-3 space-y-1.5"
               >
                 <li
                   v-for="exam in examsByAsignatura(asig)"
@@ -83,7 +81,7 @@
                 >
                   <span class="text-indigo-500 mr-1" aria-hidden="true">•</span> {{ exam.title }}
                 </li>
-                <li v-if="!examsByAsignatura(asig).length" class="italic text-slate-600">
+                <li v-if="!examsByAsignatura(asig).length" class="italic text-slate-500">
                   Sin exámenes
                 </li>
               </ul>
@@ -146,8 +144,8 @@
                     <input
                         v-model="exam.title"
                         @blur="saveTitle(exam)"
-                        aria-label="Título del examen"
-                        class="text-lg md:text-xl font-bold w-full bg-transparent border-b border-transparent hover:border-indigo-500/50 focus:border-indigo-500 focus:outline-none transition-colors mb-2 text-slate-200 placeholder-slate-600 py-1"
+                        aria-label="Editar título del examen"
+                        class="text-lg md:text-xl font-bold w-full bg-transparent border-b border-transparent hover:border-indigo-500/50 focus:border-indigo-500 focus:outline-none transition-colors mb-2 text-slate-200 placeholder-slate-500 py-1"
                     />
 
                     <div class="flex flex-wrap gap-2 md:gap-3 items-center mt-1">
@@ -167,7 +165,7 @@
                         <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20">
                             {{ exam.tipo }}
                         </span>
-                        <span class="text-xs text-slate-500 font-medium">
+                        <span class="text-xs text-slate-400 font-medium">
                             <i class="mr-1" aria-hidden="true">📝</i>{{ exam.numPreguntas }} pregs.
                         </span>
                     </div>
@@ -179,9 +177,9 @@
                         @click="toggleFav(exam)"
                         type="button"
                         class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-slate-800 border border-white/5 hover:border-yellow-500/50 shadow-sm"
-                        :class="exam.favorito ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' : 'text-slate-600 hover:text-yellow-400'"
+                        :class="exam.favorito ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' : 'text-slate-500 hover:text-yellow-400'"
                         :title="exam.favorito ? 'Quitar de favoritos' : 'Añadir a favoritos'"
-                        :aria-label="exam.favorito ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+                        :aria-label="exam.favorito ? 'Quitar examen de favoritos' : 'Añadir examen a favoritos'"
                         :aria-pressed="exam.favorito"
                     >
                         <span class="text-lg leading-none mt-1" aria-hidden="true">{{ exam.favorito ? '★' : '☆' }}</span>
@@ -190,7 +188,7 @@
                     <button
                         @click="removeExam(exam._id)"
                         type="button"
-                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-slate-800 border border-white/5 hover:border-red-500/30 hover:bg-red-900/20 text-slate-600 hover:text-red-400 shadow-sm"
+                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-slate-800 border border-white/5 hover:border-red-500/30 hover:bg-red-900/20 text-slate-500 hover:text-red-400 shadow-sm"
                         title="Eliminar examen"
                         aria-label="Eliminar examen"
                     >
@@ -250,10 +248,15 @@ const asignaturas = ref([])
 const openAsignaturas = ref({})
 const tab = ref('historial')
 
-userStore.loadSession()
+// Carga de sesión sin bloqueo
+try {
+  userStore.loadSession()
+} catch (e) {
+  console.error("Sesión no cargada:", e)
+}
 
 onMounted(async () => {
-  // ✅ OPTIMIZACIÓN: SEO - Títulos y Meta
+  // ✅ SEO: Títulos dinámicos
   document.title = "Tu Biblioteca - Historial de Exámenes";
   let metaDesc = document.querySelector('meta[name="description"]');
   if (!metaDesc) {
@@ -278,7 +281,7 @@ onMounted(async () => {
    ========================================= */
 
 const filteredExams = computed(() => tab.value === 'favoritos' ? exams.value.filter(e => e.favorito) : exams.value)
-// Nota: Usar métodos en template no es ideal, pero para listas pequeñas es seguro.
+// Método optimizado para el filtro del v-for
 const examsByAsignatura = (asig) => exams.value.filter(e => e.asignatura === asig)
 const toggleAsignatura = (asig) => { openAsignaturas.value[asig] = !openAsignaturas.value[asig] }
 
@@ -395,10 +398,6 @@ const saveTitle = async (exam) => {
   animation: shimmer 2s infinite;
 }
 
-.animate-shake {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-}
-
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out;
 }
@@ -442,13 +441,6 @@ const saveTitle = async (exam) => {
 
 @keyframes shimmer {
   100% { transform: translateX(100%); }
-}
-
-@keyframes shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 
 @keyframes fadeInUp {

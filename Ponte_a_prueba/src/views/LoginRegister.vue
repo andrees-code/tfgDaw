@@ -3,8 +3,8 @@
 
     <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-        <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-900/30 rounded-full blur-[100px] opacity-50 animate-blob mix-blend-screen"></div>
-        <div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-purple-900/30 rounded-full blur-[100px] opacity-50 animate-blob animation-delay-2000 mix-blend-screen"></div>
+        <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-900/30 rounded-full blur-[100px] opacity-50 animate-blob mix-blend-screen will-change-transform"></div>
+        <div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-purple-900/30 rounded-full blur-[100px] opacity-50 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
     </div>
 
     <Header class="relative z-20" />
@@ -26,14 +26,14 @@
             <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-xl">
               <div class="flex items-center gap-4 mb-3">
                 <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 shadow-lg shadow-indigo-900/20">
-                  <i class="fa-solid fa-shield-halved text-xl"></i>
+                  <i class="fa-solid fa-shield-halved text-xl" aria-hidden="true"></i>
                 </div>
                 <div>
                   <h4 class="font-bold text-slate-200">Seguridad Garantizada</h4>
                   <p class="text-xs text-slate-400">Tus datos están protegidos</p>
                 </div>
               </div>
-              <p class="text-sm text-slate-500 italic">"La mejor forma de empezar es dejar de hablar y comenzar a hacer."</p>
+              <p class="text-sm text-slate-400 italic">"La mejor forma de empezar es dejar de hablar y comenzar a hacer."</p>
             </div>
           </div>
         </div>
@@ -49,24 +49,28 @@
 
             <div v-if="modo !== 'forgot'" class="flex p-1 bg-slate-950/50 rounded-xl mb-8 relative border border-white/5">
               <button
+                type="button"
                 class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
-                :class="modo === 'login' ? 'bg-slate-800 text-white shadow-lg border border-white/10' : 'text-slate-500 hover:text-slate-300'"
+                :class="modo === 'login' ? 'bg-slate-800 text-white shadow-lg border border-white/10' : 'text-slate-400 hover:text-slate-300'"
                 @click="cambiarModo('login')"
+                aria-label="Cambiar a modo Iniciar Sesión"
               >
-                <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Iniciar sesión
               </button>
               <button
+                type="button"
                 class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
-                :class="modo === 'register' ? 'bg-slate-800 text-white shadow-lg border border-white/10' : 'text-slate-500 hover:text-slate-300'"
+                :class="modo === 'register' ? 'bg-slate-800 text-white shadow-lg border border-white/10' : 'text-slate-400 hover:text-slate-300'"
                 @click="cambiarModo('register')"
+                aria-label="Cambiar a modo Registrarse"
               >
-                <i class="fa-solid fa-user-plus"></i> Registrarse
+                <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Registrarse
               </button>
             </div>
 
             <div v-else class="mb-8">
-              <button @click="cambiarModo('login')" class="text-slate-400 hover:text-indigo-400 text-sm flex items-center gap-2 transition-colors">
-                <i class="fa-solid fa-arrow-left"></i> Volver al inicio de sesión
+              <button type="button" @click="cambiarModo('login')" class="text-slate-400 hover:text-indigo-400 text-sm flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver al inicio de sesión
               </button>
             </div>
 
@@ -77,34 +81,38 @@
                   <h2 class="text-2xl font-bold text-white mb-1 hidden lg:block">Hola de nuevo 👋</h2>
                   <p class="text-slate-400 text-sm mb-6 hidden lg:block">Ingresa tus credenciales para acceder.</p>
 
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1 tracking-wider">Correo electrónico</label>
+                  <label for="login-email" class="block text-xs font-bold uppercase text-slate-400 mb-2 ml-1 tracking-wider">Correo electrónico</label>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <i class="fa-regular fa-envelope text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                      <i class="fa-regular fa-envelope text-slate-400 group-focus-within:text-indigo-400 transition-colors" aria-hidden="true"></i>
                     </div>
                     <input
+                      id="login-email"
                       v-model="loginForm.email"
                       type="email"
-                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
+                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
                       placeholder="nombre@ejemplo.com"
+                      autocomplete="username"
                     />
                   </div>
                 </div>
 
                 <div>
                   <div class="flex justify-between items-center mb-2 ml-1">
-                    <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider">Contraseña</label>
+                    <label for="login-password" class="block text-xs font-bold uppercase text-slate-400 tracking-wider">Contraseña</label>
                     <a href="#" @click.prevent="cambiarModo('forgot')" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">¿Olvidaste tu contraseña?</a>
                   </div>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <i class="fa-solid fa-lock text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                      <i class="fa-solid fa-lock text-slate-400 group-focus-within:text-indigo-400 transition-colors" aria-hidden="true"></i>
                     </div>
                     <input
+                      id="login-password"
                       v-model="loginForm.password"
                       type="password"
-                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
+                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
                       placeholder="••••••••"
+                      autocomplete="current-password"
                     />
                   </div>
                 </div>
@@ -116,7 +124,7 @@
                 >
                   <span v-if="loading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
                   <span v-else>Iniciar sesión</span>
-                  <i v-if="!loading" class="fa-solid fa-arrow-right text-sm"></i>
+                  <i v-if="!loading" class="fa-solid fa-arrow-right text-sm" aria-hidden="true"></i>
                 </button>
               </form>
 
@@ -125,49 +133,55 @@
                   <h2 class="text-2xl font-bold text-white mb-1 hidden lg:block">Crea tu cuenta 🚀</h2>
                   <p class="text-slate-400 text-sm mb-6 hidden lg:block">Empieza tu prueba gratuita de 30 días.</p>
 
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1 tracking-wider">Nombre de usuario</label>
+                  <label for="reg-username" class="block text-xs font-bold uppercase text-slate-400 mb-2 ml-1 tracking-wider">Nombre de usuario</label>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <i class="fa-regular fa-user text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                      <i class="fa-regular fa-user text-slate-400 group-focus-within:text-indigo-400 transition-colors" aria-hidden="true"></i>
                     </div>
                     <input
+                      id="reg-username"
                       v-model="registerForm.username"
                       type="text"
-                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
+                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
                       placeholder="Tu nombre"
+                      autocomplete="username"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1 tracking-wider">Correo electrónico</label>
+                  <label for="reg-email" class="block text-xs font-bold uppercase text-slate-400 mb-2 ml-1 tracking-wider">Correo electrónico</label>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <i class="fa-regular fa-envelope text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                      <i class="fa-regular fa-envelope text-slate-400 group-focus-within:text-indigo-400 transition-colors" aria-hidden="true"></i>
                     </div>
                     <input
+                      id="reg-email"
                       v-model="registerForm.email"
                       type="email"
-                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
+                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
                       placeholder="correo@ejemplo.com"
+                      autocomplete="email"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1 tracking-wider">Contraseña</label>
+                  <label for="reg-password" class="block text-xs font-bold uppercase text-slate-400 mb-2 ml-1 tracking-wider">Contraseña</label>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <i class="fa-solid fa-lock text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                      <i class="fa-solid fa-lock text-slate-400 group-focus-within:text-indigo-400 transition-colors" aria-hidden="true"></i>
                     </div>
                     <input
+                      id="reg-password"
                       v-model="registerForm.password"
                       type="password"
-                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
+                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
                       placeholder="Mínimo 6 caracteres"
+                      autocomplete="new-password"
                     />
                   </div>
-                  <p class="text-xs text-slate-500 mt-1 ml-1">Debe contener números y letras.</p>
+                  <p class="text-xs text-slate-400 mt-1 ml-1">Debe contener números y letras.</p>
                 </div>
 
                 <button
@@ -185,16 +199,18 @@
                   <h2 class="text-2xl font-bold text-white mb-1">Recuperar acceso 🔒</h2>
                   <p class="text-slate-400 text-sm mb-6">Ingresa tu email y te enviaremos las instrucciones.</p>
 
-                  <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1 tracking-wider">Correo electrónico</label>
+                  <label for="forgot-email" class="block text-xs font-bold uppercase text-slate-400 mb-2 ml-1 tracking-wider">Correo electrónico</label>
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <i class="fa-solid fa-paper-plane text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                      <i class="fa-solid fa-paper-plane text-slate-400 group-focus-within:text-indigo-400 transition-colors" aria-hidden="true"></i>
                     </div>
                     <input
+                      id="forgot-email"
                       v-model="forgotEmail"
                       type="email"
-                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
+                      class="w-full pl-10 pr-4 py-3 bg-slate-950/50 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-slate-900 transition-all"
                       placeholder="nombre@ejemplo.com"
+                      autocomplete="email"
                     />
                   </div>
                 </div>
@@ -213,21 +229,21 @@
 
             <transition name="slide-up">
               <div v-if="error" class="mt-6 p-4 rounded-xl bg-red-900/20 border border-red-500/20 flex items-start gap-3">
-                <i class="fa-solid fa-circle-exclamation text-red-400 mt-0.5"></i>
+                <i class="fa-solid fa-circle-exclamation text-red-400 mt-0.5" aria-hidden="true"></i>
                 <p class="text-sm text-red-300 font-medium">{{ error }}</p>
               </div>
             </transition>
 
             <transition name="slide-up">
               <div v-if="success" class="mt-6 p-4 rounded-xl bg-green-900/20 border border-green-500/20 flex items-start gap-3">
-                <i class="fa-solid fa-circle-check text-green-400 mt-0.5"></i>
+                <i class="fa-solid fa-circle-check text-green-400 mt-0.5" aria-hidden="true"></i>
                 <p class="text-sm text-green-300 font-medium">{{ success }}</p>
               </div>
             </transition>
 
           </div>
 
-          <div class="mt-8 text-center text-xs text-slate-600">
+          <div class="mt-8 text-center text-xs text-slate-500">
              &copy; {{ new Date().getFullYear() }} Tu Empresa. Todos los derechos reservados.
           </div>
         </div>
@@ -239,7 +255,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import Header from "@/components/HeaderCompleto.vue"
 import Footer from '@/components/FooterComponent.vue'
@@ -257,6 +273,18 @@ const loading = ref(false)
 const loginForm = ref({ email: "", password: "" })
 const registerForm = ref({ username: "", email: "", password: "" })
 const forgotEmail = ref("")
+
+onMounted(() => {
+  // ✅ SEO: Títulos dinámicos
+  document.title = "Acceso Usuario - PonteAprobados";
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.name = "description";
+      document.head.appendChild(metaDesc);
+  }
+  metaDesc.content = "Inicia sesión o regístrate en PonteAprobados para gestionar tus exámenes y suscripciones.";
+})
 
 function cambiarModo(nuevoModo) {
   modo.value = nuevoModo
@@ -344,6 +372,11 @@ async function forgotPassword() {
 /* Grid Pattern */
 .bg-grid-white {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='%23ffffff'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+}
+
+/* Optimización GPU */
+.will-change-transform {
+    will-change: transform;
 }
 
 /* Animaciones */

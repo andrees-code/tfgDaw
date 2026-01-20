@@ -4,9 +4,9 @@
     <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
        <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
 
-       <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-900/30 rounded-full blur-[100px] opacity-60 animate-blob mix-blend-screen"></div>
-       <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen"></div>
-       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] animate-blob animation-delay-4000 mix-blend-screen"></div>
+       <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-900/30 rounded-full blur-[100px] opacity-60 animate-blob mix-blend-screen will-change-transform"></div>
+       <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
+       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] animate-blob animation-delay-4000 mix-blend-screen will-change-transform"></div>
     </div>
 
     <Header class="relative z-20" />
@@ -35,40 +35,44 @@
 
                 <img
                   :src="previewFoto || userStore.user.avatar || fotoPlaceholder"
+                  alt="Foto de perfil"
+                  width="128"
+                  height="128"
                   class="w-32 h-32 rounded-full object-cover border-4 border-slate-900 ring-2 ring-indigo-500/50 shadow-xl bg-slate-800"
                 />
 
                 <label
-                  for="foto"
+                  for="input-foto"
                   class="absolute bottom-0 right-0 bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-indigo-500 hover:scale-110 transition-all ring-4 ring-slate-900 border border-white/10"
-                  title="Cambiar foto"
+                  title="Cambiar foto de perfil"
+                  aria-label="Subir nueva foto de perfil"
                 >
-                  <i class="fa-solid fa-camera text-sm"></i>
+                  <i class="fa-solid fa-camera text-sm" aria-hidden="true"></i>
                 </label>
-                <input id="foto" type="file" accept="image/*" class="hidden" @change="updateAvatar" />
+                <input id="input-foto" type="file" accept="image/*" class="hidden" @change="updateAvatar" />
               </div>
 
               <h2 class="mt-4 text-xl font-bold text-white">{{ userStore.user.username || 'Usuario' }}</h2>
               <p class="text-sm text-slate-400 font-medium">{{ userStore.user.email }}</p>
 
-              <p v-if="msgAvatar" class="text-xs text-green-400 mt-2 font-medium animate-fade-in-up">{{ msgAvatar }}</p>
-              <p v-if="errAvatar" class="text-xs text-red-400 mt-2 animate-shake">{{ errAvatar }}</p>
+              <p v-if="msgAvatar" class="text-xs text-green-400 mt-2 font-medium animate-fade-in-up" role="status">{{ msgAvatar }}</p>
+              <p v-if="errAvatar" class="text-xs text-red-400 mt-2 animate-shake" role="alert">{{ errAvatar }}</p>
 
               <div
                 class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider"
                 :class="activePlan === 'free' ? 'bg-slate-800/50 text-slate-400 border-slate-700' : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]'"
               >
-                  <i v-if="activePlan !== 'free'" class="fa-solid fa-crown mr-1.5 text-xs"></i>
+                  <i v-if="activePlan !== 'free'" class="fa-solid fa-crown mr-1.5 text-xs" aria-hidden="true"></i>
                   {{ activePlanDisplay }}
               </div>
             </div>
 
             <nav class="mt-8 space-y-2">
               <a href="#general" class="flex items-center gap-3 px-4 py-3 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded-xl font-medium transition-all hover:bg-indigo-500/20">
-                <i class="fa-regular fa-user w-5"></i> General
+                <i class="fa-regular fa-user w-5" aria-hidden="true"></i> General
               </a>
               <a href="#billing" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl font-medium transition-colors border border-transparent">
-                <i class="fa-regular fa-credit-card w-5"></i> Facturación
+                <i class="fa-regular fa-credit-card w-5" aria-hidden="true"></i> Facturación
               </a>
             </nav>
           </div>
@@ -80,7 +84,7 @@
             <div class="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 shadow-lg shadow-indigo-900/20">
-                  <i class="fa-regular fa-id-card text-xl"></i>
+                  <i class="fa-regular fa-id-card text-xl" aria-hidden="true"></i>
                 </div>
                 <div>
                   <h3 class="text-xl font-bold text-white">Información Personal</h3>
@@ -92,8 +96,9 @@
             <form @submit.prevent="updateInfo" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-xs font-bold uppercase text-slate-500 ml-1 tracking-wider">Nombre de usuario</label>
+                  <label for="profile-username" class="text-xs font-bold uppercase text-slate-400 ml-1 tracking-wider">Nombre de usuario</label>
                   <input
+                    id="profile-username"
                     v-model="username"
                     type="text"
                     class="w-full rounded-xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:bg-slate-900 transition-all outline-none placeholder-slate-600"
@@ -101,8 +106,9 @@
                   />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-xs font-bold uppercase text-slate-500 ml-1 tracking-wider">Correo electrónico</label>
+                  <label for="profile-email" class="text-xs font-bold uppercase text-slate-400 ml-1 tracking-wider">Correo electrónico</label>
                   <input
+                    id="profile-email"
                     v-model="email"
                     type="email"
                     class="w-full rounded-xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:bg-slate-900 transition-all outline-none placeholder-slate-600"
@@ -121,10 +127,10 @@
                 </button>
 
                 <transition name="fade">
-                  <p v-if="msgInfo" class="text-green-400 text-sm font-medium flex items-center"><i class="fa-solid fa-check-circle mr-1.5"></i> {{ msgInfo }}</p>
+                  <p v-if="msgInfo" class="text-green-400 text-sm font-medium flex items-center" role="status"><i class="fa-solid fa-check-circle mr-1.5" aria-hidden="true"></i> {{ msgInfo }}</p>
                 </transition>
                 <transition name="fade">
-                  <p v-if="errInfo" class="text-red-400 text-sm font-medium flex items-center"><i class="fa-solid fa-circle-exclamation mr-1.5"></i> {{ errInfo }}</p>
+                  <p v-if="errInfo" class="text-red-400 text-sm font-medium flex items-center" role="alert"><i class="fa-solid fa-circle-exclamation mr-1.5" aria-hidden="true"></i> {{ errInfo }}</p>
                 </transition>
               </div>
             </form>
@@ -133,7 +139,7 @@
           <div class="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">
               <div class="flex items-center gap-4 mb-6 border-b border-white/5 pb-4">
               <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-400 border border-purple-500/30 shadow-lg shadow-purple-900/20">
-                <i class="fa-solid fa-lock text-xl"></i>
+                <i class="fa-solid fa-lock text-xl" aria-hidden="true"></i>
               </div>
               <div>
                 <h3 class="text-xl font-bold text-white">Contraseña y Seguridad</h3>
@@ -144,12 +150,12 @@
             <form @submit.prevent="updatePassword" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-xs font-bold uppercase text-slate-500 ml-1 tracking-wider">Nueva contraseña</label>
-                  <input v-model="password" type="password" placeholder="••••••••" class="w-full rounded-xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 focus:bg-slate-900 transition-all outline-none placeholder-slate-600" />
+                  <label for="profile-password" class="text-xs font-bold uppercase text-slate-400 ml-1 tracking-wider">Nueva contraseña</label>
+                  <input id="profile-password" v-model="password" type="password" placeholder="••••••••" class="w-full rounded-xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 focus:bg-slate-900 transition-all outline-none placeholder-slate-600" />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-xs font-bold uppercase text-slate-500 ml-1 tracking-wider">Confirmar contraseña</label>
-                  <input v-model="passwordConfirm" type="password" placeholder="••••••••" class="w-full rounded-xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 focus:bg-slate-900 transition-all outline-none placeholder-slate-600" />
+                  <label for="profile-pass-confirm" class="text-xs font-bold uppercase text-slate-400 ml-1 tracking-wider">Confirmar contraseña</label>
+                  <input id="profile-pass-confirm" v-model="passwordConfirm" type="password" placeholder="••••••••" class="w-full rounded-xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 focus:bg-slate-900 transition-all outline-none placeholder-slate-600" />
                 </div>
               </div>
 
@@ -164,10 +170,10 @@
                 </button>
 
                 <transition name="fade">
-                  <p v-if="msgPass" class="text-green-400 text-sm font-medium flex items-center"><i class="fa-solid fa-check-circle mr-1.5"></i> {{ msgPass }}</p>
+                  <p v-if="msgPass" class="text-green-400 text-sm font-medium flex items-center" role="status"><i class="fa-solid fa-check-circle mr-1.5" aria-hidden="true"></i> {{ msgPass }}</p>
                 </transition>
                 <transition name="fade">
-                  <p v-if="errPass" class="text-red-400 text-sm font-medium flex items-center"><i class="fa-solid fa-circle-exclamation mr-1.5"></i> {{ errPass }}</p>
+                  <p v-if="errPass" class="text-red-400 text-sm font-medium flex items-center" role="alert"><i class="fa-solid fa-circle-exclamation mr-1.5" aria-hidden="true"></i> {{ errPass }}</p>
                 </transition>
               </div>
             </form>
@@ -175,7 +181,7 @@
 
           <div id="billing" class="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8 overflow-hidden relative scroll-mt-32 shadow-2xl">
             <div class="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
-              <i class="fa-solid fa-gem text-9xl text-white"></i>
+              <i class="fa-solid fa-gem text-9xl text-white" aria-hidden="true"></i>
             </div>
 
             <div class="relative z-10 mb-8">
@@ -194,9 +200,9 @@
                  <span class="text-slate-500">/mes</span>
                </div>
                <ul class="space-y-3 mb-8 flex-1">
-                 <li class="flex items-center gap-2 text-sm text-slate-400"><i class="fa-solid fa-check text-slate-500"></i> Acceso básico</li>
+                 <li class="flex items-center gap-2 text-sm text-slate-400"><i class="fa-solid fa-check text-slate-500" aria-hidden="true"></i> Acceso básico</li>
                </ul>
-               <button disabled class="w-full py-2.5 rounded-xl font-bold border border-white/10 text-slate-500 bg-transparent cursor-default">
+               <button type="button" disabled class="w-full py-2.5 rounded-xl font-bold border border-white/10 text-slate-500 bg-transparent cursor-default">
                  {{ activePlan === 'free' ? 'Plan Actual' : 'Incluido' }}
                </button>
              </div>
@@ -213,10 +219,11 @@
                  <span class="text-slate-500">/mes</span>
                </div>
                <ul class="space-y-3 mb-8 flex-1">
-                 <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-indigo-400"></i> Sin publicidad</li>
-                 <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-indigo-400"></i> Exámenes ilimitados</li>
+                 <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-indigo-400" aria-hidden="true"></i> Sin publicidad</li>
+                 <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-indigo-400" aria-hidden="true"></i> Exámenes ilimitados</li>
                </ul>
                <button
+                 type="button"
                  @click="suscribirse('monthly')"
                  :disabled="activePlan === 'monthly' || loadingSub === 'monthly'"
                  class="w-full py-2.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 relative z-10"
@@ -224,7 +231,7 @@
                >
                  <span v-if="loadingSub === 'monthly'" class="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></span>
                  <span v-else>
-                    <i v-if="activePlan === 'monthly'" class="fa-solid fa-check mr-2"></i>
+                    <i v-if="activePlan === 'monthly'" class="fa-solid fa-check mr-2" aria-hidden="true"></i>
                     {{ activePlan === 'monthly' ? 'Activo' : 'Elegir Mensual' }}
                  </span>
                </button>
@@ -244,11 +251,12 @@
                  <span class="text-slate-500">/año</span>
                </div>
                <ul class="space-y-3 mb-8 flex-1">
-                <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-green-400"></i> Sin publicidad</li>
-                <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-green-400"></i> Exámenes ilimitados</li>
-                 <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-green-400"></i> 2 meses gratis</li>
+                <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-green-400" aria-hidden="true"></i> Sin publicidad</li>
+                <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-green-400" aria-hidden="true"></i> Exámenes ilimitados</li>
+                 <li class="flex items-center gap-2 text-sm text-slate-300"><i class="fa-solid fa-check text-green-400" aria-hidden="true"></i> 2 meses gratis</li>
                </ul>
                <button
+                 type="button"
                  @click="suscribirse('yearly')"
                  :disabled="activePlan === 'yearly' || loadingSub === 'yearly'"
                  class="w-full py-2.5 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
@@ -256,7 +264,7 @@
                >
                  <span v-if="loadingSub === 'yearly'" class="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></span>
                  <span v-else>
-                     <i v-if="activePlan === 'yearly'" class="fa-solid fa-check mr-2"></i>
+                     <i v-if="activePlan === 'yearly'" class="fa-solid fa-check mr-2" aria-hidden="true"></i>
                      {{ activePlan === 'yearly' ? 'Activo' : 'Elegir Anual' }}
                  </span>
                </button>
@@ -267,7 +275,7 @@
              <div class="mt-8 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
               <p class="text-sm text-slate-400 italic">¿Prefieres hacer una aportación única?</p>
               <router-link to="/paypal" class="inline-flex items-center gap-2 text-slate-300 hover:text-[#003087] hover:bg-[#003087]/10 font-bold transition-colors bg-white/5 px-4 py-2 rounded-lg border border-white/5 hover:border-[#003087]/30">
-                <i class="fab fa-paypal text-xl text-[#003087]"></i> Donar con PayPal
+                <i class="fab fa-paypal text-xl text-[#003087]" aria-hidden="true"></i> Donar con PayPal
               </router-link>
             </div>
           </div>
@@ -286,7 +294,7 @@ import { userStore } from '@/stores/userStores'
 import { SubscriptionService } from '@/services/subscriptionService'
 import { updateProfile, loginUser } from '@/services/userService'
 
-// ... (TU LÓGICA PERMANECE EXACTAMENTE IGUAL)
+// Lógica original (sin cambios funcionales, solo optimizaciones)
 const fotoPlaceholder = '/img/perfil.jpg'
 const previewFoto = ref(null)
 
@@ -319,6 +327,9 @@ const activePlanDisplay = computed(() => {
 })
 
 onMounted(async () => {
+  // ✅ SEO Local
+  document.title = "Ajustes de Perfil - PonteAprobados";
+  
   await userStore.loadSession()
   if (userStore.user) {
     cargarDatosLocales()
@@ -486,6 +497,9 @@ async function suscribirse(plan) {
 /* Animaciones utilitarias */
 .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
 .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+
+/* Optimización GPU */
+.will-change-transform { will-change: transform; }
 
 @keyframes shake {
   10%, 90% { transform: translate3d(-1px, 0, 0); }

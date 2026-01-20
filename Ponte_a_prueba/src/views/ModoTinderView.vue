@@ -3,7 +3,6 @@
 
     <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
       <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-
       <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[100px] opacity-60 animate-blob mix-blend-screen will-change-transform"></div>
       <div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-900/20 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
       <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-900/20 rounded-full blur-[80px] opacity-40 animate-blob animation-delay-4000 mix-blend-screen will-change-transform"></div>
@@ -31,7 +30,7 @@
 
               <div class="space-y-8">
                 <div class="group relative">
-                    <label for="input-apuntes" class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
+                    <label for="input-apuntes" class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
                     <div class="relative transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-xl focus-within:shadow-black/20 rounded-2xl">
                         <textarea 
                             id="input-apuntes"
@@ -41,11 +40,11 @@
                             placeholder=" "
                             aria-label="Pega tus apuntes aquí"
                         ></textarea>
-                          <div v-if="!apuntes && !archivoNombre" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-500 gap-3">
+                          <div v-if="!apuntes && !archivoNombre" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400 gap-3">
                             <div class="w-12 h-12 rounded-full bg-slate-800 shadow-lg border border-white/5 flex items-center justify-center text-indigo-400">
                                 <i class="fa-solid fa-pen-nib text-xl" aria-hidden="true"></i>
                             </div>
-                            <span class="font-medium text-sm text-slate-500">Pega tus apuntes aquí</span>
+                            <span class="font-medium text-sm text-slate-400">Pega tus apuntes aquí</span>
                         </div>
                     </div>
                 </div>
@@ -53,12 +52,12 @@
                 <div class="group border-2 border-dashed border-white/10 hover:border-indigo-500/40 hover:bg-indigo-500/5 rounded-2xl p-4 transition-all duration-300">
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-colors" :class="archivoNombre ? 'bg-red-900/20 text-red-400' : 'bg-slate-800 text-slate-500 group-hover:bg-indigo-500/20 group-hover:text-indigo-400'">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-colors" :class="archivoNombre ? 'bg-red-900/20 text-red-400' : 'bg-slate-800 text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-400'">
                                 <i class="fa-solid fa-file-pdf text-2xl" aria-hidden="true"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-slate-300 truncate max-w-[200px] md:max-w-xs">{{ archivoNombre || '¿Prefieres usar un PDF?' }}</p>
-                                <p class="text-slate-500 text-xs mt-0.5">{{ archivoNombre ? 'Archivo cargado correctamente' : 'Hasta 20 páginas' }}</p>
+                                <p class="text-slate-400 text-xs mt-0.5">{{ archivoNombre ? 'Archivo cargado correctamente' : 'Hasta 20 páginas' }}</p>
                             </div>
                         </div>
                         <label for="pdf-upload" class="px-5 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-slate-300 text-sm font-bold cursor-pointer hover:border-indigo-500/50 hover:text-indigo-400 transition-all shadow-lg hover:shadow-black/20">Explorar</label>
@@ -68,27 +67,27 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
+                        <label class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
                         <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5" role="group" aria-label="Nivel de dificultad">
-                            <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" @click="dificultad = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', dificultad === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-100' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
+                            <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" @click="dificultad = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', dificultad === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-100' : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
                         </div>
                     </div>
                     <div>
-                        <label for="range-preguntas" class="flex justify-between text-xs font-bold uppercase text-slate-500 tracking-wider mb-4 pl-1">
+                        <label for="range-preguntas" class="flex justify-between text-xs font-bold uppercase text-slate-400 tracking-wider mb-4 pl-1">
                             <span>Cantidad</span>
                             <span class="text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">{{ numPreguntas }} preguntas</span>
                         </label>
                         <div class="relative px-2">
-                              <input id="range-preguntas" type="range" min="5" max="20" step="5" v-model.number="numPreguntas" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 slider-custom" aria-valuemin="5" aria-valuemax="20" :aria-valuenow="numPreguntas" />
-                            <div class="flex justify-between mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
+                              <input id="range-preguntas" type="range" min="5" max="20" step="5" v-model.number="numPreguntas" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 slider-custom" aria-valuemin="5" aria-valuemax="20" :aria-valuenow="numPreguntas" aria-label="Número de preguntas" />
+                            <div class="flex justify-between mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                   <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Formato de preguntas</label>
+                   <label class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Formato de preguntas</label>
                    <div class="grid grid-cols-1 gap-3">
-                     <button v-for="tipo in tipos" :key="tipo" @click="tipoExamen = tipo" :class="['px-4 py-4 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden', tipoExamen === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-500 hover:border-white/10 hover:bg-white/5']">
+                     <button v-for="tipo in tipos" :key="tipo" @click="tipoExamen = tipo" :class="['px-4 py-4 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden', tipoExamen === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']">
                         <div v-if="tipoExamen === tipo" class="absolute top-0 right-0 w-8 h-8 -mr-4 -mt-4 bg-indigo-500 rotate-45"></div>
                         <span class="relative z-10">{{ tipo }}</span>
                      </button>
@@ -108,6 +107,7 @@
                   </span>
                 </button>
              </div>
+             
              <p v-if="error" role="alert" class="text-center text-red-400 mt-6 text-sm bg-red-900/20 py-2 px-4 rounded-xl border border-red-500/20 flex items-center justify-center gap-2 animate-shake"><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> {{ error }}</p>
 
         </div>
@@ -119,7 +119,7 @@
                 <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
             </button>
             <div class="flex-1 mx-6 flex flex-col gap-1">
-                <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     <span>Progreso</span><span>{{ Math.round(progresoPorcentaje) }}%</span>
                 </div>
                 <div class="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner border border-white/5" role="progressbar" :aria-valuenow="progresoPorcentaje" aria-valuemin="0" aria-valuemax="100"> 
@@ -195,7 +195,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-// ✅ OPTIMIZACIÓN: Eliminada importación estática de pdfjs-dist
+// ✅ OPTIMIZACIÓN: Eliminada importación estática de pdfjs-dist para reducir el bundle inicial
 import Header from '@/components/HeaderCompleto.vue'
 import { saveExam, generateExam } from '@/services/examService'
 import { userStore } from "@/stores/userStores"
@@ -265,14 +265,14 @@ onMounted(() => {
 })
 
 // --- 1. LÓGICA DE PDF CON LAZY LOADING ---
-// ✅ OPTIMIZACIÓN: Función asíncrona que importa la librería solo si se usa
+// ✅ OPTIMIZACIÓN: Importación dinámica de la librería PDF solo cuando se necesita
 async function handlePdfUploadCustom(event) {
   const file = event.target.files[0]
   if (!file) return
   archivoNombre.value = file.name
   
   try {
-      // Import dinámico (Lazy load)
+      // Lazy load de pdfjs-dist
       const pdfjsLib = await import('pdfjs-dist')
       if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
@@ -294,7 +294,6 @@ async function handlePdfUploadCustom(event) {
 }
 
 // --- 2. MOTOR DE PARSEO ROBUSTO ---
-// (Lógica intacta para asegurar funcionamiento del examen)
 function mezclarArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

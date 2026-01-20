@@ -10,17 +10,25 @@
 
         <div class="flex items-center">
           <button
+            type="button"
             @click="router.back()"
             class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-indigo-500 hover:text-white hover:border-indigo-400 border border-white/10 transition-all duration-200 group backdrop-blur-sm shadow-lg shadow-black/20"
-            aria-label="Volver"
+            aria-label="Volver a la página anterior"
           >
-            <i class="fa-solid fa-arrow-left group-hover:-translate-x-0.5 transition-transform"></i>
+            <i class="fa-solid fa-arrow-left group-hover:-translate-x-0.5 transition-transform" aria-hidden="true"></i>
           </button>
         </div>
 
         <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-          <router-link to="/" class="block pointer-events-auto hover:opacity-80 transition-opacity filter drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
-            <img class="h-9 w-auto object-contain" src="../assets/logo/prueba2.webp" alt="Logo" width="288" height="63" loading="eager"/>
+          <router-link to="/" class="block pointer-events-auto hover:opacity-80 transition-opacity filter drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]" aria-label="Ir al inicio">
+            <img 
+              class="h-9 w-auto object-contain" 
+              src="../assets/logo/prueba2.webp" 
+              alt="Logo PonteAprobados" 
+              width="288" 
+              height="63" 
+              loading="eager"
+            />
           </router-link>
         </div>
 
@@ -28,10 +36,13 @@
 
           <div class="relative" ref="menuContainer">
                <button
+                  type="button"
                   class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-300 hover:bg-white/10 hover:text-white transition-all border border-transparent hover:border-white/10"
                   @click="abrirMenu"
+                  aria-label="Abrir menú de navegación"
+                  :aria-expanded="menuAbierto"
               >
-                  <i class="fa-solid fa-bars text-xl"></i>
+                  <i class="fa-solid fa-bars text-xl" aria-hidden="true"></i>
               </button>
 
               <Menu v-if="menuAbierto" @cerrar="menuAbierto = false" />
@@ -41,16 +52,21 @@
             <div class="relative" ref="dropdownContainer">
 
               <button
+                  type="button"
                   @click="abrirDropdown"
                   class="flex items-center gap-2 pl-1 pr-1 py-1 rounded-full hover:bg-white/10 transition-all border border-transparent focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                   :class="dropdownAbierto ? 'bg-white/10 ring-1 ring-white/10' : ''"
+                  aria-label="Menú de usuario"
+                  :aria-expanded="dropdownAbierto"
               >
                   <img
                     :src="userStore.user?.avatar ?? '/img/perfil.jpg'"
-                    alt="Avatar"
+                    alt="Avatar de usuario"
                     class="w-9 h-9 rounded-full object-cover border-2 border-[#020617] ring-1 ring-white/20 shadow-sm"
+                    width="36"
+                    height="36"
                   />
-                  <i class="hidden md:block fa-solid fa-chevron-down text-[10px] text-slate-400 mr-1 transition-transform duration-200" :class="dropdownAbierto ? 'rotate-180' : ''"></i>
+                  <i class="hidden md:block fa-solid fa-chevron-down text-[10px] text-slate-400 mr-1 transition-transform duration-200" :class="dropdownAbierto ? 'rotate-180' : ''" aria-hidden="true"></i>
               </button>
 
               <Transition
@@ -77,17 +93,18 @@
                           @click="dropdownAbierto = false"
                         >
                           <span class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-colors shadow-inner shadow-indigo-500/10">
-                               <i class="fa-solid fa-user text-xs"></i>
+                               <i class="fa-solid fa-user text-xs" aria-hidden="true"></i>
                           </span>
                           Mi Perfil
                         </router-link>
 
                         <button
+                          type="button"
                           @click="logout"
                           class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all group mt-1 border border-transparent hover:border-red-500/20"
                         >
                           <span class="w-8 h-8 rounded-lg bg-slate-800 text-slate-500 flex items-center justify-center group-hover:bg-red-500/20 group-hover:text-red-400 transition-colors">
-                               <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                               <i class="fa-solid fa-right-from-bracket text-xs" aria-hidden="true"></i>
                           </span>
                           Cerrar sesión
                         </button>
@@ -103,8 +120,8 @@
               class="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-full transition-all shadow-[0_0_15px_rgba(79,70,229,0.4)] hover:shadow-[0_0_25px_rgba(79,70,229,0.6)] border border-indigo-400/50 hover:-translate-y-0.5"
             >
               <span class="hidden md:inline">Entrar</span>
-              <i class="fa-solid fa-user md:hidden"></i>
-              <i class="hidden md:inline fa-solid fa-arrow-right text-xs text-indigo-200"></i>
+              <i class="fa-solid fa-user md:hidden" aria-hidden="true"></i>
+              <i class="hidden md:inline fa-solid fa-arrow-right text-xs text-indigo-200" aria-hidden="true"></i>
             </router-link>
           </template>
 
@@ -161,12 +178,13 @@ const handleClickOutside = (event) => {
 }
 
 const handleScroll = () => {
+    // Pequeña optimización: usar requestAnimationFrame si fuera muy pesado, pero aquí está bien
     scrolled.value = window.scrollY > 20
 }
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  window.addEventListener('scroll', handleScroll)
+  window.addEventListener('scroll', handleScroll, { passive: true }) // passive: true mejora rendimiento scroll
 })
 
 onBeforeUnmount(() => {

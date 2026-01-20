@@ -2,12 +2,11 @@
   <div class="min-h-screen flex flex-col font-sans text-slate-300 bg-slate-950 overflow-hidden relative selection:bg-indigo-500 selection:text-white">
 
     <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-
       <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
 
-      <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[100px] opacity-60 animate-blob mix-blend-screen"></div>
-      <div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-900/20 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-900/20 rounded-full blur-[80px] opacity-40 animate-blob animation-delay-4000 mix-blend-screen"></div>
+      <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[100px] opacity-60 animate-blob mix-blend-screen will-change-transform"></div>
+      <div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-900/20 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-900/20 rounded-full blur-[80px] opacity-40 animate-blob animation-delay-4000 mix-blend-screen will-change-transform"></div>
     </div>
 
     <Header class="relative z-20" />
@@ -32,12 +31,19 @@
 
               <div class="space-y-8">
                 <div class="group relative">
-                    <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
+                    <label for="input-apuntes" class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
                     <div class="relative transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-xl focus-within:shadow-black/20 rounded-2xl">
-                        <textarea v-model="apuntes" rows="6" class="w-full rounded-2xl bg-slate-950/50 border border-white/10 px-6 py-5 text-slate-200 resize-none placeholder:text-transparent focus:bg-slate-900 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/50 focus:outline-none transition-all text-base shadow-inner custom-scrollbar" placeholder=" "></textarea>
+                        <textarea 
+                            id="input-apuntes"
+                            v-model="apuntes" 
+                            rows="6" 
+                            class="w-full rounded-2xl bg-slate-950/50 border border-white/10 px-6 py-5 text-slate-200 resize-none placeholder:text-transparent focus:bg-slate-900 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/50 focus:outline-none transition-all text-base shadow-inner custom-scrollbar" 
+                            placeholder=" "
+                            aria-label="Pega tus apuntes aquí"
+                        ></textarea>
                           <div v-if="!apuntes && !archivoNombre" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-500 gap-3">
                             <div class="w-12 h-12 rounded-full bg-slate-800 shadow-lg border border-white/5 flex items-center justify-center text-indigo-400">
-                                <i class="fa-solid fa-pen-nib text-xl"></i>
+                                <i class="fa-solid fa-pen-nib text-xl" aria-hidden="true"></i>
                             </div>
                             <span class="font-medium text-sm text-slate-500">Pega tus apuntes aquí</span>
                         </div>
@@ -48,7 +54,7 @@
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-colors" :class="archivoNombre ? 'bg-red-900/20 text-red-400' : 'bg-slate-800 text-slate-500 group-hover:bg-indigo-500/20 group-hover:text-indigo-400'">
-                                <i class="fa-solid fa-file-pdf text-2xl"></i>
+                                <i class="fa-solid fa-file-pdf text-2xl" aria-hidden="true"></i>
                             </div>
                             <div>
                                 <p class="font-bold text-slate-300 truncate max-w-[200px] md:max-w-xs">{{ archivoNombre || '¿Prefieres usar un PDF?' }}</p>
@@ -56,25 +62,25 @@
                             </div>
                         </div>
                         <label for="pdf-upload" class="px-5 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-slate-300 text-sm font-bold cursor-pointer hover:border-indigo-500/50 hover:text-indigo-400 transition-all shadow-lg hover:shadow-black/20">Explorar</label>
-                        <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" @change="handlePdfUploadCustom" />
+                        <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" @change="handlePdfUploadCustom" aria-label="Subir archivo PDF" />
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
-                        <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5">
+                        <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5" role="group" aria-label="Nivel de dificultad">
                             <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" @click="dificultad = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', dificultad === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-100' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
                         </div>
                     </div>
                     <div>
-                        <label class="flex justify-between text-xs font-bold uppercase text-slate-500 tracking-wider mb-4 pl-1">
+                        <label for="range-preguntas" class="flex justify-between text-xs font-bold uppercase text-slate-500 tracking-wider mb-4 pl-1">
                             <span>Cantidad</span>
                             <span class="text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">{{ numPreguntas }} preguntas</span>
                         </label>
                         <div class="relative px-2">
-                              <input type="range" min="5" max="20" step="5" v-model.number="numPreguntas" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 slider-custom" />
-                            <div class="flex justify-between mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest"><span>5</span><span>10</span><span>15</span><span>20</span></div>
+                              <input id="range-preguntas" type="range" min="5" max="20" step="5" v-model.number="numPreguntas" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 slider-custom" aria-valuemin="5" aria-valuemax="20" :aria-valuenow="numPreguntas" />
+                            <div class="flex justify-between mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
                         </div>
                     </div>
                 </div>
@@ -98,25 +104,26 @@
                     <span class="animate-pulse">Diseñando tu reto...</span>
                   </span>
                   <span v-else class="flex items-center justify-center gap-2 relative z-10">
-                    Comenzar Reto <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-indigo-200"></i>
+                    Comenzar Reto <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-indigo-200" aria-hidden="true"></i>
                   </span>
                 </button>
              </div>
-             <p v-if="error" class="text-center text-red-400 mt-6 text-sm bg-red-900/20 py-2 px-4 rounded-xl border border-red-500/20 flex items-center justify-center gap-2 animate-shake"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
+             <p v-if="error" role="alert" class="text-center text-red-400 mt-6 text-sm bg-red-900/20 py-2 px-4 rounded-xl border border-red-500/20 flex items-center justify-center gap-2 animate-shake"><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> {{ error }}</p>
 
         </div>
       </div>
 
       <div v-else class="max-w-xl mx-auto h-[85vh] flex flex-col relative">
           <div class="flex items-center justify-between mb-6 px-4">
-            <button @click="salirModoExamen" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:text-red-400 hover:bg-red-900/20 shadow-sm border border-white/10 flex items-center justify-center transition-all hover:rotate-90">
-                <i class="fa-solid fa-xmark text-xl"></i>
+            <button @click="salirModoExamen" aria-label="Salir del examen" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:text-red-400 hover:bg-red-900/20 shadow-sm border border-white/10 flex items-center justify-center transition-all hover:rotate-90">
+                <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
             </button>
             <div class="flex-1 mx-6 flex flex-col gap-1">
                 <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
                     <span>Progreso</span><span>{{ Math.round(progresoPorcentaje) }}%</span>
                 </div>
-                <div class="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner border border-white/5"> <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]" :style="{ width: `${progresoPorcentaje}%` }"></div>
+                <div class="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner border border-white/5" role="progressbar" :aria-valuenow="progresoPorcentaje" aria-valuemin="0" aria-valuemax="100"> 
+                    <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]" :style="{ width: `${progresoPorcentaje}%` }"></div>
                 </div>
             </div>
             <div class="bg-slate-800 px-3 py-1.5 rounded-full border border-white/10 shadow-sm text-slate-400 font-bold text-sm tabular-nums">
@@ -161,16 +168,16 @@
 
                     <div v-if="respuestaSeleccionada !== null" class="bg-slate-950/80 backdrop-blur border-t border-white/10 p-5 md:p-6 animate-slide-up-fade">
                         <div v-if="esRespuestaCorrecta" class="flex items-center gap-3 mb-3 p-3 bg-green-900/20 rounded-xl text-green-400 border border-green-500/20">
-                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs"><i class="fa-solid fa-check"></i></div>
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs"><i class="fa-solid fa-check" aria-hidden="true"></i></div>
                             <span class="font-bold">¡Correcto!</span>
                         </div>
                         <div v-else class="flex items-center gap-3 mb-3 p-3 bg-red-900/20 rounded-xl text-red-400 border border-red-500/20">
-                             <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs"><i class="fa-solid fa-xmark"></i></div>
+                             <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs"><i class="fa-solid fa-xmark" aria-hidden="true"></i></div>
                             <span class="font-bold">Incorrecto</span>
                         </div>
                         <p class="text-sm text-slate-500 mb-5 pl-1">La respuesta correcta era la <strong class="text-slate-200 bg-slate-800 px-1 rounded border border-white/10">{{ obtenerLetraCorrectaParaUI() }}</strong>.</p>
                         <button @click="siguientePregunta" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-indigo-900/40 transition-all flex items-center justify-center gap-2">
-                            <span>{{ tarjetaActualIndex < preguntasParseadas.length - 1 ? 'Siguiente Pregunta' : 'Ver Resultados' }}</span> <i class="fa-solid fa-arrow-right"></i>
+                            <span>{{ tarjetaActualIndex < preguntasParseadas.length - 1 ? 'Siguiente Pregunta' : 'Ver Resultados' }}</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -184,10 +191,11 @@
     </main>
   </div>
 </template>
+
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import * as pdfjsLib from 'pdfjs-dist'
+// ✅ OPTIMIZACIÓN: Eliminada importación estática de pdfjs-dist
 import Header from '@/components/HeaderCompleto.vue'
 import { saveExam, generateExam } from '@/services/examService'
 import { userStore } from "@/stores/userStores"
@@ -205,19 +213,18 @@ const archivoNombre = ref("")
 const loading = ref(false)
 const error = ref(null)
 
-// MODIFICADO: Dejamos solo "Test (4 opciones)" visible. Los otros están comentados para no romper lógica.
-const tipos = ["Test (4 opciones)"] //, "Verdadero/Falso", "Mix"]
+const tipos = ["Test (4 opciones)"]
 
 // --- ESTADO DEL MODO EXAMEN ---
 const modoExamenActivo = ref(false)
 const preguntasParseadas = ref([])
 const tarjetaActualIndex = ref(0)
-const respuestaSeleccionada = ref(null) // Guarda el índice del array barajado
+const respuestaSeleccionada = ref(null)
 const aciertos = ref(0)
 const examenTerminado = ref(false)
 const animandoSalida = ref(false)
 
-// Generador visual de letras (independiente de la lógica interna)
+// Generador visual de letras
 const alfabeto = ['A', 'B', 'C', 'D', 'E', 'F'];
 function obtenerLetraVisual(index) {
     return alfabeto[index] || '?';
@@ -245,27 +252,49 @@ const nota = computed(() => {
 
 onMounted(() => {
   userStore.loadSession()
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+  
+  // ✅ OPTIMIZACIÓN: SEO Local
+  document.title = "Modo Reto - Exámenes Interactivos con IA";
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.name = "description";
+      document.head.appendChild(metaDesc);
+  }
+  metaDesc.content = "Ponte a prueba con el modo reto. Genera exámenes interactivos a partir de tus apuntes y obtén feedback instantáneo.";
 })
 
-// --- 1. LÓGICA DE PDF ---
+// --- 1. LÓGICA DE PDF CON LAZY LOADING ---
+// ✅ OPTIMIZACIÓN: Función asíncrona que importa la librería solo si se usa
 async function handlePdfUploadCustom(event) {
   const file = event.target.files[0]
   if (!file) return
   archivoNombre.value = file.name
-  const buffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
-  let text = ""
-  for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
-    const page = await pdf.getPage(i)
-    const content = await page.getTextContent()
-    text += content.items.map(i => i.str).join(" ") + "\n\n"
+  
+  try {
+      // Import dinámico (Lazy load)
+      const pdfjsLib = await import('pdfjs-dist')
+      if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+           pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+      }
+
+      const buffer = await file.arrayBuffer()
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
+      let text = ""
+      for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
+        const page = await pdf.getPage(i)
+        const content = await page.getTextContent()
+        text += content.items.map(i => i.str).join(" ") + "\n\n"
+      }
+      apuntes.value = text
+  } catch (e) {
+      console.error("Error cargando PDF:", e)
+      error.value = "Error leyendo el PDF"
   }
-  apuntes.value = text
 }
 
-// --- 2. MOTOR DE PARSEO ROBUSTO (SECUENCIAL Y SINCRONIZADO) ---
-
+// --- 2. MOTOR DE PARSEO ROBUSTO ---
+// (Lógica intacta para asegurar funcionamiento del examen)
 function mezclarArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -462,10 +491,8 @@ function salirModoExamen() {
     preguntasParseadas.value = [];
 }
 
-// --- CLASES DINÁMICAS (ADAPTADAS A DARK MODE) ---
-
+// --- CLASES DINÁMICAS ---
 function claseOpcion(index) {
-    // Estado inicial (sin seleccionar nada)
     if (respuestaSeleccionada.value === null) {
         return "border-white/5 bg-slate-800 hover:border-indigo-500/50 hover:bg-slate-700 cursor-pointer shadow-sm hover:shadow-md text-slate-300";
     }
@@ -473,17 +500,14 @@ function claseOpcion(index) {
     const estaOpcion = preguntaActual.value.opciones[index];
     const fueSeleccionada = respuestaSeleccionada.value === index;
 
-    // 1. Correcta (Verde brillante)
     if (estaOpcion.esCorrecta) {
         return "bg-green-900/30 border-green-500 text-green-300 font-bold shadow-[0_0_15px_rgba(34,197,94,0.3)] ring-1 ring-green-500/50";
     }
 
-    // 2. Errónea seleccionada (Rojo brillante)
     if (fueSeleccionada) {
         return "bg-red-900/30 border-red-500 text-red-300 opacity-90";
     }
 
-    // 3. El resto (Apagado)
     return "border-white/5 bg-slate-900 opacity-40 grayscale";
 }
 
@@ -545,6 +569,11 @@ function claseBotonLetra(index) {
 .slider-custom::-webkit-slider-thumb:hover {
   box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.4);
   transform: scale(1.1);
+}
+
+/* Optimización GPU para fondos */
+.will-change-transform {
+    will-change: transform;
 }
 
 /* Animaciones y utilidades */

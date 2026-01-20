@@ -12,13 +12,13 @@
 
       <div class="hidden lg:block absolute top-[20%] left-[5%] animate-float opacity-30">
         <div class="w-20 h-28 bg-slate-800/80 border border-white/10 rounded-xl shadow-2xl -rotate-12 flex items-center justify-center backdrop-blur-sm">
-            <i class="fa-solid fa-file-lines text-3xl text-indigo-400"></i>
+            <i class="fa-solid fa-file-lines text-3xl text-indigo-400" aria-hidden="true"></i>
         </div>
       </div>
 
       <div class="hidden lg:block absolute top-[30%] right-[8%] animate-float animation-delay-1000 opacity-30">
         <div class="w-20 h-20 bg-slate-800/80 border border-white/10 rounded-2xl shadow-2xl rotate-12 flex items-center justify-center backdrop-blur-sm">
-            <i class="fa-solid fa-graduation-cap text-3xl text-purple-400"></i>
+            <i class="fa-solid fa-graduation-cap text-3xl text-purple-400" aria-hidden="true"></i>
         </div>
       </div>
     </div>
@@ -40,7 +40,7 @@
                <span class="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Exámenes</span>
                <svg class="absolute w-full h-3 -bottom-1 left-0 text-indigo-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" /></svg>
 
-               <span class="absolute -top-2 -right-4 flex h-4 w-4 cursor-pointer" @click="irAlModoReto" title="Nueva funcionalidad disponible">
+               <span class="absolute -top-2 -right-4 flex h-4 w-4 cursor-pointer" role="button" aria-label="Nueva funcionalidad disponible" @click="irAlModoReto" title="Nueva funcionalidad disponible">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-500 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-4 w-4 bg-pink-500 border-2 border-slate-900"></span>
               </span>
@@ -57,12 +57,17 @@
 
           <div class="space-y-8">
             <div class="group relative">
-               <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
+               <label for="input-apuntes" class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Fuente de conocimiento</label>
                <div class="relative transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-xl focus-within:shadow-black/20 rounded-2xl h-64">
-                <textarea v-model="apuntes" class="w-full h-full rounded-2xl bg-slate-950/50 border border-white/10 px-6 py-5 text-slate-200 resize-none placeholder:text-transparent focus:bg-slate-900 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/50 focus:outline-none transition-all text-base shadow-inner relative z-10 custom-scrollbar"></textarea>
+                <textarea 
+                  id="input-apuntes"
+                  v-model="apuntes" 
+                  class="w-full h-full rounded-2xl bg-slate-950/50 border border-white/10 px-6 py-5 text-slate-200 resize-none placeholder:text-transparent focus:bg-slate-900 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500/50 focus:outline-none transition-all text-base shadow-inner relative z-10 custom-scrollbar"
+                  aria-label="Introduce tus apuntes aquí"
+                ></textarea>
                 <div v-if="!apuntes && archivoNombre === 'Ningún archivo seleccionado'" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-500 gap-3 z-0">
                   <div class="w-14 h-14 rounded-full bg-slate-800 shadow-lg border border-white/5 flex items-center justify-center text-indigo-400 mb-2">
-                    <i class="fa-solid fa-pen-nib text-xl"></i>
+                    <i class="fa-solid fa-pen-nib text-xl" aria-hidden="true"></i>
                   </div>
                   <span class="font-medium text-slate-500">Pega tus apuntes aquí</span>
                 </div>
@@ -74,7 +79,7 @@
                 <div class="flex items-center gap-4">
                   <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
                        :class="archivoNombre !== 'Ningún archivo seleccionado' ? 'bg-red-900/20 text-red-400' : 'bg-slate-800 text-slate-500 group-hover:bg-indigo-500/20 group-hover:text-indigo-400'">
-                    <i class="fa-solid fa-file-pdf text-2xl"></i>
+                    <i class="fa-solid fa-file-pdf text-2xl" aria-hidden="true"></i>
                   </div>
                   <div class="min-w-0">
                       <p class="font-bold text-slate-300 truncate max-w-[150px] md:max-w-xs">
@@ -95,26 +100,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
               <div>
                 <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
-                <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5">
+                <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5" role="group" aria-label="Selecciona la dificultad">
                   <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" @click="dificultad = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', dificultad === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-[1.02]' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
                 </div>
               </div>
               <div>
-                <label class="flex justify-between items-center text-xs font-bold uppercase text-slate-500 tracking-wider mb-4 pl-1">
+                <label for="range-preguntas" class="flex justify-between items-center text-xs font-bold uppercase text-slate-500 tracking-wider mb-4 pl-1">
                   <span>Cantidad</span>
                   <span class="text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-lg shadow-sm">{{ numPreguntas }} preguntas</span>
                 </label>
                 <div class="relative px-1 py-2">
-                  <input type="range" min="5" max="20" step="5" v-model.number="numPreguntas" :style="{ backgroundSize: ((numPreguntas - 5) * 100) / 15 + '% 100%' }" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none slider-custom" />
-                  <div class="flex justify-between mt-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest px-1"><span>5</span><span>10</span><span>15</span><span>20</span></div>
+                  <input id="range-preguntas" aria-label="Número de preguntas" type="range" min="5" max="20" step="5" v-model.number="numPreguntas" :style="{ backgroundSize: ((numPreguntas - 5) * 100) / 15 + '% 100%' }" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none slider-custom" />
+                  <div class="flex justify-between mt-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest px-1" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
                 </div>
               </div>
             </div>
 
             <div>
                <label class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-3 block pl-1">Formato de preguntas</label>
-               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                 <button v-for="tipo in tipos" :key="tipo" @click="tipoExamen = tipo" :class="['h-full w-full px-5 py-5 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden group', tipoExamen === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-500 hover:border-white/10 hover:bg-white/5']">
+               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="radiogroup" aria-label="Formato de preguntas">
+                 <button role="radio" :aria-checked="tipoExamen === tipo" v-for="tipo in tipos" :key="tipo" @click="tipoExamen = tipo" :class="['h-full w-full px-5 py-5 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden group', tipoExamen === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-500 hover:border-white/10 hover:bg-white/5']">
                     <div v-if="tipoExamen === tipo" class="absolute top-0 right-0 w-8 h-8 -mr-4 -mt-4 bg-indigo-500 rotate-45 shadow-sm"></div>
                     <span class="relative z-10 flex items-center gap-2">{{ tipo }}</span>
                  </button>
@@ -129,14 +134,14 @@
                     <span class="animate-pulse">Generando examen...</span>
                   </span>
                   <span v-else class="flex items-center justify-center gap-2 relative z-10">
-                    Generar Examen <i class="fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform text-indigo-200"></i>
+                    Generar Examen <i class="fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform text-indigo-200" aria-hidden="true"></i>
                   </span>
                 </button>
              </div>
 
-             <div v-if="error" class="text-center mt-6 animate-shake">
+             <div v-if="error" class="text-center mt-6 animate-shake" role="alert">
                  <div class="inline-flex items-center gap-2 bg-red-900/20 text-red-400 py-2 px-4 rounded-xl border border-red-500/20 text-sm font-medium">
-                   <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+                   <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> {{ error }}
                  </div>
                  <div v-if="esErrorDeAuth" class="mt-3">
                     <button @click="irAlLogin" class="text-xs text-slate-400 underline hover:text-indigo-400">Iniciar sesión para continuar</button>
@@ -146,7 +151,7 @@
           </div>
         </div>
 
-        <div v-if="resultado" class="mt-12 animate-slide-up-fade">
+        <div v-if="resultado" class="mt-12 animate-slide-up-fade" role="region" aria-label="Resultado del examen">
              <div class="flex items-center justify-between mb-6 px-2">
                 <h3 class="text-2xl font-bold text-slate-200">Resultado</h3>
                 <span class="text-xs font-bold uppercase tracking-wider text-green-400 bg-green-900/20 px-3 py-1 rounded-full border border-green-500/20">Generado con éxito</span>
@@ -158,7 +163,7 @@
                  </div>
                  <div class="bg-slate-950/50 border-t border-white/5 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <button v-if="hayRespuestas" @click="toggleResuelto" class="px-6 py-3 rounded-xl bg-slate-800 border border-white/10 text-slate-300 hover:text-indigo-400 hover:border-indigo-500/30 font-bold text-sm transition-all shadow-lg hover:shadow-black/20 flex items-center gap-2">
-                        <i :class="mostrarResuelto ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                        <i :class="mostrarResuelto ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
                         {{ mostrarResuelto ? 'Ocultar soluciones' : 'Ver soluciones' }}
                     </button>
                     <span class="text-xs text-slate-500 font-medium">Guardado automáticamente</span>
@@ -167,7 +172,7 @@
             <div v-if="mostrarResuelto" class="mt-6 bg-green-900/10 backdrop-blur-sm border border-green-500/20 rounded-[2rem] p-8 md:p-10 shadow-lg animate-fade-in-up relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                 <h4 class="flex items-center gap-2 text-lg font-bold text-green-400 mb-6 pb-4 border-b border-green-500/20">
-                    <span class="w-8 h-8 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs"><i class="fa-solid fa-check"></i></span>
+                    <span class="w-8 h-8 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
                     Hoja de Respuestas
                 </h4>
                 <div class="whitespace-pre-wrap leading-relaxed text-sm md:text-base text-slate-300 font-medium">{{ respuestas }}</div>
@@ -181,10 +186,10 @@
         <div v-if="mostrarNovedad" class="fixed bottom-6 right-4 md:right-8 z-50 w-full max-w-sm">
              <div class="relative bg-slate-900/90 backdrop-blur-md p-5 rounded-3xl shadow-[0_10px_40px_-10px_rgba(79,70,229,0.5)] border border-white/10 ring-1 ring-white/5 overflow-hidden group hover:scale-[1.02] transition-transform duration-300 cursor-pointer" @click="irAlModoReto">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500"></div>
-                <button @click.stop="cerrarNovedad" class="absolute top-2 right-2 p-2 text-slate-500 hover:text-slate-300 z-10 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                <button @click.stop="cerrarNovedad" aria-label="Cerrar aviso de novedad" class="absolute top-2 right-2 p-2 text-slate-500 hover:text-slate-300 z-10 transition-colors"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                 <div class="flex gap-4 items-start relative z-10">
                     <div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-                        <i class="fa-solid fa-fire text-xl animate-pulse"></i>
+                        <i class="fa-solid fa-fire text-xl animate-pulse" aria-hidden="true"></i>
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
@@ -192,7 +197,7 @@
                             <span class="px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-400 text-[10px] font-bold uppercase tracking-wide border border-pink-500/20">Beta</span>
                         </div>
                         <p class="text-xs text-slate-400 leading-relaxed mb-3">¡Aprende jugando! Desliza tarjetas a la derecha o izquierda.</p>
-                        <button class="text-xs font-bold text-indigo-400 flex items-center gap-1 group-hover:gap-2 transition-all">Probar ahora <i class="fa-solid fa-arrow-right"></i></button>
+                        <button class="text-xs font-bold text-indigo-400 flex items-center gap-1 group-hover:gap-2 transition-all">Probar ahora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
                 <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -207,7 +212,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import * as pdfjsLib from 'pdfjs-dist'
+// ✅ OPTIMIZACIÓN #4 y #1: Eliminado import estático de 'pdfjs-dist' para Lazy Loading
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
 import { saveExam, generateExam } from '@/services/examService'
@@ -234,7 +239,18 @@ const tipos = ["Test (4 opciones)", "Verdadero/Falso", "Respuestas cortas", "Res
 
 onMounted(() => {
   userStore.loadSession()
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+  // Eliminado setup inmediato de PDF worker, se mueve a 'on demand'
+
+  // ✅ OPTIMIZACIÓN #7: Añadir Meta Description y Title dinámicamente
+  document.title = "Generador de Exámenes IA - Crea Tests Automáticos";
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.name = "description";
+      document.head.appendChild(metaDesc);
+  }
+  metaDesc.content = "Convierte apuntes y PDFs en exámenes y tests automáticamente con nuestra IA. Herramienta de estudio para generar preguntas y respuestas al instante.";
+
 
   setTimeout(() => {
     const yaVisto = localStorage.getItem('novedad_reto_visto')
@@ -253,19 +269,34 @@ function irAlModoReto() {
     router.push('/modotinder')
 }
 
+// ✅ OPTIMIZACIÓN #4 y #1: Lazy Load de la librería PDF (Dividir JS)
+// Solo se descarga el código de PDF.js si el usuario sube un archivo.
 async function handlePdfUploadCustom(event) {
   const file = event.target.files[0]
   if (!file) return
   archivoNombre.value = file.name
-  const buffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
-  let text = ""
-  for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
-    const page = await pdf.getPage(i)
-    const content = await page.getTextContent()
-    text += content.items.map(i => i.str).join(" ") + "\n\n"
+  
+  try {
+      // Dynamic import
+      const pdfjsLib = await import('pdfjs-dist')
+      // Configuración del worker solo cuando se necesita
+      if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+           pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+      }
+
+      const buffer = await file.arrayBuffer()
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise
+      let text = ""
+      for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+        const page = await pdf.getPage(i)
+        const content = await page.getTextContent()
+        text += content.items.map(i => i.str).join(" ") + "\n\n"
+      }
+      apuntes.value = text
+  } catch (e) {
+      console.error("Error cargando PDF", e)
+      error.value = "Error al leer el archivo PDF"
   }
-  apuntes.value = text
 }
 
 function darFormatoVisual(texto) {

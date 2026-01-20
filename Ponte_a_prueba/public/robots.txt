@@ -3,7 +3,6 @@ Allow: /
 
 # 🚫 Zonas Privadas (Ahorra presupuesto de rastreo)
 Disallow: /perfil
-Disallow: /ajustes
 Disallow: /biblioteca
 Disallow: /examen/
 Disallow: /estudio

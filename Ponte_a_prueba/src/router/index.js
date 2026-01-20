@@ -47,12 +47,6 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/ajustes',
-      name: 'ajustes',
-      component: () => import('@/views/AjustesView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
       path: '/biblioteca',
       name: 'biblioteca',
       component: () => import('@/views/BibliotecaView.vue'),

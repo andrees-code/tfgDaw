@@ -63,7 +63,7 @@
 
         <!-- Página de inicio -->
         <div v-else class="flex flex-col items-center justify-center w-full h-full overflow-hidden mb-[10%]">
-          <img src="../assets/logo/prueba2.png" alt="tuZona Logo" class="w-80 max-w-full h-auto object-contain mb-7" />
+          <img src="../assets/logo/prueba2.webp" alt="tuZona Logo" class="w-80 max-w-full h-auto object-contain mb-7" />
 
           <div class="relative w-full max-w-xl mb-6">
             <input

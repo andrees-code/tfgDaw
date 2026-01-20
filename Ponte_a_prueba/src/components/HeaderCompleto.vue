@@ -20,7 +20,7 @@
 
         <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
           <router-link to="/" class="block pointer-events-auto hover:opacity-80 transition-opacity filter drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
-            <img class="h-9 w-auto object-contain" src="../assets/logo/prueba2.png" alt="Logo" />
+            <img class="h-9 w-auto object-contain" src="../assets/logo/prueba2.webp" alt="Logo" />
           </router-link>
         </div>
 

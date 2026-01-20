@@ -20,7 +20,7 @@
           <div class="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
           <img
             class="w-24 h-auto relative z-10 animate-float drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-            src="../assets/logo/prueba2.png"
+            src="../assets/logo/prueba2.webp"
             alt="Logo"
           />
         </div>

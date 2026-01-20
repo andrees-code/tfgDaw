@@ -1,8 +1,8 @@
 <template>
   <ul
     class="absolute top-full right-0 mt-2 w-56 p-2 rounded-xl z-50
-           bg-white/90 backdrop-blur-xl border border-white/40
-           shadow-[0_8px_32px_0_rgba(31,38,135,0.20)]
+           bg-slate-900/90 backdrop-blur-xl border border-white/10
+           shadow-2xl shadow-indigo-500/10
            transition-all duration-300 ease-in-out"
   >
     <li
@@ -13,16 +13,16 @@
       <router-link
         :to="item.route"
         @click="emit('cerrar')"
-        class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 font-medium
+        class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 font-medium
                transition-all duration-200 ease-out
-               hover:bg-gray-50 hover:shadow-sm"
+               hover:bg-white/5 hover:text-white hover:shadow-lg hover:shadow-indigo-500/5"
       >
         <div class="w-6 text-center transition-transform group-hover:scale-110">
           <i :class="['fa-solid', `fa-${item.icon}`,
-          'transition-all duration-200 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:via-violet-500 group-hover:to-pink-500']"></i>
+          'text-slate-400 transition-all duration-200 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400']"></i>
         </div>
 
-        <span class="tracking-wide transition-all duration-200 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:via-violet-500 group-hover:to-pink-500">
+        <span class="tracking-wide transition-all duration-200 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400">
             {{ item.label }}
         </span>
       </router-link>

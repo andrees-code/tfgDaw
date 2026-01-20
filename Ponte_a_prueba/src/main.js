@@ -5,6 +5,9 @@ import App from './App.vue'
 import router from './router'
 import { userStore } from '@/stores/userStores'
 
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/inter/900.css';
 // ✅ Importar CSS al final puede ayudar ligeramente en algunos bundlers
 import './assets/main.css'
 

@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* en tu <style> o en un css global */
-
-
+@layer base {
+  html {
+    /* ✅ Asegura que la fuente base sea la misma que el skeleton loader */
+    font-family: 'Inter', system-ui, sans-serif;
+    /* ✅ Mejora la legibilidad del texto */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* ✅ Evita que las imágenes rompan el layout mientras cargan */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block; 
+  }
+}

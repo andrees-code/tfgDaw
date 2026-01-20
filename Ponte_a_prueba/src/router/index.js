@@ -1,17 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+// ✅ ESTRATEGIA: HomeView se carga normal (Eager Loading)
+// Queremos que la portada sea instantánea, así que la importamos arriba.
 import HomeView from '@/views/HomeView.vue'
-import Contacto from '@/views/ContactoView.vue'
-import Perfil from '@/views/PerfilView.vue'
-import Ajustes from '@/views/AjustesView.vue'
-import LoginRegister from '@/views/LoginRegister.vue'
-import BibliotecaView from '@/views/BibliotecaView.vue'
-import ExamenView from '@/views/ExamenView.vue'
-import Estudio from '@/views/ZonaEstudioView.vue'
-import PaypalView from '@/views/PaypalView.vue'
-import ErrorView from '@/views/ErrorView.vue'
-import ResetPasswordView from '@/views/ResetPasswordView.vue'
-import ModoTinderView from '@/views/ModoTinderView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,83 +10,102 @@ const router = createRouter({
     // 🔓 PÚBLICAS
     {
       path: '/',
-      component: HomeView,
+      name: 'home',
+      component: HomeView, // Carga inmediata
     },
     {
       path: '/home',
-      component: HomeView,
+      redirect: '/' // Mejor redireccionar para no duplicar contenido SEO
     },
     {
       path: '/contacto',
-      component: Contacto,
+      name: 'contacto',
+      // 🚀 LAZY LOADING: Solo se descarga si el usuario va a /contacto
+      component: () => import('@/views/ContactoView.vue'),
     },
     {
       path: '/login',
-      component: LoginRegister,
+      name: 'login',
+      component: () => import('@/views/LoginRegister.vue'),
     },
     {
       path: '/reset-password',
       name: 'reset-password',
-      component: ResetPasswordView
+      component: () => import('@/views/ResetPasswordView.vue')
     },
     {
       path: '/modotinder',
       name: 'tinder',
-      component: ModoTinderView
+      component: () => import('@/views/ModoTinderView.vue')
     },
 
     // 🔒 PRIVADAS
     {
       path: '/perfil',
-      component: Perfil,
+      name: 'perfil',
+      component: () => import('@/views/PerfilView.vue'),
       meta: { requiresAuth: true },
     },
     {
       path: '/ajustes',
-      component: Ajustes,
+      name: 'ajustes',
+      component: () => import('@/views/AjustesView.vue'),
       meta: { requiresAuth: true },
     },
     {
       path: '/biblioteca',
-      component: BibliotecaView,
+      name: 'biblioteca',
+      component: () => import('@/views/BibliotecaView.vue'),
       meta: { requiresAuth: true },
     },
     {
       path: '/examen/:id',
-      component: ExamenView,
+      name: 'examen',
+      component: () => import('@/views/ExamenView.vue'),
       meta: { requiresAuth: true },
     },
     {
       path: '/estudio',
-      component: Estudio,
+      name: 'estudio',
+      component: () => import('@/views/ZonaEstudioView.vue'),
       meta: { requiresAuth: true },
     },
     {
       path: '/paypal',
-      component: PaypalView,
+      name: 'paypal',
+      component: () => import('@/views/PaypalView.vue'),
       meta: { requiresAuth: true },
     },
 
-    // ❌ ERRORES
+    // ❌ ERRORES (También lazy, ¡esperamos que nadie entre aquí!)
     {
       path: '/404',
-      component: ErrorView,
+      name: 'error-404',
+      component: () => import('@/views/ErrorView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      component: ErrorView,
+      component: () => import('@/views/ErrorView.vue'),
     },
   ],
+  // ✅ OPTIMIZACIÓN EXTRA: Scroll al inicio al cambiar de página
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
 })
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('token')
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login') // 🔁 redirige al login
+    next('/login') 
   } else {
-    next() // ✅ permite acceso
+    next()
   }
 })
 

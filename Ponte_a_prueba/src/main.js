@@ -1,20 +1,30 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import { inject } from '@vercel/analytics'
 import App from './App.vue'
 import router from './router'
-import { createPinia } from 'pinia'
 import { userStore } from '@/stores/userStores'
-import { inject } from '@vercel/analytics'
+
+// ✅ Importar CSS al final puede ayudar ligeramente en algunos bundlers
 import './assets/main.css'
 
 const app = createApp(App)
 
-app.use(router)
 app.use(createPinia())
+app.use(router)
 
-// 🔹 Activar Vercel Analytics
+// Activar Analytics
 inject()
 
-// 🔹 Cargar sesión antes de montar la app
-userStore.loadSession()
-
+// 🚀 OPTIMIZACIÓN CRÍTICA:
+// Montamos la app PRIMERO para que el usuario vea la interfaz inmediatamente.
+// La sesión se carga después/paralelamente.
 app.mount('#app')
+
+// ✅ Cargar sesión después de montar
+// Si loadSession es muy lenta, no bloqueará la aparición inicial de la web.
+try {
+    userStore.loadSession()
+} catch (e) {
+    console.error("Error cargando sesión:", e)
+}

@@ -12,6 +12,29 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 
+    <style>
+      body { margin: 0; background-color: #020617; font-family: 'Inter', system-ui, sans-serif; }
+      /* Corrección para FontAwesome: fuerza a que no bloquee texto invisible */
+      @font-face {
+        font-family: 'Font Awesome 6 Free';
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap; 
+        src: url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2) format('woff2');
+      }
+      .app-loader {
+        height: 100vh; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center; color: #cbd5e1;
+      }
+      .loader-spinner {
+        width: 48px; height: 48px; border: 5px solid #4f46e5; /* Indigo-600 */
+        border-bottom-color: transparent; border-radius: 50%; 
+        display: inline-block; box-sizing: border-box; 
+        animation: rotation 1s linear infinite; margin-bottom: 16px;
+      }
+      @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+
     <link 
       rel="preload" 
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
@@ -21,28 +44,13 @@
     <noscript>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </noscript>
-
-    <style>
-      body { margin: 0; background-color: #020617; font-family: 'Inter', sans-serif; }
-      .app-loader {
-        height: 100vh; display: flex; flex-direction: column; 
-        align-items: center; justify-content: center; color: #cbd5e1;
-      }
-      .loader-spinner {
-        width: 48px; height: 48px; border: 5px solid #3730a3; 
-        border-bottom-color: transparent; border-radius: 50%; 
-        display: inline-block; box-sizing: border-box; 
-        animation: rotation 1s linear infinite mb-4;
-      }
-      @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
   </head>
 
   <body>
     <div id="app">
       <div class="app-loader">
         <div class="loader-spinner"></div>
-        <p style="margin-top: 20px; font-weight: 700; font-size: 1.2rem;">Preparando tus exámenes...</p>
+        <p style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.025em;">Cargando PonteAprobados...</p>
       </div>
     </div>
     
@@ -52,17 +60,14 @@
       function cargarScriptsExternos() {
         if (window.scriptsCargados) return;
         window.scriptsCargados = true;
+        console.log("⚡ Cargando servicios extra...");
 
-        console.log("⚡ Cargando servicios de Google...");
-
-        // AdSense
         const adScript = document.createElement('script');
         adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8114132400914870";
         adScript.async = true;
         adScript.crossOrigin = "anonymous";
         document.body.appendChild(adScript);
 
-        // reCAPTCHA
         const recapScript = document.createElement('script');
         recapScript.src = "https://www.google.com/recaptcha/api.js?render=%VITE_RECAPTCHA_SITE_KEY%"; 
         recapScript.async = true;
@@ -70,15 +75,11 @@
       }
 
       const eventosUsuario = ['mousemove', 'keydown', 'touchstart', 'scroll'];
-      
       const iniciarCarga = () => {
         eventosUsuario.forEach(e => window.removeEventListener(e, iniciarCarga));
         cargarScriptsExternos();
       };
-
       eventosUsuario.forEach(e => window.addEventListener(e, iniciarCarga, { passive: true }));
-      
-      // ⚠️ Aumentado a 7000ms (7s) para que Lighthouse termine de medir antes de cargar esto
       setTimeout(cargarScriptsExternos, 7000);
     </script>
   </body>

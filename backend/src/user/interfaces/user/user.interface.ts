@@ -4,6 +4,7 @@ export interface User {
   _id: string;
   username: string;
   email: string;
+  googleId?: string | null;
   role: 'user' | 'admin';
   avatar: string | null;
   lastLogin?: Date;

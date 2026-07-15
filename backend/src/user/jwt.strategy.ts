@@ -16,9 +16,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const options: StrategyOptionsWithoutRequest = {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: secret,
-      ignoreExpiration: true,
+      ignoreExpiration: false,
     };
-    console.log('LLAVE EN ESTRATEGIA:', secret)
     super(options);
   }
 
@@ -27,8 +26,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!payload || !payload.id) {
       throw new UnauthorizedException('Token inválido');
     }
-
-    console.log('[JwtStrategy] payload recibido:', payload);
 
     // Esto se asigna a req.user
     return {

@@ -227,6 +227,15 @@
 
             </transition>
 
+            <div v-show="modo !== 'forgot'" class="mt-6">
+              <div class="flex items-center gap-3 mb-5">
+                <div class="flex-1 h-px bg-white/10"></div>
+                <span class="text-xs uppercase tracking-wider text-slate-500">o continúa con</span>
+                <div class="flex-1 h-px bg-white/10"></div>
+              </div>
+              <div id="google-btn-container" class="flex justify-center"></div>
+            </div>
+
             <transition name="slide-up">
               <div v-if="error" class="mt-6 p-4 rounded-xl bg-red-900/20 border border-red-500/20 flex items-start gap-3">
                 <i class="fa-solid fa-circle-exclamation text-red-400 mt-0.5" aria-hidden="true"></i>
@@ -259,7 +268,7 @@ import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import Header from "@/components/HeaderCompleto.vue"
 import Footer from '@/components/FooterComponent.vue'
-import { loginUser, registerUser, sendPasswordResetEmail } from "@/services/userService"
+import { loginUser, registerUser, sendPasswordResetEmail, loginWithGoogle } from "@/services/userService"
 import { userStore } from "@/stores/userStores"
 
 const router = useRouter()
@@ -284,7 +293,74 @@ onMounted(() => {
       document.head.appendChild(metaDesc);
   }
   metaDesc.content = "Inicia sesión o regístrate en PonteAprobados para gestionar tus exámenes y suscripciones.";
+
+  loadGoogleScript(initGoogleButton)
 })
+
+// 🔵 Carga el SDK de Google Identity Services (mismo patrón que el SDK de PayPal)
+function loadGoogleScript(callback) {
+  if (window.google?.accounts?.id) {
+    callback()
+    return
+  }
+  if (!document.getElementById('google-identity-sdk')) {
+    const script = document.createElement('script')
+    script.id = 'google-identity-sdk'
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.onload = callback
+    document.head.appendChild(script)
+  } else {
+    const interval = setInterval(() => {
+      if (window.google?.accounts?.id) {
+        clearInterval(interval)
+        callback()
+      }
+    }, 100)
+  }
+}
+
+function initGoogleButton() {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  if (!clientId) {
+    console.warn('VITE_GOOGLE_CLIENT_ID no está configurado; el botón de Google no se mostrará')
+    return
+  }
+
+  window.google.accounts.id.initialize({
+    client_id: clientId,
+    callback: handleGoogleCredential,
+  })
+
+  const container = document.getElementById('google-btn-container')
+  if (container) {
+    container.innerHTML = ''
+    window.google.accounts.id.renderButton(container, {
+      theme: 'filled_black',
+      size: 'large',
+      shape: 'pill',
+      width: 320,
+      text: 'continue_with',
+    })
+  }
+}
+
+async function handleGoogleCredential(response) {
+  try {
+    loading.value = true
+    error.value = null
+    success.value = null
+
+    const res = await loginWithGoogle(response.credential)
+    userStore.setSession(res)
+    router.push('/')
+  } catch (e) {
+    error.value = e.response?.data?.message || 'No se pudo iniciar sesión con Google. Inténtalo de nuevo.'
+  } finally {
+    loading.value = false
+  }
+}
 
 function cambiarModo(nuevoModo) {
   modo.value = nuevoModo

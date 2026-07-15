@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   InternalServerErrorException,
   NotFoundException,
@@ -11,6 +12,9 @@ import {
   Post,
   Put,
   Query,
+  Req,
+  UnauthorizedException,
+  UseGuards,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
@@ -23,6 +27,16 @@ import { CreateUserDto } from './dto/user.dto/CreateUserDto';
 import { LoginUserDto } from './dto/user.dto/LoginUserDto';
 import { ForgotPasswordDto } from './dto/user.dto/ForgotPasswordDto';
 import { ResetPasswordDto } from './dto/user.dto/ResetPasswordDto';
+import { GoogleAuthDto } from './dto/user.dto/GoogleAuthDto';
+import { JwtAuthGuard } from './jwt-auth.guard';
+
+// Solo el propietario de la cuenta (o un admin) puede modificar/eliminar sus datos
+function assertOwnershipOrAdmin(req: any, id: string) {
+  const requesterId = req.user?.id || req.user?.userId || req.user?._id;
+  if (requesterId !== id && req.user?.role !== 'admin') {
+    throw new ForbiddenException('No tienes permiso para modificar este usuario');
+  }
+}
 
 @Controller('api/v1/users')
 export class UserController {
@@ -50,7 +64,20 @@ export class UserController {
     }
   }
 
+  // 🔐 Login / registro con Google
+  @Post('auth/google')
+  async googleAuth(@Body() dto: GoogleAuthDto) {
+    try {
+      const { user, token } = await this.userService.loginWithGoogle(dto.credential);
+      return { status: true, user, token };
+    } catch (e: any) {
+      if (e instanceof UnauthorizedException) throw e;
+      throw new BadRequestException({ status: false, message: e.message });
+    }
+  }
+
   // ➕ Crear usuario (admin)
+  @UseGuards(JwtAuthGuard)
   @Post()
   async addUser(@Body() userDto: UserDto) {
     try {
@@ -84,6 +111,7 @@ export class UserController {
   }
 
   // 📄 Obtener todos
+  @UseGuards(JwtAuthGuard)
   @Get()
   async getUsers() {
     try {
@@ -95,6 +123,7 @@ export class UserController {
   }
 
   // 🔍 Obtener por ID
+  @UseGuards(JwtAuthGuard)
   @Get('user/:id')
   async getUser(@Param('id') id: string) {
     try {
@@ -107,6 +136,7 @@ export class UserController {
   }
 
   // 🔍 Buscar por username
+  @UseGuards(JwtAuthGuard)
   @Get('byUsername')
   async getUserByUsername(@Query('username') username: string) {
     try {
@@ -118,17 +148,27 @@ export class UserController {
   }
 
   // 🔄 Update completo con avatar (compatible Vercel)
+  @UseGuards(JwtAuthGuard)
   @Put('update/:id')
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: memoryStorage(),
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB máximo
+      fileFilter: (_req, file, cb) => {
+        if (!/^image\/(png|jpe?g|webp|gif)$/.test(file.mimetype)) {
+          return cb(new BadRequestException('Formato de imagen no permitido'), false);
+        }
+        cb(null, true);
+      },
     }),
   )
   async updateUser(
+    @Req() req,
     @Param('id') id: string,
     @Body() userDto: UserDto,
     @UploadedFile() avatar?: Express.Multer.File,
   ) {
+    assertOwnershipOrAdmin(req, id);
     try {
       if (avatar) {
         // Aquí deberías subir avatar.buffer a S3, Cloudinary o Firebase
@@ -145,8 +185,10 @@ export class UserController {
   }
 
   // 🩹 Patch parcial
+  @UseGuards(JwtAuthGuard)
   @Patch('update/:id')
-  async patchUser(@Param('id') id: string, @Body() partialUserDto: Partial<UserDto>) {
+  async patchUser(@Req() req, @Param('id') id: string, @Body() partialUserDto: Partial<UserDto>) {
+    assertOwnershipOrAdmin(req, id);
     try {
       const updated = await this.userService.patchUser(id, partialUserDto);
       return { status: true, data: updated };
@@ -157,8 +199,10 @@ export class UserController {
   }
 
   // ❌ Eliminar usuario
+  @UseGuards(JwtAuthGuard)
   @Delete('delete/:id')
-  async deleteUser(@Param('id') id: string) {
+  async deleteUser(@Req() req, @Param('id') id: string) {
+    assertOwnershipOrAdmin(req, id);
     try {
       await this.userService.deleteUser(id);
       return { status: true, message: 'User deleted' };

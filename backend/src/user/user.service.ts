@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { OAuth2Client } from 'google-auth-library';
 import * as crypto from 'crypto';
 // 👇 1. IMPORTAR MAILER SERVICE
 import { MailerService } from '@nestjs-modules/mailer';
@@ -15,12 +17,17 @@ import { LoginUserDto } from './dto/user.dto/LoginUserDto';
 
 @Injectable()
 export class UserService {
+  private readonly googleClient: OAuth2Client;
+
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
     private readonly jwtService: JwtService,
     // 👇 2. INYECTARLO AQUÍ
     private readonly mailerService: MailerService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.googleClient = new OAuth2Client(this.configService.get<string>('GOOGLE_CLIENT_ID'));
+  }
 
   // ➕ Crear usuario manual/admin
   async addUser(userDto: UserDto): Promise<User> {
@@ -55,6 +62,10 @@ export class UserService {
     const user = await this.userModel.findOne({ email: data.email }).select('+password');
     if (!user) throw new BadRequestException('Usuario o contraseña incorrecta');
 
+    if (!user.password) {
+      throw new BadRequestException('Esta cuenta usa inicio de sesión con Google. Entra con el botón "Continuar con Google".');
+    }
+
     const valid = await bcrypt.compare(data.password, user.password);
     if (!valid) throw new BadRequestException('Usuario o contraseña incorrecta');
 
@@ -62,6 +73,67 @@ export class UserService {
 
     const { password, ...userWithoutPassword } = user.toObject();
     return { user: { ...userWithoutPassword, _id: user._id.toString() }, token };
+  }
+
+  // 🔐 Login / registro con Google (ID token verificado)
+  async loginWithGoogle(idToken: string) {
+    const audience = this.configService.get<string>('GOOGLE_CLIENT_ID');
+    if (!audience) {
+      throw new InternalServerErrorException('GOOGLE_CLIENT_ID no está configurado en el servidor');
+    }
+
+    let payload;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({ idToken, audience });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Token de Google inválido o expirado');
+    }
+
+    if (!payload || !payload.email) {
+      throw new UnauthorizedException('No se pudo verificar la cuenta de Google');
+    }
+    if (!payload.email_verified) {
+      throw new UnauthorizedException('El email de Google no está verificado');
+    }
+
+    const googleId = payload.sub;
+    let user = await this.userModel.findOne({ googleId });
+
+    if (!user) {
+      // ¿Ya existe una cuenta con ese email registrada por contraseña? -> vincular
+      user = await this.userModel.findOne({ email: payload.email });
+
+      if (user) {
+        user.googleId = googleId;
+        if (!user.avatar && payload.picture) user.avatar = payload.picture;
+        await user.save();
+      } else {
+        const baseUsername = (payload.name || payload.email.split('@')[0]).trim();
+        user = await this.userModel.create({
+          username: await this.generateUniqueUsername(baseUsername),
+          email: payload.email,
+          googleId,
+          avatar: payload.picture || null,
+          role: 'user',
+        });
+      }
+    }
+
+    const token = this.jwtService.sign({ id: user._id.toString(), role: user.role });
+    const { password, ...userWithoutPassword } = user.toObject();
+    return { user: { ...userWithoutPassword, _id: user._id.toString() }, token };
+  }
+
+  // Genera un username único a partir de un nombre base (por si ya existe)
+  private async generateUniqueUsername(base: string): Promise<string> {
+    let candidate = base || 'usuario';
+    let suffix = 0;
+    while (await this.userModel.exists({ username: candidate })) {
+      suffix += 1;
+      candidate = `${base}${suffix}`;
+    }
+    return candidate;
   }
 
   // 📄 Obtener todos los usuarios

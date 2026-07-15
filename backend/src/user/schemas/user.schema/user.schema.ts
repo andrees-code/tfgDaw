@@ -3,7 +3,8 @@ import { Schema, Document } from 'mongoose';
 export interface UserDocument extends Document {
   username: string;
   email: string;
-  password: string;
+  password?: string;
+  googleId?: string | null;
   role: 'user' | 'admin';
   avatar: string | null;
   lastLogin?: Date;
@@ -26,7 +27,8 @@ export interface UserDocument extends Document {
 export const UserSchema = new Schema<UserDocument>({
   username: { type: String, required: true, unique: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password: { type: String, required: true, select: false },
+  password: { type: String, required: false, select: false },
+  googleId: { type: String, default: null, unique: true, sparse: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   avatar: { type: String, default: null },
   lastLogin: { type: Date, default: null },

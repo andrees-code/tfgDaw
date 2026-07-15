@@ -22,7 +22,28 @@ async function createNestApp(): Promise<express.Express> {
 
   app.useGlobalFilters(new AllExceptionsFilter())
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
-  app.enableCors({ origin: true, credentials: true })
+
+  // ✅ CORS restringido a orígenes conocidos (configurable vía CORS_ORIGINS)
+  const defaultOrigins = [
+    'https://www.ponteaprobados.es',
+    'https://ponteaprobados.es',
+    'http://localhost:5173',
+    'http://localhost:4173',
+  ]
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+    : defaultOrigins
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Permitimos peticiones sin origin (curl, apps móviles, server-to-server)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+      return callback(new Error(`Origen no permitido por CORS: ${origin}`))
+    },
+    credentials: true,
+  })
 
   await app.init()
   cachedApp = expressApp

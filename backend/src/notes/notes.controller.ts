@@ -18,14 +18,33 @@ export class NotesController {
     return this.notesService.findAllByUser(req.user.id)
   }
 
+  // Papelera (debe ir antes de :id para no colisionar con la ruta paramétrica)
+  @Get('trash')
+  findTrash(@Req() req) {
+    return this.notesService.findTrash(req.user.id)
+  }
+
   @Get(':id')
   findOne(@Req() req, @Param('id') id: string) {
     return this.notesService.findOne(req.user.id, id)
   }
 
+  // Enviar a la papelera (soft delete)
   @Delete(':id')
   delete(@Req() req, @Param('id') id: string) {
     return this.notesService.delete(req.user.id, id)
+  }
+
+  // Restaurar de la papelera
+  @Post(':id/restore')
+  restore(@Req() req, @Param('id') id: string) {
+    return this.notesService.restore(req.user.id, id)
+  }
+
+  // Destrucción definitiva
+  @Delete(':id/permanent')
+  purge(@Req() req, @Param('id') id: string) {
+    return this.notesService.purge(req.user.id, id)
   }
 
   @Patch(':id/favorite')
@@ -52,5 +71,11 @@ export class NotesController {
   @Patch(':id/date')
   updateDate(@Param('id') id: string, @Req() req, @Body('date') date: string) {
     return this.notesService.updateDate(id, req.user.id, date)
+  }
+
+  // Mover nota a otra carpeta (null = raíz)
+  @Patch(':id/folder')
+  updateFolder(@Param('id') id: string, @Req() req, @Body('folderId') folderId: string | null) {
+    return this.notesService.updateFolder(id, req.user.id, folderId)
   }
 }

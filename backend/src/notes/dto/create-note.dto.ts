@@ -19,4 +19,9 @@ export class CreateNoteDto {
   @IsString()
   @IsOptional()
   calendarDate?: string
+
+  // Carpeta contenedora (null/ausente = raíz)
+  @IsString()
+  @IsOptional()
+  folderId?: string
 }

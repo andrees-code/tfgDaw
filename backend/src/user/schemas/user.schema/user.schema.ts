@@ -28,7 +28,10 @@ export const UserSchema = new Schema<UserDocument>({
   username: { type: String, required: true, unique: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: false, select: false },
-  googleId: { type: String, default: null, unique: true, sparse: true },
+  // Sin default: si el usuario no es de Google, el campo queda AUSENTE.
+  // (default: null rompía el índice unique+sparse: solo permitía UN usuario
+  // con googleId null explícito y el segundo registro local fallaba con E11000)
+  googleId: { type: String, unique: true, sparse: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   avatar: { type: String, default: null },
   lastLogin: { type: Date, default: null },

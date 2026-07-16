@@ -1,4 +1,4 @@
-import { IsInt, IsString, Min } from 'class-validator'
+import { IsInt, IsOptional, IsString, Min } from 'class-validator'
 
 export class CreateExamDto {
   @IsString()
@@ -14,12 +14,25 @@ export class CreateExamDto {
   @Min(1)
   numPreguntas: number
 
+  @IsOptional()
   @IsString()
-  apuntes: string
+  apuntes?: string
 
   @IsString()
   preguntas: string
 
   @IsString()
   respuestas: string
+
+  @IsOptional()
+  @IsString()
+  categoria?: string
+
+  @IsOptional()
+  @IsString()
+  tema?: string
+
+  @IsOptional()
+  @IsString()
+  modo?: string
 }

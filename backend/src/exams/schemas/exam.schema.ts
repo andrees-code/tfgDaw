@@ -33,7 +33,14 @@ export class Exam extends Document {
   @Prop({ type: String, default: '' })
   asignatura: string
 
+  @Prop({ type: String, default: 'general' })
+  categoria: string
 
+  @Prop({ type: String, default: '' })
+  tema: string
+
+  @Prop({ type: String, default: 'normal' })
+  modo: string
 }
 
 export const ExamSchema = SchemaFactory.createForClass(Exam)

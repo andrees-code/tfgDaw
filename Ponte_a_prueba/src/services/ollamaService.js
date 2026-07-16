@@ -1,5 +1,7 @@
+import { API_BASE_URL } from '@/config/api'
+
 export async function sendChat(messages, token) {
-  const res = await fetch("https://bakend-murex.vercel.app/api/api/chat", {
+  const res = await fetch(`${API_BASE_URL}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

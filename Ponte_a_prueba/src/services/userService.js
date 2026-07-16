@@ -1,9 +1,10 @@
 // src/services/userService.js
 import axios from 'axios'
 import { userStore } from '@/stores/userStores'
+import { API_BASE_URL } from '@/config/api'
 
 export const api = axios.create({
-  baseURL: 'https://bakend-murex.vercel.app/api/api/v1/users',
+  baseURL: `${API_BASE_URL}/v1/users`,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -56,14 +57,13 @@ export const updateProfile = async (userId, data) => {
 }
 
 export const sendPasswordResetEmail = async (payload) => {
-  // Asegúrate de que la URL coincida con la ruta de tu Backend
-  const response = await axios.post('https://bakend-murex.vercel.app/api/api/v1/users/auth/forgot-password', payload)
+  const response = await axios.post(`${API_BASE_URL}/v1/users/auth/forgot-password`, payload)
   return response.data
 }
 
 // Añade esto al final
 export const resetPassword = async (payload) => {
   // payload = { token, newPassword }
-  const response = await axios.post('https://bakend-murex.vercel.app/api/api/v1/users/auth/reset-password', payload)
+  const response = await axios.post(`${API_BASE_URL}/v1/users/auth/reset-password`, payload)
   return response.data
 }

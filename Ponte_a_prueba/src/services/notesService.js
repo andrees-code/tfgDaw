@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { userStore } from "@/stores/userStores"
+import { API_BASE_URL } from '@/config/api'
 
 const api = axios.create({
-  baseURL: 'https://bakend-murex.vercel.app/api/api', // Asegúrate que esta URL es correcta
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 

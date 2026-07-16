@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { userStore } from "@/stores/userStores"
+import { API_BASE_URL } from '@/config/api'
 
 const api = axios.create({
-  baseURL: 'https://bakend-murex.vercel.app/api/api', // Asegúrate que esta URL es correcta
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -50,6 +51,13 @@ export async function saveNote(note) {
       })
     }
 
+    // Carpeta contenedora (null = raíz)
+    if (note.folderId !== undefined) {
+      await api.patch(`/notes/${note.idBackend}/folder`, {
+        folderId: note.folderId,
+      })
+    }
+
     return note
   } else {
     // Creación
@@ -62,6 +70,7 @@ export async function saveNote(note) {
           ? note.color || 'bg-yellow-200'
           : undefined,
       calendarDate: note.calendarDate || null, // Enviamos la fecha al crear
+      folderId: note.folderId || undefined,
     })
 
     note.idBackend = res.data._id
@@ -70,11 +79,36 @@ export async function saveNote(note) {
 }
 
 // ===============================
-// BORRAR NOTA
+// MOVER NOTA DE CARPETA (null = raíz)
+// ===============================
+export async function updateNoteFolder(idBackend, folderId) {
+  const res = await api.patch(`/notes/${idBackend}/folder`, { folderId })
+  return res.data
+}
+
+// ===============================
+// BORRAR NOTA (envía a la papelera)
 // ===============================
 export async function deleteNote(idBackend) {
   if (!idBackend) return
   await api.delete(`/notes/${idBackend}`)
+}
+
+// ===============================
+// PAPELERA DE NOTAS
+// ===============================
+export async function loadTrashNotes() {
+  const res = await api.get('/notes/trash')
+  return res.data
+}
+
+export async function restoreNote(idBackend) {
+  const res = await api.post(`/notes/${idBackend}/restore`)
+  return res.data
+}
+
+export async function purgeNote(idBackend) {
+  await api.delete(`/notes/${idBackend}/permanent`)
 }
 
 // ===============================

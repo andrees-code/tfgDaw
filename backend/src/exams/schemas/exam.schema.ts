@@ -41,6 +41,16 @@ export class Exam extends Document {
 
   @Prop({ type: String, default: 'normal' })
   modo: string
+
+  @Prop({ type: String, required: false, default: null })
+  calendarDate: string | null
+
+  @Prop({ type: Types.ObjectId, ref: 'Folder', default: null })
+  folderId: Types.ObjectId | null
+
+  // Papelera: fecha de eliminación (null = activo). Se purga a los 30 días.
+  @Prop({ type: Date, default: null, index: true })
+  deletedAt: Date | null
 }
 
 export const ExamSchema = SchemaFactory.createForClass(Exam)

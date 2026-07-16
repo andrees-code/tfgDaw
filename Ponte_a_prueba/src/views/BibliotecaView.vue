@@ -27,76 +27,54 @@
           <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-70"></div>
 
           <div class="flex justify-between items-center mb-6">
-            <h2 class="font-bold text-slate-100 text-lg tracking-tight">📘 Asignaturas</h2>
+            <h2 class="font-bold text-slate-100 text-lg tracking-tight">📁 Carpetas</h2>
             <button
-              v-if="asignaturas.length"
-              @click="addAsignatura()"
+              @click="newFolder(null)"
               type="button"
               class="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg text-xs font-bold border border-indigo-500/20 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-              aria-label="Añadir nueva asignatura"
+              aria-label="Añadir nueva carpeta"
             >
-              ➕ Añadir
+              ➕ Carpeta
             </button>
           </div>
 
-          <div v-if="asignaturas.length" class="space-y-2">
-            <div
-              v-for="asig in asignaturas"
-              :key="asig"
-              class="group border border-transparent hover:border-white/10 rounded-xl p-2 transition-all hover:bg-white/5"
-            >
-              <div class="flex justify-between items-center">
-                <button
-                  @click="toggleAsignatura(asig)"
-                  type="button"
-                  class="font-semibold flex-1 text-left text-slate-400 group-hover:text-indigo-300 text-sm transition-colors flex items-center justify-between"
-                  :aria-expanded="!!openAsignaturas[asig]"
-                  :aria-label="openAsignaturas[asig] ? 'Colapsar asignatura ' + asig : 'Expandir asignatura ' + asig"
-                >
-                  {{ asig }}
-                  <span class="ml-1 text-[10px] opacity-50" aria-hidden="true">
-                    {{ openAsignaturas[asig] ? '▼' : '▶' }}
-                  </span>
-                </button>
+          <button
+            v-if="selectedFolderId"
+            @click="selectedFolderId = ''"
+            type="button"
+            class="w-full text-left text-xs font-bold text-indigo-400 hover:text-indigo-300 px-2 py-1.5 mb-2 rounded-lg hover:bg-white/5 transition-colors flex items-center gap-1"
+          >
+            ✕ Ver todos los exámenes
+          </button>
 
-                <button
-                  @click="removeAsignatura(asig)"
-                  type="button"
-                  class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 rounded-md hover:bg-red-900/20 transition-colors"
-                  title="Borrar asignatura"
-                  :aria-label="'Eliminar asignatura ' + asig"
-                >
-                  🗑
-                </button>
-              </div>
+          <!-- Input inline para crear carpeta raíz -->
+          <div v-if="creatingIn === 'root'" class="flex items-center gap-1.5 px-2 py-1 mb-1">
+            <span class="text-indigo-400/60 text-sm" aria-hidden="true">📁</span>
+            <input
+              :ref="el => el && el.focus()"
+              v-model="rootFolderName"
+              type="text"
+              placeholder="Nombre de la carpeta..."
+              class="flex-1 min-w-0 bg-slate-950/70 border border-indigo-500/40 rounded-md px-1.5 py-1 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none"
+              @keydown.enter.prevent="submitRootFolder"
+              @keydown.esc="creatingIn = null; rootFolderName = ''"
+              @blur="submitRootFolder"
+              aria-label="Nombre de la nueva carpeta"
+            />
+          </div>
 
-              <ul
-                v-if="openAsignaturas[asig]"
-                class="text-xs text-slate-400 ml-2 mt-2 border-l-2 border-slate-700 pl-3 space-y-1.5"
-              >
-                <li
-                  v-for="exam in examsByAsignatura(asig)"
-                  :key="exam._id"
-                  class="break-words"
-                >
-                  <span class="text-indigo-500 mr-1" aria-hidden="true">•</span> {{ exam.title }}
-                </li>
-                <li v-if="!examsByAsignatura(asig).length" class="italic text-slate-500">
-                  Sin exámenes
-                </li>
-              </ul>
+          <div
+            class="space-y-1 min-h-[40px] rounded-xl transition-colors"
+            :class="rootDragOver ? 'bg-indigo-500/10 ring-1 ring-indigo-500/30' : ''"
+            @dragenter.prevent
+            @dragover.prevent="rootDragOver = true"
+            @dragleave="rootDragOver = false"
+            @drop="onDropToRoot"
+          >
+            <ExamFolderTree :nodes="folderTree" />
+            <div v-if="!folderTree.length && creatingIn !== 'root'" class="px-2 py-6 text-center text-xs text-slate-600">
+              Crea carpetas para organizar tus exámenes.
             </div>
-          </div>
-
-          <div v-else class="flex flex-1 justify-center items-center py-8 flex-col gap-2">
-             <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-xl mb-2 animate-float border border-white/5" aria-hidden="true">📚</div>
-            <button
-              @click="addAsignatura()"
-              type="button"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-900/20"
-            >
-              Crear tu primera asignatura
-            </button>
           </div>
         </aside>
 
@@ -131,64 +109,97 @@
             </button>
           </div>
 
-          <div class="space-y-4 list-container">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+            <div class="relative flex-1">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" aria-hidden="true">🔍</span>
+              <input
+                v-model="search"
+                type="text"
+                placeholder="Buscar por título..."
+                aria-label="Buscar examen por título"
+                class="w-full pl-9 pr-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+              />
+            </div>
+
+            <select
+              v-model="sortBy"
+              aria-label="Ordenar exámenes"
+              class="px-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+            >
+              <option value="recientes">Más recientes</option>
+              <option value="antiguos">Más antiguos</option>
+              <option value="az">Título (A-Z)</option>
+              <option value="za">Título (Z-A)</option>
+            </select>
+
+            <span class="text-xs text-slate-500 font-medium whitespace-nowrap px-1">
+              {{ filteredExams.length }} examen{{ filteredExams.length === 1 ? '' : 'es' }}
+            </span>
+          </div>
+
+          <div class="bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-2xl divide-y divide-white/5 overflow-hidden shadow-lg list-container">
             <transition-group name="slide-fade">
                 <div
                     v-for="exam in filteredExams"
                     :key="exam._id"
-                    class="group bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 md:p-6 shadow-lg hover:shadow-indigo-500/10 hover:border-white/10 hover:-translate-y-1 transition-all duration-300 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 relative overflow-hidden"
+                    draggable="true"
+                    @dragstart="onDragStartExam($event, exam)"
+                    class="group flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors duration-200 cursor-grab active:cursor-grabbing"
                 >
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                    <div class="text-xl shrink-0" aria-hidden="true">{{ typeIcon(exam.tipo) }}</div>
 
-                    <div class="flex-1 w-full relative z-10">
-                    <input
-                        v-model="exam.title"
-                        @blur="saveTitle(exam)"
-                        aria-label="Editar título del examen"
-                        class="text-lg md:text-xl font-bold w-full bg-transparent border-b border-transparent hover:border-indigo-500/50 focus:border-indigo-500 focus:outline-none transition-colors mb-2 text-slate-200 placeholder-slate-500 py-1"
-                    />
-
-                    <div class="flex flex-wrap gap-2 md:gap-3 items-center mt-1">
-                        <div class="relative group/select">
-                            <select
-                            v-model="exam.asignatura"
-                            @change="handleAsignaturaChange(exam)"
-                            aria-label="Asignar asignatura"
-                            class="appearance-none cursor-pointer border border-white/10 bg-slate-950/50 hover:bg-slate-900 rounded-lg pl-3 pr-8 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-400 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none transition-all max-w-[150px] truncate"
-                            >
-                            <option value="" class="bg-slate-900 text-slate-300">Sin asignatura</option>
-                            <option v-for="a in asignaturas" :key="a" :value="a" class="bg-slate-900 text-slate-300">{{ a }}</option>
-                            </select>
-                            <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs" aria-hidden="true">▼</div>
-                        </div>
-
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                            {{ exam.tipo }}
-                        </span>
-                        <span class="text-xs text-slate-400 font-medium">
-                            <i class="mr-1" aria-hidden="true">📝</i>{{ exam.numPreguntas }} pregs.
-                        </span>
-                    </div>
+                    <div class="flex-1 min-w-0">
+                      <input
+                          v-model="exam.title"
+                          @blur="saveTitle(exam)"
+                          aria-label="Editar título del examen"
+                          class="block w-full bg-transparent text-sm md:text-base font-semibold text-slate-200 placeholder-slate-500 border-b border-transparent hover:border-indigo-500/40 focus:border-indigo-500 focus:outline-none transition-colors truncate"
+                      />
+                      <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1 mt-0.5 text-xs text-slate-500">
+                          <span class="text-purple-300">{{ exam.tipo }}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>{{ exam.numPreguntas }} pregs.</span>
+                          <span aria-hidden="true">·</span>
+                          <span>{{ formatDate(exam.createdAt) }}</span>
+                          <template v-if="folderName(exam)">
+                            <span aria-hidden="true">·</span>
+                            <span class="text-indigo-400 font-medium truncate max-w-[120px]" title="Arrastra el examen a otra carpeta en la barra lateral">📁 {{ folderName(exam) }}</span>
+                          </template>
+                      </div>
                     </div>
 
-                    <div class="flex flex-row items-center gap-3 justify-end lg:self-center mt-1 lg:mt-0 relative z-10 border-t lg:border-t-0 border-white/5 pt-3 lg:pt-0 w-full lg:w-auto">
+                    <div class="hidden md:block shrink-0 relative">
+                        <select
+                        :value="exam.folderId || ''"
+                        @change="onExamFolderSelect(exam, $event.target.value)"
+                        @click.stop
+                        aria-label="Guardar examen en carpeta"
+                        class="appearance-none cursor-pointer border border-white/10 bg-slate-950/50 hover:bg-slate-900 rounded-lg pl-2.5 pr-7 py-1.5 text-[11px] font-bold text-slate-400 focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 outline-none transition-all max-w-[150px] truncate"
+                        >
+                        <option value="" class="bg-slate-900 text-slate-300">📂 Sin carpeta</option>
+                        <option v-for="opt in folderOptions" :key="opt.id" :value="opt.id" class="bg-slate-900 text-slate-300">{{ opt.label }}</option>
+                        </select>
+                        <div class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs" aria-hidden="true">▼</div>
+                    </div>
+
+                    <div class="flex items-center gap-1 shrink-0">
 
                     <button
                         @click="toggleFav(exam)"
                         type="button"
-                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-slate-800 border border-white/5 hover:border-yellow-500/50 shadow-sm"
-                        :class="exam.favorito ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' : 'text-slate-500 hover:text-yellow-400'"
+                        class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-yellow-900/20"
+                        :class="exam.favorito ? 'text-yellow-400' : 'text-slate-600 hover:text-yellow-400'"
                         :title="exam.favorito ? 'Quitar de favoritos' : 'Añadir a favoritos'"
                         :aria-label="exam.favorito ? 'Quitar examen de favoritos' : 'Añadir examen a favoritos'"
                         :aria-pressed="exam.favorito"
                     >
-                        <span class="text-lg leading-none mt-1" aria-hidden="true">{{ exam.favorito ? '★' : '☆' }}</span>
+                        <span class="text-base leading-none" aria-hidden="true">{{ exam.favorito ? '★' : '☆' }}</span>
                     </button>
 
                     <button
                         @click="removeExam(exam._id)"
                         type="button"
-                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-slate-800 border border-white/5 hover:border-red-500/30 hover:bg-red-900/20 text-slate-500 hover:text-red-400 shadow-sm"
+                        class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 text-slate-600 hover:text-red-400 hover:bg-red-900/20"
                         title="Eliminar examen"
                         aria-label="Eliminar examen"
                     >
@@ -197,10 +208,9 @@
 
                     <RouterLink
                         :to="`/examen/${exam._id}`"
-                        class="ml-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/20 hover:-translate-y-0.5 flex items-center gap-2 overflow-hidden group/btn relative"
+                        class="ml-1 px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs md:text-sm font-bold hover:bg-indigo-500 transition-all shadow-md shadow-indigo-900/20 flex items-center gap-1.5 whitespace-nowrap"
                     >
-                        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-shimmer"></div>
-                        <span class="relative z-10">Abrir</span> <span class="text-xs relative z-10" aria-hidden="true">→</span>
+                        Abrir <span aria-hidden="true">→</span>
                     </RouterLink>
                     </div>
                 </div>
@@ -231,22 +241,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, provide } from 'vue'
 import {
-  getExams,
   deleteExam,
   toggleFavorite,
-  updateExamAsignatura,
   updateExamTitle
 } from '@/services/examService'
+import { useExamLibrary } from '@/composables/useExamLibrary'
 import { userStore } from '@/stores/userStores'
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
+import ExamFolderTree from '@/components/biblioteca/ExamFolderTree.vue'
 
-const exams = ref([])
-const asignaturas = ref([])
-const openAsignaturas = ref({})
+const lib = useExamLibrary()
+const { exams, folders, folderTree, folderOptions, addFolder, renameFolder, moveFolder, removeFolder, moveExamToFolder } = lib
+
 const tab = ref('historial')
+const search = ref('')
+const sortBy = ref('recientes')
+const selectedFolderId = ref('')
+const expandedMap = reactive({})
+const creatingIn = ref(null) // 'root' | folderId | null
+const rootFolderName = ref('')
+const rootDragOver = ref(false)
 
 // Carga de sesión sin bloqueo
 try {
@@ -264,72 +281,115 @@ onMounted(async () => {
       metaDesc.name = "description";
       document.head.appendChild(metaDesc);
   }
-  metaDesc.content = "Gestiona tu historial de exámenes, organiza tus asignaturas y repasa tus retos favoritos.";
+  metaDesc.content = "Gestiona tu historial de exámenes, organiza tus carpetas y repasa tus retos favoritos.";
 
-  // 1. Cargar exámenes
-  exams.value = await getExams()
-
-  // 2. Extraer asignaturas únicas
-  asignaturas.value = [...new Set(exams.value.map(e => e.asignatura).filter(Boolean))]
-
-  // 3. Inicializar acordeón
-  asignaturas.value.forEach(a => { openAsignaturas.value[a] = false })
+  await lib.loadAll()
 })
 
 /* =========================================
-   LÓGICA DE ASIGNATURAS Y EXÁMENES
+   LÓGICA DE CARPETAS Y EXÁMENES
    ========================================= */
 
-const filteredExams = computed(() => tab.value === 'favoritos' ? exams.value.filter(e => e.favorito) : exams.value)
-// Método optimizado para el filtro del v-for
-const examsByAsignatura = (asig) => exams.value.filter(e => e.asignatura === asig)
-const toggleAsignatura = (asig) => { openAsignaturas.value[asig] = !openAsignaturas.value[asig] }
+const filteredExams = computed(() => {
+  let list = tab.value === 'favoritos' ? exams.value.filter(e => e.favorito) : exams.value
 
-const addAsignatura = () => {
-  const name = prompt('Nombre de la nueva asignatura:')
-  if (!name) return
-  if (!asignaturas.value.includes(name)) {
-    asignaturas.value.push(name)
-    openAsignaturas.value[name] = true
+  if (selectedFolderId.value) {
+    list = list.filter(e => e.folderId === selectedFolderId.value)
   }
+
+  const term = search.value.trim().toLowerCase()
+  if (term) {
+    list = list.filter(e => e.title?.toLowerCase().includes(term))
+  }
+
+  list = [...list].sort((a, b) => {
+    if (sortBy.value === 'az') return (a.title || '').localeCompare(b.title || '')
+    if (sortBy.value === 'za') return (b.title || '').localeCompare(a.title || '')
+    if (sortBy.value === 'antiguos') return new Date(a.createdAt) - new Date(b.createdAt)
+    return new Date(b.createdAt) - new Date(a.createdAt)
+  })
+
+  return list
+})
+
+const folderName = (exam) => folders.value.find(f => f.id === exam.folderId)?.name || ''
+
+const TYPE_ICONS = {
+  'Test (4 opciones)': '📝',
+  'Verdadero/Falso': '✅',
+  'Respuestas cortas': '✏️',
+  'Respuestas largas': '📄',
+}
+const typeIcon = (tipo) => TYPE_ICONS[tipo] || '📘'
+
+const formatDate = (date) => {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
 }
 
-const removeAsignatura = async (asig) => {
-  if (!confirm(`¿Eliminar la asignatura "${asig}" y desasignar todos los exámenes?`)) return
-
-  const examsToUpdate = exams.value.filter(e => e.asignatura === asig)
-
-  try {
-    await Promise.all(examsToUpdate.map(exam =>
-        updateExamAsignatura(exam._id, '')
-    ))
-
-    exams.value.forEach(e => {
-      if (e.asignatura === asig) e.asignatura = ''
-    })
-
-    asignaturas.value = asignaturas.value.filter(a => a !== asig)
-    delete openAsignaturas.value[asig]
-
-  } catch (error) {
-    console.error("Error al borrar asignatura:", error)
-    alert("Hubo un error al guardar los cambios. Revisa tu conexión.")
-  }
+// ----- Carpetas: creación inline -----
+function newFolder(parentId = null) {
+  creatingIn.value = parentId ?? 'root'
+  if (parentId) expandedMap[parentId] = true
 }
 
-const handleAsignaturaChange = async (exam) => {
-  try {
-    await updateExamAsignatura(exam._id, exam.asignatura)
+async function confirmCreateFolder(name) {
+  const target = creatingIn.value
+  creatingIn.value = null
+  if (!target || !name || !name.trim()) return
+  await lib.addFolder(name.trim(), target === 'root' ? null : target)
+  if (target !== 'root') expandedMap[target] = true
+}
 
-    if (exam.asignatura && !asignaturas.value.includes(exam.asignatura)) {
-        asignaturas.value.push(exam.asignatura)
-        openAsignaturas.value[exam.asignatura] = true
-    }
+function submitRootFolder() {
+  const name = rootFolderName.value
+  rootFolderName.value = ''
+  if (creatingIn.value === 'root') confirmCreateFolder(name)
+}
+
+function toggleFolder(folderId) {
+  expandedMap[folderId] = !expandedMap[folderId]
+  selectedFolderId.value = selectedFolderId.value === folderId ? '' : folderId
+}
+
+// ----- Drag & drop -----
+function onDragStartExam(e, exam) {
+  e.dataTransfer.setData('text/plain', JSON.stringify({ kind: 'exam', id: exam._id }))
+  e.dataTransfer.effectAllowed = 'move'
+}
+
+// Guardar examen en la carpeta elegida en el desplegable ('' = raíz)
+function onExamFolderSelect(exam, value) {
+  moveExamToFolder(exam, value || null)
+}
+
+function onDropToRoot(e) {
+  rootDragOver.value = false
+  let payload
+  try {
+    payload = JSON.parse(e.dataTransfer.getData('text/plain'))
   } catch {
-    alert('No se pudo guardar la asignatura')
+    return
+  }
+  if (!payload) return
+  if (payload.kind === 'exam') {
+    const exam = exams.value.find(ex => ex._id === payload.id)
+    if (exam && exam.folderId) moveExamToFolder(exam, null)
+  } else if (payload.kind === 'folder') {
+    const folder = folders.value.find(f => f.id === payload.id)
+    if (folder && folder.parentId) moveFolder(folder, null)
   }
 }
 
+provide('examCtx', {
+  folders, exams, folderTree,
+  expandedMap, selectedFolderId, creatingIn,
+  newFolder, confirmCreateFolder, toggleFolder,
+  renameFolder, removeFolder, moveFolder, moveExamToFolder,
+  onDragStartExam,
+})
+
+// ----- Exámenes -----
 const removeExam = async (id) => {
   if (!confirm('¿Eliminar examen?')) return
   await deleteExam(id)

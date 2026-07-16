@@ -45,14 +45,33 @@ export class ExamsController {
     return this.examsService.findAllByUser(req.user.id);
   }
 
+  // Papelera (antes de :id para no colisionar con la ruta paramétrica)
+  @Get('trash')
+  findTrash(@Req() req) {
+    return this.examsService.findTrash(req.user.id);
+  }
+
   @Get(':id')
   findOne(@Req() req, @Param('id') id: string) {
     return this.examsService.findOne(req.user.id, id);
   }
 
+  // Enviar a la papelera (soft delete)
   @Delete(':id')
   delete(@Req() req, @Param('id') id: string) {
     return this.examsService.delete(req.user.id, id);
+  }
+
+  // Restaurar de la papelera
+  @Post(':id/restore')
+  restore(@Req() req, @Param('id') id: string) {
+    return this.examsService.restore(req.user.id, id);
+  }
+
+  // Destrucción definitiva
+  @Delete(':id/permanent')
+  purge(@Req() req, @Param('id') id: string) {
+    return this.examsService.purge(req.user.id, id);
   }
 
   @Patch(':id/favorite')
@@ -73,5 +92,20 @@ export class ExamsController {
   @Patch(':id/title')
   updateTitle(@Param('id') id: string, @Req() req, @Body('title') title: string) {
     return this.examsService.updateTitle(id, req.user.id, title);
+  }
+
+  @Patch(':id/date')
+  updateDate(@Param('id') id: string, @Req() req, @Body('date') date: string | null) {
+    return this.examsService.updateDate(id, req.user.id, date);
+  }
+
+  @Patch(':id/folder')
+  updateFolder(@Param('id') id: string, @Req() req, @Body('folderId') folderId: string | null) {
+    return this.examsService.updateFolder(id, req.user.id, folderId);
+  }
+
+  @Patch('migrate-asignaturas')
+  migrateAsignaturas(@Req() req) {
+    return this.examsService.migrateAsignaturas(req.user.id);
   }
 }

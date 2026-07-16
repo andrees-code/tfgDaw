@@ -23,7 +23,15 @@ export class Note extends Document {
 
   // NUEVO CAMPO
   @Prop({ type: String, required: false, default: null })
-  calendarDate: string | null 
+  calendarDate: string | null
+
+  // Carpeta contenedora (null = raíz)
+  @Prop({ type: Types.ObjectId, ref: 'Folder', default: null })
+  folderId: Types.ObjectId | null
+
+  // Papelera: fecha de eliminación (null = activo). Se purga a los 30 días.
+  @Prop({ type: Date, default: null, index: true })
+  deletedAt: Date | null
 }
 
 export const NoteSchema = SchemaFactory.createForClass(Note)

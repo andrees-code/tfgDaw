@@ -5,6 +5,7 @@ import { Exam } from "./schemas/exam.schema";
 import { CreateExamDto } from "./dto/create-exam.dto";
 import { UserDocument } from "../user/schemas/user.schema/user.schema";
 import { OllamaService } from "../ollama/ollama/ollama.service";
+import { Folder } from "../notes/schemas/folder.schema";
 
 @Injectable()
 export class ExamsService {
@@ -14,6 +15,9 @@ export class ExamsService {
 
     @InjectModel('User')
     private userModel: Model<UserDocument>,
+
+    @InjectModel(Folder.name)
+    private folderModel: Model<Folder>,
 
     private ollamaService: OllamaService,
   ) {}
@@ -340,15 +344,53 @@ CONTEXTO DEL TEMA:
   // RESTO DE FUNCIONES (Find, Delete, etc.) - Sin cambios
   // ----------------------------
   findAllByUser(userId: string) {
-    return this.examModel.find({ userId: new Types.ObjectId(userId) }).sort({ createdAt: -1 }).exec();
+    return this.examModel.find({ userId: new Types.ObjectId(userId), deletedAt: null }).sort({ createdAt: -1 }).exec();
   }
 
   findOne(userId: string, examId: string) {
     return this.examModel.findOne({ _id: examId, userId: new Types.ObjectId(userId) }).exec();
   }
 
-  delete(userId: string, examId: string) {
-    return this.examModel.deleteOne({ _id: examId, userId: new Types.ObjectId(userId) });
+  // Enviar a la papelera (soft delete)
+  async delete(userId: string, examId: string) {
+    const res = await this.examModel.updateOne(
+      { _id: examId, userId: new Types.ObjectId(userId) },
+      { $set: { deletedAt: new Date() } },
+    );
+    return { trashed: res.modifiedCount > 0 };
+  }
+
+  // Papelera de exámenes: purga lo caducado (>30 días) y devuelve lo vigente
+  async findTrash(userId: string) {
+    await this.purgeExpired(userId);
+    return this.examModel
+      .find({ userId: new Types.ObjectId(userId), deletedAt: { $ne: null } })
+      .sort({ deletedAt: -1 })
+      .exec();
+  }
+
+  async restore(userId: string, examId: string) {
+    const exam = await this.examModel.findOne({ _id: examId, userId: new Types.ObjectId(userId) });
+    if (!exam) throw new NotFoundException('Examen no encontrado');
+    exam.deletedAt = null;
+    return exam.save();
+  }
+
+  purge(userId: string, examId: string) {
+    return this.examModel.deleteOne({ _id: examId, userId: new Types.ObjectId(userId), deletedAt: { $ne: null } });
+  }
+
+  purgeExpired(userId: string) {
+    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    return this.examModel.deleteMany({ userId: new Types.ObjectId(userId), deletedAt: { $ne: null, $lt: cutoff } });
+  }
+
+  // Mover en bloque a la papelera al borrar carpetas (limpia folderId)
+  trashByFolders(userId: string, folderIds: (string | Types.ObjectId)[]) {
+    return this.examModel.updateMany(
+      { userId: new Types.ObjectId(userId), folderId: { $in: folderIds } },
+      { $set: { deletedAt: new Date(), folderId: null } },
+    );
   }
 
   async toggleFavorite(id: string, userId: string) {
@@ -359,7 +401,7 @@ CONTEXTO DEL TEMA:
   }
 
   async getFavorites(userId: string) {
-    return this.examModel.find({ userId: new Types.ObjectId(userId), favorito: true });
+    return this.examModel.find({ userId: new Types.ObjectId(userId), favorito: true, deletedAt: null });
   }
 
   async updateAsignatura(examId: string, userId: string, asignatura: string) {
@@ -374,5 +416,52 @@ CONTEXTO DEL TEMA:
     if (!exam) throw new NotFoundException('Examen no encontrado');
     exam.title = title;
     return exam.save();
+  }
+
+  // Fecha del calendario (null = desvincular del día)
+  async updateDate(examId: string, userId: string, date: string | null) {
+    const exam = await this.examModel.findOne({ _id: examId, userId: new Types.ObjectId(userId) });
+    if (!exam) throw new NotFoundException('Examen no encontrado');
+    exam.calendarDate = date;
+    return exam.save();
+  }
+
+  // Mover examen a otra carpeta (null = raíz)
+  async updateFolder(examId: string, userId: string, folderId: string | null) {
+    const exam = await this.examModel.findOne({ _id: examId, userId: new Types.ObjectId(userId) });
+    if (!exam) throw new NotFoundException('Examen no encontrado');
+    exam.folderId = folderId ? new Types.ObjectId(folderId) : null;
+    return exam.save();
+  }
+
+  // Migración única e idempotente: cada valor distinto de `asignatura` (legacy)
+  // pasa a ser una carpeta raíz real. Solo toca exámenes sin folderId asignado aún.
+  async migrateAsignaturas(userId: string) {
+    const userObjectId = new Types.ObjectId(userId);
+    const pending = await this.examModel.find({
+      userId: userObjectId,
+      folderId: null,
+      asignatura: { $nin: [null, ''] },
+    });
+
+    if (pending.length) {
+      const names = [...new Set(pending.map(e => e.asignatura))];
+      const folderByName = new Map<string, Types.ObjectId>();
+
+      for (const name of names) {
+        let folder = await this.folderModel.findOne({ userId: userObjectId, parentId: null, name });
+        if (!folder) {
+          folder = await this.folderModel.create({ userId: userObjectId, parentId: null, name });
+        }
+        folderByName.set(name, folder._id as Types.ObjectId);
+      }
+
+      for (const exam of pending) {
+        exam.folderId = folderByName.get(exam.asignatura) ?? null;
+        await exam.save();
+      }
+    }
+
+    return this.examModel.find({ userId: userObjectId }).sort({ createdAt: -1 }).exec();
   }
 }

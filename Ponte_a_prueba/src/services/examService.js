@@ -39,6 +39,21 @@ export async function deleteExam(id) {
   return res.data;
 }
 
+// 🗑 Papelera de exámenes
+export async function loadTrashExams() {
+  const res = await api.get('/exams/trash');
+  return res.data;
+}
+
+export async function restoreExam(id) {
+  const res = await api.post(`/exams/${id}/restore`);
+  return res.data;
+}
+
+export async function purgeExam(id) {
+  await api.delete(`/exams/${id}/permanent`);
+}
+
 export async function toggleFavorite(id) {
   const res = await api.patch(`/exams/${id}/favorite`)
   return res.data
@@ -59,6 +74,21 @@ export async function updateExamAsignatura(id, asignatura) {
 
 export async function updateExamTitle(id, title) {
   const res = await api.patch(`/exams/${id}/title`, { title });
+  return res.data;
+}
+
+export async function updateExamFolder(id, folderId) {
+  const res = await api.patch(`/exams/${id}/folder`, { folderId });
+  return res.data;
+}
+
+export async function updateExamDate(id, date) {
+  const res = await api.patch(`/exams/${id}/date`, { date });
+  return res.data;
+}
+
+export async function migrateAsignaturas() {
+  const res = await api.patch('/exams/migrate-asignaturas');
   return res.data;
 }
 

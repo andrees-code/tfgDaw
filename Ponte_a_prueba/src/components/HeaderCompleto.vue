@@ -10,6 +10,7 @@
 
         <div class="flex items-center">
           <button
+            v-if="route.path !== '/'"
             type="button"
             @click="router.back()"
             class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-indigo-500 hover:text-white hover:border-indigo-400 border border-white/10 transition-all duration-200 group backdrop-blur-sm shadow-lg shadow-black/20"
@@ -136,13 +137,14 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { userStore } from '@/stores/userStores'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import Menu from '@/components/BarsMenu.vue'
 
 const menuAbierto = ref(false)
 const dropdownAbierto = ref(false)
 const scrolled = ref(false)
 const router = useRouter()
+const route = useRoute()
 
 // Refs para los contenedores (padres)
 const menuContainer = ref(null)

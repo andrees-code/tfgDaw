@@ -9,6 +9,10 @@
     /* ✅ Mejora la legibilidad del texto */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* ✅ Reserva siempre el hueco de la scrollbar para que el contenido no
+       se desplace al aparecer/desaparecer (p.ej. al abrir un modal o cambiar
+       de página con menos contenido) */
+    scrollbar-gutter: stable;
   }
   
   /* ✅ Evita que las imágenes rompan el layout mientras cargan */

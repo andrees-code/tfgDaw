@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { Exam } from "./schemas/exam.schema";
@@ -56,8 +56,15 @@ export class ExamsService {
     tipo: string,
     dificultad: string,
     numPreguntas: number,
-    apuntes: string
+    apuntes?: string,
+    categoria?: string,
+    tema?: string,
+    modo?: string,
   }) {
+    if (!dto.apuntes?.trim() && !dto.tema?.trim()) {
+      throw new BadRequestException('Debes indicar unos apuntes o un tema para generar el examen.');
+    }
+
     const userObjectId = new Types.ObjectId(userId);
 
     // Validación usuario (igual que antes)
@@ -126,19 +133,49 @@ export class ExamsService {
   // ----------------------------
   // FUNCIONES AUXILIARES PARA PROMPTS (MODIFICADAS)
   // ----------------------------
-  
+
+  // Instrucciones adicionales según la categoría del examen, para acercar el
+  // estilo de las preguntas al de cada tipo de prueba oficial.
+  private static readonly CONTEXTO_CATEGORIA: Record<string, string> = {
+    carnet_conducir:
+      'CONTEXTO: Genera preguntas al estilo del examen teórico oficial de la DGT española (permiso B), basándote en el Reglamento General de Circulación y la normativa de tráfico vigente.',
+    programacion:
+      'CONTEXTO: Genera preguntas técnicas de programación rigurosas, evaluando corrección conceptual, sintaxis y buenas prácticas.',
+    oposiciones_policia:
+      'CONTEXTO: Genera preguntas al estilo de exámenes oficiales de oposición a Policía Nacional/Local en España, basándote en la legislación vigente (Constitución Española, organización del Estado, derecho penal básico, etc.).',
+  };
+
+  private getContextoCategoria(categoria?: string): string {
+    if (!categoria) return '';
+    return ExamsService.CONTEXTO_CATEGORIA[categoria] || '';
+  }
+
+  // Construye el bloque de "fuente" del prompt: apuntes pegados por el
+  // usuario, o si no hay, el tema elegido (predefinido o libre).
+  private buildFuenteBlock(dto: any): { etiqueta: string; contenido: string } {
+    if (dto.apuntes?.trim()) {
+      return { etiqueta: 'TEXTO GUÍA (APUNTES)', contenido: dto.apuntes.substring(0, 15000) };
+    }
+    return { etiqueta: 'TEMA A EVALUAR', contenido: dto.tema?.trim() || '' };
+  }
+
   private buildPromptPreguntas(cantidad: number, inicio: number, preguntasPrevias: string, dto: any) {
     const tipo = dto.tipo;
     const dificultad = dto.dificultad || 'media';
-    const ap = dto.apuntes.substring(0, 15000);
+    const fuente = this.buildFuenteBlock(dto);
+    const ap = fuente.contenido;
+    const usaTema = !dto.apuntes?.trim();
 
     // INSTRUCCIÓN CLAVE: Usar apuntes como contexto, conocimiento propio para la precisión.
     const instruccionBase = `
 ROL: Eres un profesor universitario experto diseñando exámenes.
-FUENTE DE TEMAS: Usa el siguiente texto SOLO para identificar los temas, conceptos y contexto clave que el alumno debe estudiar.
+${this.getContextoCategoria(dto.categoria)}
+FUENTE DE TEMAS: ${usaTema
+      ? 'Usa el tema indicado abajo como área a evaluar. No tienes apuntes del alumno: apóyate en tu propio conocimiento estándar y actualizado sobre ese tema y esa categoría de examen.'
+      : 'Usa el siguiente texto SOLO para identificar los temas, conceptos y contexto clave que el alumno debe estudiar.'}
 CALIDAD: Usa TU PROPIO conocimiento académico general para formular las preguntas. Asegúrate de que sean rigurosas, precisas y no ambiguas.
 DIFICULTAD: ${dificultad}.
-REGLA: No inventes información falsa, pero si los apuntes son vagos, complétalos con definiciones académicas estándar correctas.
+REGLA: No inventes información falsa${usaTema ? '' : ', pero si los apuntes son vagos, complétalos con definiciones académicas estándar correctas'}.
 `;
 
     const contextoNegativo = preguntasPrevias.length > 10
@@ -164,7 +201,7 @@ REQUISITOS:
 3. Las definiciones deben ser precisas (ej: diferencia bien área de perímetro).
 4. La numeración empieza en ${inicio}.
 
-TEXTO GUÍA (APUNTES):
+${fuente.etiqueta}:
 """${ap}"""`;
     }
 
@@ -182,7 +219,7 @@ REQUISITOS:
 2. Evita opiniones subjetivas.
 3. La numeración empieza en ${inicio}.
 
-TEXTO GUÍA (APUNTES):
+${fuente.etiqueta}:
 """${ap}"""`;
     }
 
@@ -200,7 +237,7 @@ REQUISITOS:
 2. Enfócate en definiciones, fechas clave, nombres o conceptos específicos del texto.
 3. La numeración empieza en ${inicio}.
 
-TEXTO GUÍA (APUNTES):
+${fuente.etiqueta}:
 """${ap}"""`;
     }
 
@@ -217,7 +254,7 @@ REQUISITOS:
 1. Pide explicaciones, relaciones entre conceptos, causas y consecuencias.
 2. La numeración empieza en ${inicio}.
 
-TEXTO GUÍA (APUNTES):
+${fuente.etiqueta}:
 """${ap}"""`;
     }
 
@@ -235,20 +272,21 @@ REQUISITOS:
 1. Asegura precisión académica máxima.
 2. La numeración empieza en ${inicio}.
 
-TEXTO GUÍA (APUNTES):
+${fuente.etiqueta}:
 """${ap}"""`;
   }
 
 
   private buildPromptRespuestas(preguntas: string, dto: any) {
     const tipo = dto.tipo;
-    const ap = dto.apuntes.substring(0, 15000);
+    const ap = this.buildFuenteBlock(dto).contenido;
 
     // INSTRUCCIÓN CLAVE: Priorizar la verdad factual sobre el texto proporcionado si hay conflicto.
     const instruccionBase = `
 ROL: Eres un corrector oficial de exámenes.
+${this.getContextoCategoria(dto.categoria)}
 OBJETIVO: Generar la hoja de respuestas correcta.
-IMPORTANTE: Basa tus respuestas en la VERDAD ACADÉMICA ESTÁNDAR. Usa el texto proporcionado como contexto para entender a qué se refieren las preguntas, pero si el texto es ambiguo, prioriza la definición universalmente correcta.
+IMPORTANTE: Basa tus respuestas en la VERDAD ACADÉMICA ESTÁNDAR. Usa el texto/tema proporcionado como contexto para entender a qué se refieren las preguntas, pero si es ambiguo, prioriza la definición universalmente correcta.
 `;
 
     // --- RESPUESTAS TEST ---

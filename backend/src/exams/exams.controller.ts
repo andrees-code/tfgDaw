@@ -22,7 +22,15 @@ export class ExamsController {
   // GENERAR EXAMEN CON IA
   // ----------------------------
   @Post('generate')
-  async generateExam(@Req() req, @Body() dto: { tipo: string; dificultad: string; numPreguntas: number; apuntes: string }) {
+  async generateExam(@Req() req, @Body() dto: {
+    tipo: string;
+    dificultad: string;
+    numPreguntas: number;
+    apuntes?: string;
+    categoria?: string;
+    tema?: string;
+    modo?: string;
+  }) {
     console.log('🔥 generateExam() llamado desde controller');
     console.log('REQ USER:', req.user);
 

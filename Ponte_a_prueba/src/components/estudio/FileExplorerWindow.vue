@@ -39,37 +39,49 @@
         <IconHome class="w-4 h-4" aria-hidden="true" />
       </button>
       <span class="w-px h-5 bg-slate-200 mx-1"></span>
-      <button type="button" class="tb-btn" :disabled="inFav" title="Nueva carpeta" aria-label="Nueva carpeta" @click="createFolderHere">
+      <button type="button" class="tb-btn" :disabled="!canEdit" title="Nueva carpeta" aria-label="Nueva carpeta" @click="createFolderHere">
         <IconFolderPlus class="w-4 h-4" aria-hidden="true" />
       </button>
-      <button type="button" class="tb-btn" :disabled="inFav" title="Nuevo documento" aria-label="Nuevo documento" @click="createNoteHere('Documento')">
+      <button type="button" class="tb-btn" :disabled="!canEdit" title="Nuevo documento" aria-label="Nuevo documento" @click="createNoteHere('Documento')">
         <IconFilePlus class="w-4 h-4" aria-hidden="true" />
       </button>
-      <button type="button" class="tb-btn" :disabled="inFav" title="Nuevo post-it" aria-label="Nuevo post-it" @click="createNoteHere('Post-it')">
+      <button type="button" class="tb-btn" :disabled="!canEdit" title="Nuevo post-it" aria-label="Nuevo post-it" @click="createNoteHere('Post-it')">
         <IconSticky class="w-4 h-4 text-amber-500" aria-hidden="true" />
       </button>
       <span class="w-px h-5 bg-slate-200 mx-1"></span>
-      <button type="button" class="tb-btn" :disabled="!selectionCount" title="Cortar" aria-label="Cortar" @click="clip('cut')">
+      <button type="button" class="tb-btn" :disabled="!selectionCount || inTrash" title="Cortar" aria-label="Cortar" @click="clip('cut')">
         <IconCut class="w-4 h-4" aria-hidden="true" />
       </button>
-      <button type="button" class="tb-btn" :disabled="!selectionCount" title="Copiar" aria-label="Copiar" @click="clip('copy')">
+      <button type="button" class="tb-btn" :disabled="!selectionCount || inTrash" title="Copiar" aria-label="Copiar" @click="clip('copy')">
         <IconCopy class="w-4 h-4" aria-hidden="true" />
       </button>
-      <button type="button" class="tb-btn" :disabled="!clipboard || inFav" title="Pegar" aria-label="Pegar" @click="paste">
+      <button type="button" class="tb-btn" :disabled="!clipboard || !canEdit" title="Pegar" aria-label="Pegar" @click="paste">
         <IconPaste class="w-4 h-4" aria-hidden="true" />
       </button>
       <span class="w-px h-5 bg-slate-200 mx-1"></span>
       <button type="button" class="tb-btn" :disabled="!canRename" title="Renombrar (F2)" aria-label="Renombrar" @click="renameSingle">
         <IconPencil class="w-4 h-4" aria-hidden="true" />
       </button>
-      <button type="button" class="tb-btn hover:!bg-red-50 hover:!text-red-600" :disabled="!selectionCount" title="Eliminar (Supr)" aria-label="Eliminar" @click="deleteSelected">
+      <button
+        type="button"
+        class="tb-btn hover:!bg-red-50 hover:!text-red-600"
+        :disabled="!selectionCount"
+        :title="inTrash ? 'Eliminar definitivamente (Supr)' : 'Eliminar (Supr)'"
+        :aria-label="inTrash ? 'Eliminar definitivamente' : 'Eliminar'"
+        @click="deleteSelected"
+      >
         <IconTrash class="w-4 h-4" aria-hidden="true" />
       </button>
-      <span class="w-px h-5 bg-slate-200 mx-1"></span>
-      <button type="button" class="tb-btn relative" title="Papelera" aria-label="Abrir papelera" @click="showBin = true">
-        <IconTrash class="w-4 h-4" aria-hidden="true" />
-        <span v-if="trashCount" class="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ trashCount }}</span>
-      </button>
+      <template v-if="inTrash">
+        <span class="w-px h-5 bg-slate-200 mx-1"></span>
+        <button type="button" class="tb-btn hover:!bg-emerald-50 hover:!text-emerald-600" :disabled="!selectionCount" title="Restaurar" aria-label="Restaurar" @click="restoreSelected">
+          <IconRestore class="w-4 h-4" aria-hidden="true" />
+        </button>
+        <button type="button" class="tb-btn hover:!bg-red-50 hover:!text-red-600" :disabled="!trashCount" title="Vaciar papelera" aria-label="Vaciar papelera" @click="emptyBin">
+          <IconTrash class="w-4 h-4" aria-hidden="true" />
+          <span class="text-xs ml-1 hidden sm:inline">Vaciar</span>
+        </button>
+      </template>
     </div>
 
     <!-- Ruta (breadcrumb) -->
@@ -107,9 +119,10 @@
         </button>
         <button
           type="button"
-          class="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-slate-200/60 transition-colors text-slate-600"
+          class="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-slate-200/60 transition-colors"
+          :class="inTrash ? 'bg-blue-100 text-blue-700 font-medium' : 'text-slate-600'"
           aria-label="Abrir papelera"
-          @click="showBin = true"
+          @click="openFolder(TRASH)"
         >
           <IconTrash class="w-4 h-4 shrink-0" aria-hidden="true" /> Papelera
           <span v-if="trashCount" class="ml-auto text-[10px] font-mono text-slate-400">{{ trashCount }}</span>
@@ -164,8 +177,8 @@
         @mousedown="onContentMouseDown"
       >
         <div v-if="isEmpty" class="h-full flex flex-col items-center justify-center text-slate-400 gap-2 pointer-events-none">
-          <IconFolder class="w-12 h-12 opacity-40" aria-hidden="true" />
-          <p class="text-sm">Esta carpeta está vacía</p>
+          <component :is="inTrash ? IconTrash : IconFolder" class="w-12 h-12 opacity-40" aria-hidden="true" />
+          <p class="text-sm">{{ inTrash ? 'La papelera está vacía' : 'Esta carpeta está vacía' }}</p>
           <p v-if="currentFolderId === null" class="text-xs">Aquí aparece todo lo que no está en ninguna carpeta</p>
         </div>
 
@@ -234,6 +247,20 @@
             <IconBook class="w-11 h-11 text-purple-500" aria-hidden="true" />
             <span class="item-label">{{ e.title || 'Examen' }}</span>
           </div>
+
+          <!-- Elementos de la papelera -->
+          <div
+            v-for="t in trashItems" :key="'t' + t.kind + t.id"
+            :data-key="'trash:' + trashId(t)"
+            class="explorer-item"
+            :class="isSelected('trash', trashId(t)) ? 'bg-blue-100 ring-1 ring-blue-300' : 'hover:bg-slate-100'"
+            @click.stop="onItemClick($event, 'trash', trashId(t))"
+            @contextmenu.prevent.stop="openItemMenu($event, 'trash', trashId(t))"
+          >
+            <component :is="trashIcon(t)" class="w-11 h-11" :class="trashColor(t)" aria-hidden="true" />
+            <span class="item-label">{{ t.title || 'Sin título' }}</span>
+            <span class="text-[9px] text-slate-400 leading-none text-center">{{ daysLeftLabel(t) }}</span>
+          </div>
         </div>
 
         <!-- Rectángulo de selección (marquesina) -->
@@ -243,7 +270,8 @@
 
     <!-- Barra de estado -->
     <div class="h-6 px-3 flex items-center gap-3 bg-slate-100 border-t border-slate-200 text-[11px] text-slate-500 shrink-0">
-      <span>{{ displayFolders.length + childNotes.length + childExams.length }} elementos</span>
+      <span>{{ displayFolders.length + childNotes.length + childExams.length + trashItems.length }} elementos</span>
+      <span v-if="inTrash" class="text-slate-400">se borran a los 30 días</span>
       <span v-if="selectionCount">{{ selectionCount }} seleccionado{{ selectionCount > 1 ? 's' : '' }}</span>
       <span v-if="clipboard" class="text-blue-600 ml-auto">{{ clipboard.mode === 'cut' ? '✂ Cortado' : '⧉ Copiado' }} {{ clipboard.items.length }}</span>
     </div>
@@ -255,7 +283,12 @@
       :style="{ top: menu.y + 'px', left: menu.x + 'px' }"
       @click.stop
     >
-      <template v-if="menu.target">
+      <template v-if="menu.target && menu.target.kind === 'trash'">
+        <button type="button" class="menu-item" @click="menuAct(restoreSelected)">Restaurar</button>
+        <div class="menu-sep"></div>
+        <button type="button" class="menu-item text-red-600" @click="menuAct(deleteSelected)">Eliminar definitivamente</button>
+      </template>
+      <template v-else-if="menu.target">
         <button type="button" class="menu-item" @click="menuOpen">Abrir</button>
         <button v-if="menu.target.kind === 'folder'" type="button" class="menu-item" @click="menuAct(() => createFolderIn(menu.target.id))">Nueva subcarpeta</button>
         <div class="menu-sep"></div>
@@ -265,13 +298,18 @@
         <div class="menu-sep"></div>
         <button type="button" class="menu-item text-red-600" @click="menuAct(deleteSelected)">Eliminar</button>
       </template>
+      <template v-else-if="inTrash">
+        <button type="button" class="menu-item" @click="menuAct(selectAll)">Seleccionar todo</button>
+        <div class="menu-sep"></div>
+        <button type="button" class="menu-item text-red-600" :disabled="!trashCount" @click="menuAct(emptyBin)">Vaciar papelera</button>
+      </template>
       <template v-else>
-        <button type="button" class="menu-item" :disabled="inFav" @click="menuAct(createFolderHere)">Nueva carpeta</button>
-        <button type="button" class="menu-item" :disabled="inFav" @click="menuAct(() => createNoteHere('Documento'))">Nuevo documento</button>
-        <button type="button" class="menu-item" :disabled="inFav" @click="menuAct(() => createNoteHere('Post-it'))">Nuevo post-it</button>
+        <button type="button" class="menu-item" :disabled="!canEdit" @click="menuAct(createFolderHere)">Nueva carpeta</button>
+        <button type="button" class="menu-item" :disabled="!canEdit" @click="menuAct(() => createNoteHere('Documento'))">Nuevo documento</button>
+        <button type="button" class="menu-item" :disabled="!canEdit" @click="menuAct(() => createNoteHere('Post-it'))">Nuevo post-it</button>
         <div class="menu-sep"></div>
         <button type="button" class="menu-item" @click="menuAct(selectAll)">Seleccionar todo</button>
-        <button type="button" class="menu-item" :disabled="!clipboard || inFav" @click="menuAct(paste)">Pegar</button>
+        <button type="button" class="menu-item" :disabled="!clipboard || !canEdit" @click="menuAct(paste)">Pegar</button>
       </template>
     </div>
 
@@ -285,15 +323,12 @@
       <div class="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-slate-400"></div>
     </div>
   </div>
-
-  <RecycleBinWindow v-if="showBin" @close="showBin = false" />
 </template>
 
 <script setup>
 import { ref, reactive, computed, inject, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBackCloseOnMount } from '@/composables/useBackClose'
-import RecycleBinWindow from '@/components/estudio/RecycleBinWindow.vue'
 import {
   Folder as IconFolder, FolderPlus as IconFolderPlus, FileText as IconFile,
   FilePlus as IconFilePlus, StickyNote as IconSticky, GraduationCap as IconBook,
@@ -301,8 +336,10 @@ import {
   ArrowUp as IconUp, Home as IconHome, Pencil as IconPencil, Trash2 as IconTrash,
   Scissors as IconCut, Copy as IconCopy, ClipboardPaste as IconPaste,
   Maximize2 as IconMaximize, Minimize2 as IconMinimize, Star as IconStar,
+  RotateCcw as IconRestore,
 } from 'lucide-vue-next'
 
+const props = defineProps({ startInTrash: { type: Boolean, default: false } })
 const emit = defineEmits(['close'])
 const ctx = inject('studyCtx')
 const { folders, notes, exams, trash, folderTree } = ctx
@@ -310,12 +347,14 @@ const router = useRouter()
 
 const rootEl = ref(null)
 const contentEl = ref(null)
-const showBin = ref(false)
 const trashCount = computed(() => trash.value.length)
 
 // Carpeta virtual de exámenes favoritos (no existe en backend)
 const FAV = '__fav__'
 const favoriteExams = computed(() => exams.value.filter(e => e.favorito))
+
+// Ubicación virtual de la papelera (como en el explorador de Windows)
+const TRASH = '__trash__'
 
 // ----- Estado de la ventana -----
 const pos = reactive({ x: Math.max(40, window.innerWidth / 2 - 420), y: 90 })
@@ -323,7 +362,7 @@ const size = reactive({ w: 840, h: 560 })
 const maximized = ref(false)
 
 // ----- Navegación / selección -----
-const currentFolderId = ref(null)         // null = Inicio (sin asignar + carpetas raíz)
+const currentFolderId = ref(props.startInTrash ? TRASH : null) // null = Inicio (sin asignar + carpetas raíz)
 const selection = reactive(new Set())     // claves "kind:id"
 const anchorKey = ref(null)               // ancla para selección con Shift
 const clipboard = ref(null)               // { mode, items: [{kind,id}] }
@@ -338,8 +377,11 @@ function parseKey(k) { const i = k.indexOf(':'); return { kind: k.slice(0, i), i
 function isSelected(kind, id) { return selection.has(key(kind, id)) }
 
 const inFav = computed(() => currentFolderId.value === FAV)
+const inTrash = computed(() => currentFolderId.value === TRASH)
+const canEdit = computed(() => !inFav.value && !inTrash.value)
 const currentFolder = computed(() => folders.value.find(f => f.id === currentFolderId.value) || null)
-const currentTitle = computed(() => inFav.value ? 'Favoritos' : (currentFolder.value ? currentFolder.value.name : 'Inicio'))
+const currentTitle = computed(() =>
+  inTrash.value ? 'Papelera' : inFav.value ? 'Favoritos' : (currentFolder.value ? currentFolder.value.name : 'Inicio'))
 
 const realFolders = computed(() =>
   folders.value.filter(f => (f.parentId || null) === currentFolderId.value)
@@ -347,7 +389,7 @@ const realFolders = computed(() =>
 
 // Carpetas visibles: en Inicio se antepone la carpeta virtual "Favoritos"
 const displayFolders = computed(() => {
-  if (inFav.value) return []
+  if (inFav.value || inTrash.value) return []
   const list = realFolders.value.map(f => ({ id: f.id, name: f.name, virtual: false }))
   if (currentFolderId.value === null && favoriteExams.value.length) {
     list.unshift({ id: FAV, name: 'Favoritos', virtual: true })
@@ -364,13 +406,36 @@ const childExams = computed(() => {
     .sort((a, b) => (a.title || '').localeCompare(b.title || ''))
 })
 
-const isEmpty = computed(() => !displayFolders.value.length && !childNotes.value.length && !childExams.value.length)
+// Contenido de la papelera (solo visible en la ubicación virtual TRASH)
+const trashItems = computed(() => inTrash.value ? trash.value : [])
+const trashId = (t) => `${t.kind}:${t.id}`
+function trashFromId(id) {
+  const i = id.indexOf(':')
+  const kind = id.slice(0, i), tid = id.slice(i + 1)
+  return trash.value.find(t => t.kind === kind && t.id === tid)
+}
+function trashIcon(t) {
+  if (t.kind === 'exam') return IconBook
+  return t.type === 'Post-it' ? IconSticky : IconFile
+}
+function trashColor(t) {
+  if (t.kind === 'exam') return 'text-purple-400'
+  return t.type === 'Post-it' ? 'text-amber-400' : 'text-blue-400'
+}
+function daysLeftLabel(t) {
+  const elapsed = (Date.now() - new Date(t.deletedAt).getTime()) / 86400000
+  const d = Math.max(0, Math.ceil(30 - elapsed))
+  return d <= 1 ? 'se elimina pronto' : `se elimina en ${d} días`
+}
+
+const isEmpty = computed(() => !displayFolders.value.length && !childNotes.value.length && !childExams.value.length && !trashItems.value.length)
 
 // Elementos en orden visual (para Shift-selección, marquesina y "seleccionar todo")
 const orderedItems = computed(() => [
   ...displayFolders.value.filter(f => !f.virtual).map(f => ({ kind: 'folder', id: f.id })),
   ...childNotes.value.map(n => ({ kind: 'note', id: n.id })),
   ...childExams.value.map(e => ({ kind: 'exam', id: e._id })),
+  ...trashItems.value.map(t => ({ kind: 'trash', id: trashId(t) })),
 ])
 
 // Selección resuelta a operaciones (excluye la carpeta virtual)
@@ -378,9 +443,10 @@ const selectedList = computed(() => [...selection].map(parseKey))
 const opItems = computed(() => selectedList.value.filter(s => !(s.kind === 'folder' && s.id === FAV)))
 const selectionCount = computed(() => opItems.value.length)
 const singleSel = computed(() => opItems.value.length === 1 ? opItems.value[0] : null)
-const canRename = computed(() => !!singleSel.value && singleSel.value.kind !== 'exam')
+const canRename = computed(() => !!singleSel.value && singleSel.value.kind !== 'exam' && singleSel.value.kind !== 'trash')
 
 const crumbs = computed(() => {
+  if (inTrash.value) return [{ id: TRASH, name: 'Papelera' }]
   if (inFav.value) return [{ id: FAV, name: 'Favoritos' }]
   const chain = []
   let cur = currentFolder.value
@@ -404,7 +470,12 @@ const navList = computed(() => {
 function toggleNav(id) { expandedNav[id] = !expandedNav[id] }
 
 function clearSel() { selection.clear(); anchorKey.value = null }
-function openFolder(id) { currentFolderId.value = id; clearSel(); expandChain(id) }
+function openFolder(id) {
+  currentFolderId.value = id
+  clearSel()
+  if (id === TRASH) { ctx.loadTrash(); return }
+  expandChain(id)
+}
 function goHome() { currentFolderId.value = null; clearSel() }
 function goUp() { currentFolderId.value = currentFolder.value?.parentId || null; clearSel() }
 
@@ -442,7 +513,7 @@ function selectAll() {
 function openNote(n) { ctx.selectNote(n); emit('close') }
 function openExam(e) { router.push(`/examen/${e._id}`); emit('close') }
 function openSingle() {
-  const s = singleSel.value; if (!s) return
+  const s = singleSel.value; if (!s || s.kind === 'trash') return
   if (s.kind === 'folder') openFolder(s.id)
   else if (s.kind === 'note') openNote(notes.value.find(n => n.id === s.id))
   else openExam(exams.value.find(x => x._id === s.id))
@@ -460,13 +531,13 @@ const noteSiblings = (folderId, exceptId) => notes.value.filter(n => (n.folderId
 
 // ----- Crear ----- (no permitido dentro de la carpeta virtual Favoritos)
 async function createFolderHere() {
-  if (inFav.value) return
+  if (!canEdit.value) return
   const name = uniqueName('Nueva carpeta', folderSiblings(currentFolderId.value))
   const f = await ctx.addFolder(name, currentFolderId.value)
   if (f) { select('folder', f.id); startRename('folder', f.id) }
 }
 function createNoteHere(type) {
-  if (inFav.value) return
+  if (!canEdit.value) return
   const base = type === 'Documento' ? 'Nuevo documento' : 'Nuevo post-it'
   const title = uniqueName(base, noteSiblings(currentFolderId.value))
   const n = ctx.createNote(type, currentFolderId.value)
@@ -505,10 +576,17 @@ function confirmRename() {
   if (!name) return
   if (kind === 'folder') {
     const f = folders.value.find(x => x.id === id)
-    if (f && f.name !== name) ctx.renameFolder(f, uniqueName(name, folderSiblings(f.parentId, f.id)))
+    if (f && f.name !== name) {
+      pushUndo({ type: 'rename', kind: 'folder', id, oldName: f.name })
+      ctx.renameFolder(f, uniqueName(name, folderSiblings(f.parentId, f.id)))
+    }
   } else if (kind === 'note') {
     const n = notes.value.find(x => x.id === id)
-    if (n && n.title !== name) { n.title = uniqueName(name, noteSiblings(n.folderId, n.id)); ctx.scheduleNoteSave(n) }
+    if (n && n.title !== name) {
+      pushUndo({ type: 'rename', kind: 'note', id, oldName: n.title })
+      n.title = uniqueName(name, noteSiblings(n.folderId, n.id))
+      ctx.scheduleNoteSave(n)
+    }
   }
 }
 
@@ -516,24 +594,153 @@ function confirmRename() {
 function deleteSelected() {
   const items = opItems.value
   if (!items.length) return
+  if (inTrash.value) {
+    const msg = items.length === 1
+      ? '¿Eliminar el elemento seleccionado definitivamente? Esta acción no se puede deshacer.'
+      : `¿Eliminar ${items.length} elementos definitivamente? Esta acción no se puede deshacer.`
+    if (!confirm(msg)) return
+    for (const s of items) {
+      const t = trashFromId(s.id); if (t) ctx.purgeTrashItem(t)
+    }
+    clearSel()
+    return
+  }
   const msg = items.length === 1
     ? '¿Enviar el elemento seleccionado a la papelera?'
     : `¿Eliminar ${items.length} elementos? Se enviarán a la papelera (las carpetas también su contenido).`
   if (!confirm(msg)) return
+  const entries = []
   for (const s of items) {
     if (s.kind === 'folder') {
-      const f = folders.value.find(x => x.id === s.id); if (f) ctx.removeFolder(f)
+      const f = folders.value.find(x => x.id === s.id)
+      if (f) { entries.push(captureFolderSubtree(f)); ctx.removeFolder(f) }
     } else if (s.kind === 'note') {
-      const n = notes.value.find(x => x.id === s.id); if (n) ctx.removeNote(n)
+      const n = notes.value.find(x => x.id === s.id)
+      if (n) {
+        entries.push({ kind: 'note', trashId: n.idBackend ? String(n.idBackend) : null, snapshot: { ...n } })
+        ctx.removeNote(n)
+      }
     } else if (s.kind === 'exam') {
-      const e = exams.value.find(x => x._id === s.id); if (e) ctx.removeExam(e)
+      const e = exams.value.find(x => x._id === s.id)
+      if (e) {
+        entries.push({ kind: 'exam', trashId: String(e._id) })
+        ctx.removeExam(e)
+      }
     }
   }
+  if (entries.length) pushUndo({ type: 'delete', entries })
   clearSel()
+}
+
+// ----- Deshacer (Ctrl+Z): eliminar, mover y renombrar -----
+const undoStack = []
+function pushUndo(op) {
+  undoStack.push(op)
+  if (undoStack.length > 50) undoStack.shift()
+}
+
+// Instantánea de una carpeta y todo su subárbol antes de borrarla: nombres y
+// jerarquía (el backend la borra en cascada) más las notas/exámenes contenidos
+// (que sí van a la papelera). Orden padre-antes-que-hijo para poder recrear.
+function captureFolderSubtree(rootFolder) {
+  const list = []
+  const queue = [rootFolder]
+  while (queue.length) {
+    const f = queue.shift()
+    list.push({ oldId: f.id, name: f.name, parentId: f.parentId || null })
+    for (const c of folders.value.filter(x => x.parentId === f.id)) queue.push(c)
+  }
+  const idSet = new Set(list.map(f => f.oldId))
+  return {
+    kind: 'folder',
+    folders: list,
+    notes: notes.value.filter(n => idSet.has(n.folderId)).map(n => ({
+      trashId: n.idBackend ? String(n.idBackend) : null,
+      oldFolderId: n.folderId,
+      snapshot: n.idBackend ? null : { ...n },
+    })),
+    exams: exams.value.filter(e => idSet.has(e.folderId)).map(e => ({
+      trashId: String(e._id),
+      oldFolderId: e.folderId,
+    })),
+  }
+}
+
+// Deshace el borrado de una carpeta: recrea el subárbol (con ids nuevos) y
+// restaura su contenido desde la papelera, moviéndolo a las carpetas recreadas.
+async function undoFolderDelete(en) {
+  const map = {} // id antiguo de carpeta -> id nuevo
+  for (const f of en.folders) {
+    const parentNew = map[f.parentId] !== undefined
+      ? map[f.parentId]
+      : (folders.value.some(x => x.id === f.parentId) ? f.parentId : null)
+    const nf = await ctx.addFolder(f.name, parentNew)
+    if (nf) map[f.oldId] = nf.id
+  }
+  for (const n of en.notes) {
+    const target = map[n.oldFolderId] ?? null
+    if (n.trashId) {
+      await ctx.restoreTrashItem({ kind: 'note', id: n.trashId })
+      const note = notes.value.find(x => String(x.idBackend) === n.trashId)
+      if (note) ctx.moveNoteToFolder(note, target)
+    } else if (n.snapshot) {
+      const copy = { ...n.snapshot, folderId: target }
+      notes.value.unshift(copy)
+      await ctx.persistNoteNow(copy)
+    }
+  }
+  for (const e of en.exams) {
+    await ctx.restoreTrashItem({ kind: 'exam', id: e.trashId })
+    const ex = exams.value.find(x => String(x._id) === e.trashId)
+    if (ex) ctx.moveExamToFolder(ex, map[e.oldFolderId] ?? null)
+  }
+}
+
+async function undo() {
+  const op = undoStack.pop()
+  if (!op) return
+  if (op.type === 'delete') {
+    for (const en of op.entries) {
+      if (en.kind === 'folder') {
+        await undoFolderDelete(en)
+      } else if (en.trashId) {
+        // Restaurar desde la papelera: el elemento vuelve y desaparece de ella
+        await ctx.restoreTrashItem({ kind: en.kind, id: en.trashId })
+      } else if (en.kind === 'note' && en.snapshot) {
+        // Nota que nunca llegó a guardarse en backend: se recrea localmente
+        const copy = { ...en.snapshot }
+        notes.value.unshift(copy)
+        await ctx.persistNoteNow(copy)
+      }
+    }
+  } else if (op.type === 'move') {
+    for (const en of op.entries) moveItem(en.kind, en.id, en.from)
+  } else if (op.type === 'rename') {
+    if (op.kind === 'folder') {
+      const f = folders.value.find(x => x.id === op.id)
+      if (f) ctx.renameFolder(f, op.oldName)
+    } else if (op.kind === 'note') {
+      const n = notes.value.find(x => x.id === op.id)
+      if (n) { n.title = op.oldName; ctx.scheduleNoteSave(n) }
+    }
+  }
+}
+
+// ----- Papelera: restaurar / vaciar -----
+function restoreSelected() {
+  for (const s of opItems.value) {
+    if (s.kind !== 'trash') continue
+    const t = trashFromId(s.id); if (t) ctx.restoreTrashItem(t)
+  }
+  clearSel()
+}
+function emptyBin() {
+  if (confirm('¿Vaciar la papelera? Se eliminarán definitivamente todos los elementos.')) ctx.emptyTrash()
 }
 
 // ----- Cortar / Copiar / Pegar -----
 function clip(mode) {
+  if (inTrash.value) return
   const items = opItems.value
   if (!items.length) return
   clipboard.value = { mode, items: items.slice() }
@@ -543,12 +750,14 @@ function clipHas(kind, id) {
 }
 async function paste() {
   const cb = clipboard.value
-  if (!cb || inFav.value) return
+  if (!cb || !canEdit.value) return
   const target = currentFolderId.value
   let examBlocked = false
+  const moved = []
   for (const it of cb.items) {
     if (cb.mode === 'cut') {
-      moveItem(it.kind, it.id, target)
+      const r = moveItem(it.kind, it.id, target)
+      if (r) moved.push(r)
     } else if (it.kind === 'note') {
       const n = notes.value.find(x => x.id === it.id); if (n) await ctx.duplicateNote(n, target)
     } else if (it.kind === 'folder') {
@@ -557,21 +766,36 @@ async function paste() {
       examBlocked = true
     }
   }
+  if (moved.length) pushUndo({ type: 'move', entries: moved })
   if (cb.mode === 'cut') clipboard.value = null
   if (examBlocked) alert('Los exámenes no se pueden copiar, solo mover.')
 }
 
+// Devuelve { kind, id, from } si movió de verdad (para poder deshacer), o null.
 function moveItem(kind, id, targetFolderId) {
   if (kind === 'note') {
     const n = notes.value.find(x => x.id === id)
-    if (n && (n.folderId || null) !== targetFolderId) ctx.moveNoteToFolder(n, targetFolderId)
+    if (n && (n.folderId || null) !== targetFolderId) {
+      const from = n.folderId || null
+      ctx.moveNoteToFolder(n, targetFolderId)
+      return { kind, id, from }
+    }
   } else if (kind === 'exam') {
     const e = exams.value.find(x => x._id === id)
-    if (e && (e.folderId || null) !== targetFolderId) ctx.moveExamToFolder(e, targetFolderId)
+    if (e && (e.folderId || null) !== targetFolderId) {
+      const from = e.folderId || null
+      ctx.moveExamToFolder(e, targetFolderId)
+      return { kind, id, from }
+    }
   } else if (kind === 'folder') {
     const f = folders.value.find(x => x.id === id)
-    if (f && f.id !== targetFolderId && (f.parentId || null) !== targetFolderId) ctx.moveFolder(f, targetFolderId)
+    if (f && f.id !== targetFolderId && (f.parentId || null) !== targetFolderId) {
+      const from = f.parentId || null
+      ctx.moveFolder(f, targetFolderId)
+      return { kind, id, from }
+    }
   }
+  return null
 }
 
 // ----- Drag & drop (arrastra toda la selección) -----
@@ -584,8 +808,13 @@ function onDragStart(e, kind, id) {
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
 }
 function dropOnFolder(folderId) {
-  if (!dragItems.value.length || folderId === FAV) return
-  for (const it of dragItems.value) moveItem(it.kind, it.id, folderId)
+  if (!dragItems.value.length || folderId === FAV || folderId === TRASH) return
+  const moved = []
+  for (const it of dragItems.value) {
+    const r = moveItem(it.kind, it.id, folderId)
+    if (r) moved.push(r)
+  }
+  if (moved.length) pushUndo({ type: 'move', entries: moved })
   dragItems.value = []
 }
 function navDrop(folderId) {
@@ -646,7 +875,7 @@ function menuAct(fn) { menu.show = false; fn() }
 function menuOpen() {
   menu.show = false
   const t = menu.target
-  if (!t) return
+  if (!t || t.kind === 'trash') return
   if (t.kind === 'folder') openFolder(t.id)
   else if (t.kind === 'note') openNote(notes.value.find(n => n.id === t.id))
   else if (t.kind === 'exam') openExam(exams.value.find(x => x._id === t.id))
@@ -661,7 +890,13 @@ function onKey(e) {
   else if (e.key === 'F2') { renameSingle() }
   else if (e.key === 'Enter') { openSingle() }
   else if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) { e.preventDefault(); selectAll() }
-  else if (e.key === 'Escape') { if (menu.show) closeContextMenu(); else clearSel() }
+  else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); undo() }
+  else if (e.key === 'Escape') {
+    e.stopPropagation()
+    if (menu.show) closeContextMenu()
+    else if (selectionCount.value) clearSel()
+    else emit('close')
+  }
 }
 function onRootMouseDown(e) {
   if (!e.target.closest('input')) rootEl.value?.focus()
@@ -701,6 +936,7 @@ useBackCloseOnMount(() => {
 })
 
 onMounted(() => {
+  if (props.startInTrash) ctx.loadTrash()
   nextTick(() => rootEl.value?.focus())
 })
 </script>

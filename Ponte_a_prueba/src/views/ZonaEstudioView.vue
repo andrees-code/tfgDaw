@@ -63,8 +63,10 @@
         </div>
 
         <!-- ÁRBOL DE CARPETAS + NOTAS -->
+        <!-- pb-32: deja hueco para que el contenido no quede oculto tras los
+             iconos fijos de Explorador y Papelera (abajo a la izquierda) -->
         <div
-          class="flex-1 overflow-y-auto px-3 custom-scrollbar pb-6"
+          class="flex-1 overflow-y-auto px-3 custom-scrollbar pb-32"
           @dragenter.prevent
           @dragover.prevent
           @drop="onDropToRoot"
@@ -89,30 +91,38 @@
 
           <!-- Árbol normal -->
           <template v-else>
-            <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] mb-2 px-2">Mis carpetas</h2>
+            <button type="button" class="section-toggle" :aria-expanded="sections.folders" @click="sections.folders = !sections.folders">
+              <component :is="sections.folders ? IconChevronDown : IconChevronRight" class="w-3 h-3 shrink-0" aria-hidden="true" />
+              Mis carpetas
+            </button>
 
-            <!-- Input inline para crear carpeta raíz -->
-            <div v-if="creatingIn === 'root'" class="flex items-center gap-1.5 px-2 py-1 mb-1">
-              <IconFolderPlus class="w-4 h-4 shrink-0 text-indigo-400/60" aria-hidden="true" />
-              <input
-                :ref="el => el && el.focus()"
-                v-model="rootFolderName"
-                type="text"
-                placeholder="Nombre de la carpeta..."
-                class="flex-1 min-w-0 bg-slate-950/70 border border-indigo-500/40 rounded-md px-1.5 py-1 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none"
-                @keydown.enter.prevent="submitRootFolder"
-                @keydown.esc="creatingIn = null; rootFolderName = ''"
-                @blur="submitRootFolder"
-                aria-label="Nombre de la nueva carpeta"
-              />
-            </div>
+            <template v-if="sections.folders">
+              <!-- Input inline para crear carpeta raíz -->
+              <div v-if="creatingIn === 'root'" class="flex items-center gap-1.5 px-2 py-1 mb-1">
+                <IconFolderPlus class="w-4 h-4 shrink-0 text-indigo-400/60" aria-hidden="true" />
+                <input
+                  :ref="el => el && el.focus()"
+                  v-model="rootFolderName"
+                  type="text"
+                  placeholder="Nombre de la carpeta..."
+                  class="flex-1 min-w-0 bg-slate-950/70 border border-indigo-500/40 rounded-md px-1.5 py-1 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none"
+                  @keydown.enter.prevent="submitRootFolder"
+                  @keydown.esc="creatingIn = null; rootFolderName = ''"
+                  @blur="submitRootFolder"
+                  aria-label="Nombre de la nueva carpeta"
+                />
+              </div>
 
-            <FolderTree :nodes="folderTree" />
+              <FolderTree :nodes="folderTree" />
 
-            <div v-if="!folderTree.length && creatingIn !== 'root'" class="px-2 mb-3 text-xs text-slate-600">Crea carpetas para organizarte.</div>
+              <div v-if="!folderTree.length && creatingIn !== 'root'" class="px-2 mb-3 text-xs text-slate-600">Crea carpetas para organizarte.</div>
+            </template>
 
-            <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] mt-4 mb-2 px-2">Sin carpeta</h2>
-            <div class="space-y-0.5">
+            <button type="button" class="section-toggle mt-4" :aria-expanded="sections.loose" @click="sections.loose = !sections.loose">
+              <component :is="sections.loose ? IconChevronDown : IconChevronRight" class="w-3 h-3 shrink-0" aria-hidden="true" />
+              Sin carpeta
+            </button>
+            <div v-show="sections.loose" class="space-y-0.5">
               <div
                 v-for="note in rootNotes"
                 :key="note.id"
@@ -129,10 +139,13 @@
                 </button>
               </div>
             </div>
-            <div v-if="!rootNotes.length" class="px-2 text-xs text-slate-600">Arrastra notas aquí para sacarlas de una carpeta.</div>
+            <div v-if="sections.loose && !rootNotes.length" class="px-2 text-xs text-slate-600">Arrastra notas aquí para sacarlas de una carpeta.</div>
 
-            <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] mt-4 mb-2 px-2">⭐ Exámenes favoritos</h2>
-            <div class="space-y-0.5">
+            <button type="button" class="section-toggle mt-4" :aria-expanded="sections.favs" @click="sections.favs = !sections.favs">
+              <component :is="sections.favs ? IconChevronDown : IconChevronRight" class="w-3 h-3 shrink-0" aria-hidden="true" />
+              ⭐ Exámenes favoritos
+            </button>
+            <div v-show="sections.favs" class="space-y-0.5">
               <RouterLink
                 v-for="exam in favoriteExams"
                 :key="exam._id"
@@ -145,7 +158,7 @@
                 <span class="flex-1 min-w-0 text-sm truncate text-slate-400 group-hover:text-slate-300">{{ exam.title || 'Sin título' }}</span>
               </RouterLink>
             </div>
-            <div v-if="!favoriteExams.length" class="px-2 py-3 text-xs text-slate-600 leading-relaxed">
+            <div v-if="sections.favs && !favoriteExams.length" class="px-2 py-3 text-xs text-slate-600 leading-relaxed">
               No tienes exámenes favoritos. Marca un examen con ★ en la Biblioteca para verlo aquí.
             </div>
           </template>
@@ -235,7 +248,7 @@
       class="fixed bottom-4 left-4 z-30 flex flex-col items-center gap-1 group"
       aria-label="Abrir explorador de archivos"
       title="Explorador de archivos"
-      @click="showExplorer = true"
+      @click="openExplorer(false)"
     >
       <span class="w-14 h-14 rounded-2xl bg-slate-800/80 backdrop-blur-xl border border-white/10 shadow-lg flex items-center justify-center group-hover:bg-indigo-600/80 group-hover:scale-105 transition-all">
         <IconFolderOpen class="w-7 h-7 text-amber-400 group-hover:text-white" aria-hidden="true" />
@@ -243,15 +256,15 @@
       <span class="text-[10px] font-medium text-slate-400 group-hover:text-slate-200">Explorador</span>
     </button>
 
-    <FileExplorerWindow v-if="showExplorer" @close="showExplorer = false" />
+    <FileExplorerWindow v-if="showExplorer" :start-in-trash="explorerStartInTrash" @close="showExplorer = false" />
 
-    <!-- PAPELERA (justo a la derecha del explorador) -->
+    <!-- PAPELERA: abre el explorador directamente en la papelera (como en Windows) -->
     <button
       type="button"
       class="fixed bottom-4 left-24 z-30 flex flex-col items-center gap-1 group"
       aria-label="Abrir papelera"
       title="Papelera"
-      @click="showBin = true"
+      @click="openExplorer(true)"
     >
       <span class="relative w-14 h-14 rounded-2xl bg-slate-800/80 backdrop-blur-xl border border-white/10 shadow-lg flex items-center justify-center group-hover:bg-slate-700 group-hover:scale-105 transition-all">
         <IconTrashBin class="w-7 h-7 text-slate-400 group-hover:text-slate-200" aria-hidden="true" />
@@ -259,8 +272,6 @@
       </span>
       <span class="text-[10px] font-medium text-slate-400 group-hover:text-slate-200">Papelera</span>
     </button>
-
-    <RecycleBinWindow v-if="showBin" @close="showBin = false" />
 
     <!-- MODAL DE DÍA: detalle (día con elementos) y menú de añadir/editar -->
     <CalendarDayDetailModal v-if="dayDetailDate" :date="dayDetailDate" @close="dayDetailDate = null" />
@@ -285,7 +296,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, provide, watch, onMounted } from 'vue'
+import { ref, reactive, computed, provide, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { userStore } from '@/stores/userStores'
 import { useStudyData } from '@/composables/useStudyData'
@@ -296,7 +307,6 @@ import StudyCalendar from '@/components/estudio/StudyCalendar.vue'
 import CalendarDayModal from '@/components/estudio/CalendarDayModal.vue'
 import CalendarDayDetailModal from '@/components/estudio/CalendarDayDetailModal.vue'
 import FileExplorerWindow from '@/components/estudio/FileExplorerWindow.vue'
-import RecycleBinWindow from '@/components/estudio/RecycleBinWindow.vue'
 import RichTextEditor from '@/components/estudio/RichTextEditor.vue'
 import {
   FileText as IconFile, StickyNote as IconSticky, Search as IconSearch,
@@ -304,6 +314,7 @@ import {
   BookOpen as IconNotebook, Calendar as IconCalendar,
   Menu as IconMenu, X as IconX, FolderPlus as IconFolderPlus,
   FolderOpen as IconFolderOpen, Trash2 as IconTrashBin,
+  ChevronDown as IconChevronDown, ChevronRight as IconChevronRight,
 } from 'lucide-vue-next'
 
 const study = useStudyData()
@@ -320,8 +331,14 @@ const searchQuery = ref('')
 const dayModalDate = ref(null)
 const dayDetailDate = ref(null)
 const showExplorer = ref(false)
-const showBin = ref(false)
+const explorerStartInTrash = ref(false)
+function openExplorer(inTrash) {
+  explorerStartInTrash.value = inTrash
+  showExplorer.value = true
+}
 const expandedMap = reactive({})
+// Secciones plegables del sidebar
+const sections = reactive({ folders: true, loose: true, favs: true })
 const creatingIn = ref(null) // 'root' | folderId | null
 const rootFolderName = ref('')
 const loadFailed = ref(false)
@@ -345,7 +362,22 @@ const postItColors = [
   { bg: 'bg-[#fef08a]' }, { bg: 'bg-[#bbf7d0]' }, { bg: 'bg-[#bfdbfe]' }, { bg: 'bg-[#fbcfe8]' }, { bg: 'bg-[#ddd6fe]' }
 ]
 
+// Escape cierra lo que esté abierto, por prioridad: modal de día, editor
+// (documento/nota) o sidebar móvil. El explorador gestiona su propio Escape
+// (detiene la propagación), así que aquí no interfiere.
+function onGlobalKey(e) {
+  if (e.key !== 'Escape') return
+  if (showExplorer.value) return
+  if (dayModalDate.value) { dayModalDate.value = null; return }
+  if (dayDetailDate.value) { dayDetailDate.value = null; return }
+  if (currentView.value === 'editor' && selectedItem.value) { goToCalendar(); return }
+  if (showSidebar.value) showSidebar.value = false
+}
+
+onUnmounted(() => window.removeEventListener('keydown', onGlobalKey))
+
 onMounted(async () => {
+  window.addEventListener('keydown', onGlobalKey)
   // ✅ SEO Local
   document.title = "Zona de Estudio - Carpetas, Notas y Calendario";
 
@@ -534,6 +566,11 @@ provide('studyCtx', {
 .font-sans { font-family: 'Inter', sans-serif; }
 .font-serif { font-family: 'Merriweather', serif; }
 .font-handwriting { font-family: 'Caveat', cursive; }
+
+/* Cabeceras de sección plegables del sidebar */
+.section-toggle {
+  @apply w-full flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] mb-2 px-2 hover:text-slate-300 transition-colors;
+}
 
 /* Scrollbar Personalizado (Versión Dark) */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

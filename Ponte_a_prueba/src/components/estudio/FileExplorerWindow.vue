@@ -1,4 +1,6 @@
 <template>
+  <div class="fixed inset-0 z-[70] bg-black/40" aria-hidden="true"></div>
+
   <div
     ref="rootEl"
     tabindex="0"
@@ -288,8 +290,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, inject, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, inject, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useBackCloseOnMount } from '@/composables/useBackClose'
 import RecycleBinWindow from '@/components/estudio/RecycleBinWindow.vue'
 import {
   Folder as IconFolder, FolderPlus as IconFolderPlus, FileText as IconFile,
@@ -690,27 +693,15 @@ function startResize(e) {
   document.addEventListener('mouseup', onUp)
 }
 
-// ----- Atrapar el botón "Atrás" (navegador / ratón) para navegar dentro del
-// explorador en lugar de salir de la página. -----
-let trapArmed = false
-function onPopState() {
-  if (currentFolderId.value !== null) {
-    goUp()
-    history.pushState({ explorer: true }, '')
-  } else {
-    trapArmed = false
-    emit('close')
-  }
-}
-onMounted(() => {
-  history.pushState({ explorer: true }, '')
-  trapArmed = true
-  window.addEventListener('popstate', onPopState)
-  nextTick(() => rootEl.value?.focus())
+// El botón "Atrás" (navegador / ratón) navega dentro del explorador en lugar
+// de salir de la página; al llegar a Inicio, cierra la ventana.
+useBackCloseOnMount(() => {
+  if (currentFolderId.value !== null) { goUp(); return true }
+  emit('close')
 })
-onBeforeUnmount(() => {
-  window.removeEventListener('popstate', onPopState)
-  if (trapArmed) { trapArmed = false; history.back() }
+
+onMounted(() => {
+  nextTick(() => rootEl.value?.focus())
 })
 </script>
 

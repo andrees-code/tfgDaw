@@ -214,6 +214,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Header from '@/components/HeaderCompleto.vue'
+import { useBackCloseWhen } from '@/composables/useBackClose'
 import { useExamGenerator } from '@/composables/useExamGenerator'
 import { userStore } from "@/stores/userStores"
 import { CATEGORIAS_RETO } from '@/config/categorias'
@@ -452,6 +453,9 @@ function salirModoExamen() {
     modoExamenActivo.value = false;
     preguntasParseadas.value = [];
 }
+
+// Botón "atrás" sale del modo examen (o de resultados) antes de navegar de ruta
+useBackCloseWhen(() => modoExamenActivo.value, () => salirModoExamen())
 
 // --- CLASES DINÁMICAS ---
 function claseOpcion(index) {

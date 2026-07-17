@@ -138,6 +138,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { userStore } from '@/stores/userStores'
 import { useRouter, useRoute } from 'vue-router'
+import { useBackCloseWhen } from '@/composables/useBackClose'
 import Menu from '@/components/BarsMenu.vue'
 
 const menuAbierto = ref(false)
@@ -154,6 +155,9 @@ function abrirMenu() {
   menuAbierto.value = !menuAbierto.value
   if (menuAbierto.value) dropdownAbierto.value = false
 }
+
+// Botón "atrás" cierra el menú móvil antes de navegar de ruta
+useBackCloseWhen(() => menuAbierto.value, () => { menuAbierto.value = false })
 
 function abrirDropdown() {
   dropdownAbierto.value = !dropdownAbierto.value

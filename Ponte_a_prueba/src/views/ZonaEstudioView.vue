@@ -52,7 +52,7 @@
           </div>
 
           <button
-            @click="currentView = 'calendar'; selectedItem = null; showSidebar = false"
+            @click="goToCalendar"
             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 border"
             :class="currentView === 'calendar' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/50 border-transparent' : 'bg-slate-800/30 text-slate-400 border-transparent hover:bg-indigo-500/10 hover:text-indigo-400 hover:border-indigo-500/20'"
             aria-label="Ver calendario"
@@ -289,6 +289,7 @@ import { ref, reactive, computed, provide, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { userStore } from '@/stores/userStores'
 import { useStudyData } from '@/composables/useStudyData'
+import { useBackCloseWhen } from '@/composables/useBackClose'
 import Header from '@/components/HeaderCompleto.vue'
 import FolderTree from '@/components/estudio/FolderTree.vue'
 import StudyCalendar from '@/components/estudio/StudyCalendar.vue'
@@ -383,11 +384,41 @@ async function retryLoad() {
 }
 
 // ----- Selección y creación -----
+function isNoteEmpty(note) {
+  if (!note) return false
+  const title = (note.title || '').trim()
+  const raw = note.content || ''
+  const content = note.type === 'Documento'
+    ? raw.replace(/<[^>]*>/g, '').trim()
+    : raw.trim()
+  return !title && !content
+}
+
+// Si la nota que se deja de editar quedó vacía, se borra en vez de quedar huérfana
+async function discardIfEmpty(note) {
+  if (isNoteEmpty(note)) await study.removeNote(note)
+}
+
 function selectNote(note) {
+  const previous = selectedItem.value
   selectedItem.value = note
   currentView.value = 'editor'
   if (window.innerWidth < 768) showSidebar.value = false
+  if (previous && previous.id !== note?.id) discardIfEmpty(previous)
 }
+
+function goToCalendar() {
+  const previous = selectedItem.value
+  currentView.value = 'calendar'
+  selectedItem.value = null
+  showSidebar.value = false
+  discardIfEmpty(previous)
+}
+
+// Botón "atrás": primero cierra el editor (vuelve al calendario) o el sidebar
+// móvil antes de permitir la navegación de ruta.
+useBackCloseWhen(() => currentView.value === 'editor' && !!selectedItem.value, () => goToCalendar())
+useBackCloseWhen(() => showSidebar.value, () => { showSidebar.value = false })
 
 function newNote(type, folderId = null) {
   const note = study.createNote(type, folderId)

@@ -55,12 +55,14 @@
 
 <script setup>
 import { computed, inject, onMounted } from 'vue'
+import { useBackCloseOnMount } from '@/composables/useBackClose'
 import {
   Trash2 as IconTrash, X as IconX, RotateCcw as IconRestore,
   FileText as IconFile, StickyNote as IconSticky, GraduationCap as IconBook,
 } from 'lucide-vue-next'
 
 const emit = defineEmits(['close'])
+useBackCloseOnMount(() => emit('close'))
 const ctx = inject('studyCtx')
 const items = computed(() => ctx.trash.value)
 

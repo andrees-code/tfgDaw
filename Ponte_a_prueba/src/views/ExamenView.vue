@@ -1,21 +1,17 @@
 <template>
   <div class="min-h-screen font-sans text-slate-300 bg-slate-950 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
 
-    <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-      <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-
-      <div class="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-900/20 rounded-full blur-[100px] opacity-60 animate-blob mix-blend-screen will-change-transform"></div>
-      <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
-    </div>
+    <CategoryBackdrop :categoria-id="exam?.categoria || 'general'" />
 
     <div class="relative z-10 max-w-4xl mx-auto p-6 lg:py-12" v-if="exam">
 
       <button
         @click="$router.back()"
         type="button"
-        class="group flex items-center gap-2 text-indigo-400 mb-8 hover:text-white transition-colors text-sm font-bold uppercase tracking-wide"
+        class="group flex items-center gap-2 mb-8 hover:text-white transition-colors text-sm font-bold uppercase tracking-wide"
+        :class="temaVisual.accentText"
       >
-        <span class="w-8 h-8 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center group-hover:border-indigo-500/50 transition-all" aria-hidden="true">←</span>
+        <span class="w-8 h-8 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center group-hover:border-white/30 transition-all" aria-hidden="true">←</span>
         Volver a la biblioteca
       </button>
 
@@ -24,12 +20,12 @@
 
         <div class="flex flex-wrap gap-3 text-sm font-bold">
           <span class="bg-slate-900/80 border border-white/10 px-3 py-1.5 rounded-lg text-slate-400 flex items-center gap-2">
-            <i class="fa-solid fa-chart-simple text-indigo-500" aria-hidden="true"></i> {{ exam.tipo }}
+            <i class="fa-solid fa-chart-simple" :class="temaVisual.accentText" aria-hidden="true"></i> {{ exam.tipo }}
           </span>
           <span class="bg-slate-900/80 border border-white/10 px-3 py-1.5 rounded-lg text-slate-400 flex items-center gap-2">
             <i class="fa-solid fa-fire text-orange-500" aria-hidden="true"></i> {{ exam.dificultad }}
           </span>
-          <span class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+          <span class="border px-3 py-1.5 rounded-lg flex items-center gap-2" :class="temaVisual.chip">
             <i class="fa-solid fa-circle-question" aria-hidden="true"></i> {{ exam.numPreguntas }} preguntas
           </span>
         </div>
@@ -41,10 +37,10 @@
           :key="index"
           class="p-6 md:p-8 border border-white/10 rounded-2xl bg-slate-900/60 backdrop-blur-xl shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all"
         >
-          <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-purple-600 opacity-50"></div>
+          <div class="absolute left-0 top-0 bottom-0 w-1 opacity-60" :style="{ backgroundColor: temaVisual.accentHex }"></div>
 
           <h2 class="font-bold text-lg md:text-xl text-slate-200 mb-6 leading-relaxed">
-            <span class="text-indigo-400 inline-block mr-2 text-2xl font-black opacity-50">{{ index + 1 }}.</span>
+            <span class="inline-block mr-2 text-2xl font-black opacity-50" :class="temaVisual.accentText">{{ index + 1 }}.</span>
             {{ item.enunciado }}
           </h2>
 
@@ -63,7 +59,7 @@
               @click="showAnswers[index] = !showAnswers[index]"
               type="button"
               class="text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg flex items-center gap-2"
-              :class="showAnswers[index] ? 'bg-slate-800 text-slate-400 border border-white/5 hover:text-white' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-500/20'"
+              :class="showAnswers[index] ? 'bg-slate-800 text-slate-400 border border-white/5 hover:text-white' : `text-white ${temaVisual.button}`"
               :aria-expanded="!!showAnswers[index]"
               :aria-label="showAnswers[index] ? 'Ocultar respuesta correcta' : 'Ver respuesta correcta'"
             >
@@ -97,10 +93,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getExamById } from '@/services/examService'
+import { getTheme } from '@/config/categorias'
+import CategoryBackdrop from '@/components/exams/CategoryBackdrop.vue'
 
 const route = useRoute()
 const exam = ref(null)
 const showAnswers = ref({})
+
+// Tema visual según la categoría del examen (fallback: general)
+const temaVisual = computed(() => getTheme(exam.value?.categoria))
 
 // Procesar preguntas y respuestas respetando todo el texto
 const examEstructurado = computed(() => {

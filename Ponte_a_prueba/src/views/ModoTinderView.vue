@@ -1,12 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col font-sans text-slate-300 bg-slate-950 overflow-hidden relative selection:bg-indigo-500 selection:text-white">
 
-    <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-      <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-      <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[100px] opacity-60 animate-blob mix-blend-screen will-change-transform"></div>
-      <div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-900/20 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-900/20 rounded-full blur-[80px] opacity-40 animate-blob animation-delay-4000 mix-blend-screen will-change-transform"></div>
-    </div>
+    <CategoryBackdrop :categoria-id="categoriaIdParaGeneracion" />
 
     <Header class="relative z-20" />
 
@@ -26,7 +21,7 @@
         </div>
 
         <div class="w-full bg-slate-900/60 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/10 p-6 md:p-10 relative overflow-hidden ring-1 ring-white/5">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
+            <div class="absolute top-0 left-0 w-full h-1 opacity-80" :class="temaActual.topBar"></div>
 
               <div class="space-y-8">
 
@@ -71,7 +66,7 @@
                         :key="t"
                         type="button"
                         @click="gen.tema.value = t"
-                        :class="['px-5 py-4 text-sm rounded-2xl border-2 text-left transition-all duration-200', gen.tema.value === t ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']"
+                        :class="['px-5 py-4 text-sm rounded-2xl border-2 text-left transition-all duration-200', gen.tema.value === t ? temaActual.optionActive : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']"
                       >
                         {{ t }}
                       </button>
@@ -98,16 +93,16 @@
                     <div>
                         <label class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
                         <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5" role="group" aria-label="Nivel de dificultad">
-                            <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" type="button" @click="gen.dificultad.value = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', gen.dificultad.value === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-100' : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
+                            <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" type="button" @click="gen.dificultad.value = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', gen.dificultad.value === dif ? temaActual.segmentActive : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
                         </div>
                     </div>
                     <div>
                         <label for="range-preguntas" class="flex justify-between text-xs font-bold uppercase text-slate-400 tracking-wider mb-4 pl-1">
                             <span>Cantidad</span>
-                            <span class="text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">{{ gen.numPreguntas.value }} preguntas</span>
+                            <span class="border px-2 py-0.5 rounded-md" :class="temaActual.chip">{{ gen.numPreguntas.value }} preguntas</span>
                         </label>
                         <div class="relative px-2">
-                              <input id="range-preguntas" type="range" min="5" max="20" step="5" v-model.number="gen.numPreguntas.value" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 slider-custom" aria-valuemin="5" aria-valuemax="20" :aria-valuenow="gen.numPreguntas.value" aria-label="Número de preguntas" />
+                              <input id="range-preguntas" type="range" min="5" max="20" step="5" v-model.number="gen.numPreguntas.value" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/20 slider-custom" :style="{ accentColor: temaActual.accentHex, '--slider-accent': temaActual.accentHex }" aria-valuemin="5" aria-valuemax="20" :aria-valuenow="gen.numPreguntas.value" aria-label="Número de preguntas" />
                             <div class="flex justify-between mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
                         </div>
                     </div>
@@ -115,7 +110,7 @@
              </div>
 
              <div v-if="categoriaSeleccionada" class="mt-10">
-                <button @click="manejarGeneracion" :disabled="gen.loading.value" class="w-full group relative overflow-hidden bg-indigo-600 hover:bg-indigo-500 text-white py-5 rounded-2xl font-bold text-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 shadow-xl shadow-indigo-900/30 hover:shadow-indigo-900/50 hover:-translate-y-1">
+                <button @click="manejarGeneracion" :disabled="gen.loading.value" class="w-full group relative overflow-hidden text-white py-5 rounded-2xl font-bold text-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 shadow-xl hover:-translate-y-1" :class="temaActual.button">
                   <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
                   <span v-if="gen.loading.value" class="flex items-center justify-center gap-3 relative z-10">
                     <svg class="animate-spin h-5 w-5 text-indigo-200" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -142,7 +137,7 @@
                     <span>Progreso</span><span>{{ Math.round(progresoPorcentaje) }}%</span>
                 </div>
                 <div class="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner border border-white/5" role="progressbar" :aria-valuenow="progresoPorcentaje" aria-valuemin="0" aria-valuemax="100">
-                    <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]" :style="{ width: `${progresoPorcentaje}%` }"></div>
+                    <div class="h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(148,163,184,0.5)]" :class="temaActual.progress" :style="{ width: `${progresoPorcentaje}%` }"></div>
                 </div>
             </div>
             <div class="bg-slate-800 px-3 py-1.5 rounded-full border border-white/10 shadow-sm text-slate-400 font-bold text-sm tabular-nums">
@@ -172,7 +167,7 @@
                 <div class="flex-grow bg-slate-900/90 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col overflow-hidden relative">
                       <div class="flex-grow overflow-y-auto p-6 md:p-8 custom-scrollbar">
                          <div class="flex items-start gap-3 mb-6">
-                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-black border border-indigo-500/20">Q</span>
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-xs font-black border" :class="[temaActual.chip]">Q</span>
                             <h3 class="text-xl md:text-2xl font-bold text-slate-200 leading-snug">{{ preguntaActual.pregunta }}</h3>
                          </div>
                          <div class="space-y-3">
@@ -214,10 +209,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Header from '@/components/HeaderCompleto.vue'
+import CategoryBackdrop from '@/components/exams/CategoryBackdrop.vue'
 import { useBackCloseWhen } from '@/composables/useBackClose'
 import { useExamGenerator } from '@/composables/useExamGenerator'
 import { userStore } from "@/stores/userStores"
-import { CATEGORIAS_RETO } from '@/config/categorias'
+import { CATEGORIAS_RETO, getTheme } from '@/config/categorias'
 
 // Selección de categoría/tema (pantalla de configuración del reto)
 const TEMA_LIBRE = { id: 'libre', label: 'Tema libre', icon: 'fa-solid fa-pen-nib', temas: null }
@@ -228,6 +224,9 @@ const categoriaIdParaGeneracion = computed(() => {
   if (!categoriaSeleccionada.value || categoriaSeleccionada.value.id === 'libre') return 'general'
   return categoriaSeleccionada.value.id
 })
+
+// Tema visual de la categoría activa (fallback: general/indigo)
+const temaActual = computed(() => getTheme(categoriaIdParaGeneracion.value))
 
 const gen = useExamGenerator({ categoria: categoriaIdParaGeneracion, modo: 'reto', tituloPrefix: 'Reto' })
 gen.fuenteActiva.value = 'tema'
@@ -517,9 +516,9 @@ function claseBotonLetra(index) {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='%23ffffff'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
 }
 
-/* Slider Personalizado */
+/* Slider Personalizado (color por tema vía --slider-accent) */
 .slider-custom {
-  background-image: linear-gradient(#6366f1, #6366f1);
+  background-image: linear-gradient(var(--slider-accent, #6366f1), var(--slider-accent, #6366f1));
   background-repeat: no-repeat;
 }
 .slider-custom::-webkit-slider-thumb {
@@ -527,13 +526,13 @@ function claseBotonLetra(index) {
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #6366f1;
+  background: var(--slider-accent, #6366f1);
   cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.2);
   transition: all 0.1s ease-in-out;
 }
 .slider-custom::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 0 6px rgba(148, 163, 184, 0.4);
   transform: scale(1.1);
 }
 

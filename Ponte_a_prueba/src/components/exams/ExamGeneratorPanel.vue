@@ -2,7 +2,7 @@
   <div>
     <div class="w-full bg-slate-900/60 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/10 p-6 md:p-10 relative overflow-hidden ring-1 ring-white/5">
 
-      <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
+      <div class="absolute top-0 left-0 w-full h-1.5 opacity-80" :class="theme.topBar"></div>
 
       <div class="space-y-8">
 
@@ -13,7 +13,7 @@
               role="tab"
               :aria-selected="gen.fuenteActiva.value === 'apuntes'"
               @click="gen.fuenteActiva.value = 'apuntes'"
-              :class="['px-5 py-2.5 rounded-xl text-sm font-bold transition-all', gen.fuenteActiva.value === 'apuntes' ? 'bg-slate-800 text-indigo-400 shadow-lg border border-white/5' : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']"
+              :class="['px-5 py-2.5 rounded-xl text-sm font-bold transition-all', gen.fuenteActiva.value === 'apuntes' ? theme.segmentActive : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']"
             >
               📋 Pegar apuntes
             </button>
@@ -22,7 +22,7 @@
               role="tab"
               :aria-selected="gen.fuenteActiva.value === 'tema'"
               @click="gen.fuenteActiva.value = 'tema'"
-              :class="['px-5 py-2.5 rounded-xl text-sm font-bold transition-all', gen.fuenteActiva.value === 'tema' ? 'bg-slate-800 text-indigo-400 shadow-lg border border-white/5' : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']"
+              :class="['px-5 py-2.5 rounded-xl text-sm font-bold transition-all', gen.fuenteActiva.value === 'tema' ? theme.segmentActive : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']"
             >
               🎯 Elegir tema
             </button>
@@ -80,7 +80,7 @@
               :key="t"
               type="button"
               @click="gen.tema.value = t"
-              :class="['px-5 py-4 text-sm rounded-2xl border-2 text-left transition-all duration-200', gen.tema.value === t ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']"
+              :class="['px-5 py-4 text-sm rounded-2xl border-2 text-left transition-all duration-200', gen.tema.value === t ? theme.optionActive : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']"
             >
               {{ t }}
             </button>
@@ -101,16 +101,16 @@
           <div>
             <label class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Nivel de desafío</label>
             <div class="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5" role="group" aria-label="Selecciona la dificultad">
-              <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" type="button" @click="gen.dificultad.value = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', gen.dificultad.value === dif ? 'bg-slate-800 text-indigo-400 shadow-lg shadow-black/30 border border-white/5 transform scale-[1.02]' : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
+              <button v-for="dif in ['facil', 'medio', 'dificil']" :key="dif" type="button" @click="gen.dificultad.value = dif" :class="['flex-1 py-3 text-sm font-bold rounded-xl transition-all capitalize', gen.dificultad.value === dif ? theme.segmentActive : 'text-slate-400 hover:text-slate-300 hover:bg-white/5']">{{ dif }}</button>
             </div>
           </div>
           <div>
             <label :for="`range-preguntas-${categoria.id}`" class="flex justify-between items-center text-xs font-bold uppercase text-slate-400 tracking-wider mb-4 pl-1">
               <span>Cantidad</span>
-              <span class="text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-lg shadow-sm">{{ gen.numPreguntas.value }} preguntas</span>
+              <span class="border px-3 py-1 rounded-lg shadow-sm" :class="theme.chip">{{ gen.numPreguntas.value }} preguntas</span>
             </label>
             <div class="relative px-1 py-2">
-              <input :id="`range-preguntas-${categoria.id}`" aria-label="Número de preguntas" type="range" min="5" max="20" step="5" v-model.number="gen.numPreguntas.value" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none slider-custom" />
+              <input :id="`range-preguntas-${categoria.id}`" aria-label="Número de preguntas" type="range" min="5" max="20" step="5" v-model.number="gen.numPreguntas.value" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer focus:outline-none slider-custom" :style="{ accentColor: theme.accentHex, '--slider-accent': theme.accentHex }" />
               <div class="flex justify-between mt-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest px-1" aria-hidden="true"><span>5</span><span>10</span><span>15</span><span>20</span></div>
             </div>
           </div>
@@ -119,14 +119,14 @@
         <div>
            <label class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3 block pl-1">Formato de preguntas</label>
            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="radiogroup" aria-label="Formato de preguntas">
-             <button role="radio" :aria-checked="gen.tipoExamen.value === tipo" v-for="tipo in tipos" :key="tipo" type="button" @click="gen.tipoExamen.value = tipo" :class="['h-full w-full px-5 py-5 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden group', gen.tipoExamen.value === tipo ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-300 font-bold shadow-lg shadow-indigo-900/10' : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']">
+             <button role="radio" :aria-checked="gen.tipoExamen.value === tipo" v-for="tipo in tipos" :key="tipo" type="button" @click="gen.tipoExamen.value = tipo" :class="['h-full w-full px-5 py-5 text-sm rounded-2xl border-2 text-left transition-all duration-200 relative overflow-hidden group', gen.tipoExamen.value === tipo ? theme.optionActive : 'border-white/5 bg-slate-950/30 text-slate-400 hover:border-white/10 hover:bg-white/5']">
                 <span class="relative z-10 flex items-center gap-2">{{ tipo }}</span>
              </button>
            </div>
         </div>
 
          <div class="mt-10">
-            <button @click="gen.generar" :disabled="gen.loading.value" class="w-full group relative overflow-hidden bg-indigo-600 hover:bg-indigo-500 text-white py-5 rounded-2xl font-bold text-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 shadow-xl shadow-indigo-900/30 hover:shadow-indigo-900/50 hover:-translate-y-0.5">
+            <button @click="gen.generar" :disabled="gen.loading.value" class="w-full group relative overflow-hidden text-white py-5 rounded-2xl font-bold text-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 shadow-xl hover:-translate-y-0.5" :class="theme.button">
               <span v-if="gen.loading.value" class="flex items-center justify-center gap-3 relative z-10">
                 <svg class="animate-spin h-5 w-5 text-indigo-200" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 <span class="animate-pulse">Generando examen...</span>
@@ -187,6 +187,8 @@ const props = defineProps({
 
 const tipos = ['Test (4 opciones)', 'Verdadero/Falso', 'Respuestas cortas', 'Respuestas largas', 'Mix']
 
+const theme = props.categoria.theme
+
 const gen = useExamGenerator({
   categoria: props.categoria.id,
   modo: 'normal',
@@ -201,7 +203,7 @@ const gen = useExamGenerator({
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #64748b; }
 
 .slider-custom {
-  background-image: linear-gradient(#6366f1, #6366f1);
+  background-image: linear-gradient(var(--slider-accent, #6366f1), var(--slider-accent, #6366f1));
   background-repeat: no-repeat;
 }
 .slider-custom::-webkit-slider-thumb {
@@ -209,13 +211,13 @@ const gen = useExamGenerator({
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #6366f1;
+  background: var(--slider-accent, #6366f1);
   cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.2);
   transition: all 0.1s ease-in-out;
 }
 .slider-custom::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 0 6px rgba(148, 163, 184, 0.3);
   transform: scale(1.1);
 }
 </style>

@@ -141,10 +141,28 @@
             </div>
             <div v-if="sections.loose && !rootNotes.length" class="px-2 text-xs text-slate-600">Arrastra notas aquí para sacarlas de una carpeta.</div>
 
-            <button type="button" class="section-toggle mt-4" :aria-expanded="sections.favs" @click="sections.favs = !sections.favs">
-              <component :is="sections.favs ? IconChevronDown : IconChevronRight" class="w-3 h-3 shrink-0" aria-hidden="true" />
-              ⭐ Exámenes favoritos
-            </button>
+            <div class="flex items-center justify-between mt-4 mb-2 px-2">
+              <button type="button" class="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] hover:text-slate-300 transition-colors" :aria-expanded="sections.favs" @click="sections.favs = !sections.favs">
+                <component :is="sections.favs ? IconChevronDown : IconChevronRight" class="w-3 h-3 shrink-0" aria-hidden="true" />
+                ⭐ Exámenes favoritos
+              </button>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[9px] font-bold uppercase tracking-wider" :class="favsMonthOnly ? 'text-slate-600' : 'text-slate-300'">Todos</span>
+                <button
+                  type="button"
+                  role="switch"
+                  :aria-checked="favsMonthOnly"
+                  class="relative w-8 h-4 rounded-full transition-colors shrink-0"
+                  :class="favsMonthOnly ? 'bg-indigo-600' : 'bg-slate-700'"
+                  :title="favsMonthOnly ? 'Mostrando solo el mes actual del calendario' : 'Mostrando todos los favoritos'"
+                  aria-label="Filtrar favoritos por mes del calendario"
+                  @click="favsMonthOnly = !favsMonthOnly"
+                >
+                  <span class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform" :class="favsMonthOnly ? 'translate-x-4' : 'translate-x-0'"></span>
+                </button>
+                <span class="text-[9px] font-bold uppercase tracking-wider" :class="favsMonthOnly ? 'text-slate-300' : 'text-slate-600'">Este mes</span>
+              </div>
+            </div>
             <div v-show="sections.favs" class="space-y-0.5">
               <RouterLink
                 v-for="exam in favoriteExams"
@@ -159,7 +177,7 @@
               </RouterLink>
             </div>
             <div v-if="sections.favs && !favoriteExams.length" class="px-2 py-3 text-xs text-slate-600 leading-relaxed">
-              No tienes exámenes favoritos. Marca un examen con ★ en la Biblioteca para verlo aquí.
+              {{ favsMonthOnly ? 'No tienes exámenes favoritos en el mes actual del calendario.' : 'No tienes exámenes favoritos. Marca un examen con ★ en la Biblioteca para verlo aquí.' }}
             </div>
           </template>
         </div>
@@ -321,8 +339,22 @@ const study = useStudyData()
 const { folders, notes, exams, trash, folderTree, rootNotes, isSaving, scheduleNoteSave } = study
 const route = useRoute()
 
-// Sección "Exámenes favoritos": solo los marcados con ★ en la Biblioteca
-const favoriteExams = computed(() => exams.value.filter(e => e.favorito))
+// Sección "Exámenes favoritos": solo los marcados con ★ en la Biblioteca.
+// Toggle: por defecto muestra todos los favoritos; activado, solo los del
+// mes que esté mostrando el calendario (mes compartido vía calendarViewDate).
+const favsMonthOnly = ref(false)
+const calendarViewDate = ref(new Date())
+const favoriteExams = computed(() => {
+  const favs = exams.value.filter(e => e.favorito)
+  if (!favsMonthOnly.value) return favs
+  const year = calendarViewDate.value.getFullYear()
+  const month = calendarViewDate.value.getMonth()
+  return favs.filter(e => {
+    if (!e.calendarDate) return false
+    const [y, m] = e.calendarDate.split('-').map(Number)
+    return y === year && (m - 1) === month
+  })
+})
 
 const showSidebar = ref(false)
 const currentView = ref('calendar')
@@ -547,6 +579,7 @@ const formatDate = (iso) => iso ? new Intl.DateTimeFormat('es-ES', { day: '2-dig
 provide('studyCtx', {
   ...study,
   expandedMap,
+  calendarViewDate,
   selectedItem,
   selectNote,
   newNote,

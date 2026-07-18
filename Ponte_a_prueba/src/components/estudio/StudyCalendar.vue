@@ -122,15 +122,16 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
+import { computed, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronLeft as IconLeft, ChevronRight as IconRight, Plus as IconPlus } from 'lucide-vue-next'
 
 const ctx = inject('studyCtx')
-const { itemsByDate, notes, exams } = ctx
+const { itemsByDate, notes, exams, calendarViewDate } = ctx
 const router = useRouter()
 
-const viewDate = ref(new Date())
+// Compartido con el sidebar (filtro de exámenes favoritos por mes)
+const viewDate = calendarViewDate
 const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 const currentMonthName = computed(() => viewDate.value.toLocaleString('es-ES', { month: 'long' }))

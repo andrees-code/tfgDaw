@@ -1,27 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col font-sans text-slate-300 bg-slate-950 overflow-hidden relative selection:bg-indigo-500 selection:text-white">
 
-    <div class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-
-      <div class="absolute inset-0 bg-grid-white/[0.03] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-
-      <div class="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-900/20 rounded-full blur-[100px] opacity-70 mix-blend-screen will-change-transform"></div>
-
-      <div class="absolute top-[10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[80px] opacity-60 animate-blob mix-blend-screen will-change-transform"></div>
-      <div class="absolute bottom-[0%] right-[-10%] w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[80px] opacity-60 animate-blob animation-delay-2000 mix-blend-screen will-change-transform"></div>
-
-      <div class="hidden lg:block absolute top-[20%] left-[5%] animate-float opacity-30 will-change-transform">
-        <div class="w-20 h-28 bg-slate-800/80 border border-white/10 rounded-xl shadow-2xl -rotate-12 flex items-center justify-center backdrop-blur-sm">
-            <i class="fa-solid fa-file-lines text-3xl text-indigo-400" aria-hidden="true"></i>
-        </div>
-      </div>
-
-      <div class="hidden lg:block absolute top-[30%] right-[8%] animate-float animation-delay-1000 opacity-30 will-change-transform">
-        <div class="w-20 h-20 bg-slate-800/80 border border-white/10 rounded-2xl shadow-2xl rotate-12 flex items-center justify-center backdrop-blur-sm">
-            <i class="fa-solid fa-graduation-cap text-3xl text-purple-400" aria-hidden="true"></i>
-        </div>
-      </div>
-    </div>
+    <CategoryBackdrop :categoria-id="categoriaActiva.id" />
 
     <Header class="relative z-20" />
 
@@ -37,7 +17,7 @@
           <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-4 flex flex-col md:block items-center justify-center gap-2 drop-shadow-lg">
             Generador de
             <span class="relative inline-block">
-               <span class="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Exámenes</span>
+               <span class="relative z-10 text-transparent bg-clip-text" :class="categoriaActiva.theme.titleGradient">Exámenes</span>
                <svg class="absolute w-full h-3 -bottom-1 left-0 text-indigo-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" /></svg>
 
                <span class="absolute -top-2 -right-4 flex h-4 w-4 cursor-pointer" role="button" aria-label="Nueva funcionalidad disponible" @click="irAlModoReto" title="Nueva funcionalidad disponible">
@@ -59,7 +39,7 @@
             role="tab"
             :aria-selected="categoriaActiva.id === cat.id"
             @click="categoriaActivaId = cat.id"
-            :class="['flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold transition-all border', categoriaActiva.id === cat.id ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-900/30 scale-[1.03]' : 'bg-slate-900/60 border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20']"
+            :class="['flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold transition-all border', categoriaActiva.id === cat.id ? cat.theme.tabActive : 'bg-slate-900/60 border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20']"
           >
             <i :class="cat.icon" aria-hidden="true"></i>
             {{ cat.label }}
@@ -104,6 +84,7 @@ import { useRouter } from 'vue-router'
 import Header from '@/components/HeaderCompleto.vue'
 import Footer from '@/components/FooterComponent.vue'
 import ExamGeneratorPanel from '@/components/exams/ExamGeneratorPanel.vue'
+import CategoryBackdrop from '@/components/exams/CategoryBackdrop.vue'
 import { CATEGORIAS, getCategoria } from '@/config/categorias'
 import { userStore } from "@/stores/userStores"
 

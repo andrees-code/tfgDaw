@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { userStore } from "@/stores/userStores"
 import { API_BASE_URL } from '@/config/api'
+import { attachAuthInterceptor } from './authInterceptor'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,6 +15,8 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+attachAuthInterceptor(api)
 
 // ===============================
 // CREAR / ACTUALIZAR NOTA
